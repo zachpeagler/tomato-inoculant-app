@@ -1,13 +1,5 @@
 ##### SETUP #####
 ## this code runs on the client at execution
-
-### INTERNAL USE ONLY ###
-### DELETE BEFORE DEPLOYMENT ###
-
-bs_themes <- bootswatch_themes()
-
-### END INTERNAL USE SECTION ###
-
 # load packages
 library(shiny)
 library(ggplot2)
@@ -28,19 +20,31 @@ p_palettes <- scico_palette_names()
 font_add_google("Open Sans", family = "open")
 font_add_google("Montserrat", family = "mont")
 showtext_auto()
-## shapes
-four_shapes = c(15,16,17,23)
 
 # distributions
 ## currently only continuous distributions are supported
 dists <- c("normal", "lognormal", "gamma", "exponential")
 
 # load data
-data_gsw <- read.csv("d24_gsw.csv")
-data_fruit <- read.csv("d24_fruit.csv")
-data_phi2 <- read.csv("d24_phi2.csv")
+load("data_gsw.RData")
+load("data_fruit.RData")
+load("data_ps2.RData")
+
+## preload vars
+### kind of a funky way of doing this, but it makes it REALLY easy to check if a variable
+### is continuous or discrete later with [if (var %in% vars_d)]
+gsw_vars <- c("DaysFromGermination", "AmbientHumidity", "AmbientPressure", "AmbientTemperature", "AmbientLight", "LeafTemperature", "gsw")
+gsw_vars_d <- c("Treatment", "Transplantation", "Germination", "Row", "Pot", "Plant", "Time", "Date")
+all_gsw_vars <- c(gsw_vars_d, gsw_vars)
+ps2_vars <- c("DaysFromGermination", "AmbientHumidity", "AmbientPressure", "AmbientTemperature", "AmbientLight", "LeafTemperature", "PhiPS2", "LogitPhiPS2")
+ps2_vars_d <- c("Treatment", "Transplantation", "Germination", "Row", "Pot", "Plant", "Device", "Time", "Date")
+all_ps2_vars <- c(ps2_vars_d, ps2_vars)
+fruit_vars <- c("DateHarvest", "DateAnalysis", "DaysFromHarvestToAnalysis", "DaysFromGermination", "Mass", "Ripeness", "SugarAvg", "SugarGrams")
+fruit_vars_d <- c("Treatment", "Transplantation", "Germination", "Row", "Pot", "Plant", "BER")
+all_fruit_vars <- c(fruit_vars_d, fruit_vars)
 
 # custom functions
+## i *think* this is faster and smaller than including these as a dependency via a custom package
 multiKS_cont <- function(var, distributions) {
   # check if "all" was passed to distributions
   if ("all" %in% distributions) {
@@ -228,7 +232,7 @@ multiPDF_plot <- function (var, seq_length = 50, distributions = "all", palette 
     p <- p + ggplot2::geom_line(aes(x= var_seq, y=pdf_exponential, color='Exponential'), linewidth = 2)
   }
   p <- p +
-    scico::scale_color_scico_d(begin=0.9, end=0, palette = palette)+
+    scico::scale_color_scico_d(begin=0.9, end=0.1, palette = palette)+
     ggplot2::theme(
       text = ggplot2::element_text(size=10, family="mont"),
       title = ggplot2::element_text(size=14, family = "mont", face = "bold"),
@@ -275,7 +279,7 @@ multiCDF_plot <- function (var, seq_length = 50, distributions = "all", palette 
     p <- p + ggplot2::geom_line(aes(x=var_seq, y=cdf_exponential, color='Exponential'), linewidth = 2)
   }
   p <- p +
-    scico::scale_color_scico_d(begin=0.9, end=0, palette = palette)+
+    scico::scale_color_scico_d(begin=0.9, end=0.1, palette = palette)+
     ggplot2::theme(
       text = ggplot2::element_text(size=10, family="mont"),
       title = ggplot2::element_text(size=14, family = "mont", face = "bold"),
@@ -444,25 +448,175 @@ predict_plot <- function(mod, data, rvar, pvar, group = NULL, length = 50, inter
 # popover
 gear <- popover(bs_icon("gear"),
                 selectInput("palette","Select color palette",
-                            choices = p_palettes, selected = "bilbao"),
+                            choices = p_palettes, selected = "oslo"),
                 title = "Options")
 # github link
 link_github <- tags$a(bs_icon("GitHub"), href = "https://github.com/zachpeagler/tomato-inoculant-app")
 
 ##### UI #####
-ui <- navbarPage(
+ui <- navbarPage(collapsible = TRUE,
   title = "Tomato Inoculants",
   theme = bs_theme(version = 5, bootswatch = "flatly"),
   nav_panel("Fluorescence",
     tabsetPanel(
+      tabPanel("Distributions",
+        card(card_header("Stomatal Conductance (gsw)", class = "bg-primary"),
+          layout_sidebar(
+            sidebar=sidebar(open=FALSE,
+              checkboxGroupInput("gsw_dists", "Distributions", choices=dists, 
+                                 selected=c("normal", "lognormal", "gamma")),
+              sliderInput("gsw_len", "Length to Test Distributions Over", min=1,
+                          max=500, value=100)
+            ), # end sidebar
+            div(
+              layout_column_wrap(
+                plotOutput("gsw_pdf"),
+                plotOutput("gsw_cdf")
+              )
+            ),
+            div(
+              markdown("###### **One-sample Kolmogorov-Smirnov tests for stomatal conductance against selected distributions**"),
+              verbatimTextOutput("gsw_KS")
+            )
+          ) # end sidebar layout
+        ), # end gsw card
+        card(card_header("Photosystem II Efficiency (PHIPS2)", class = "bg-secondary"),
+         markdown("
+                  PhiPS2 is unitless on a scale of 0-1, so we don't need to create PDF and CDF plots and perform KS tests.
+                  Instead, we know that we will wind up logit transforming it and we can use the logit transformed version in
+                  our regression models. PhiPS2 is calculated as (maximum fluorescence - steady state fluorescence)/maximum fluorescence,
+                  and is useful for estimating changes in the quantum yield of non-cyclic electron transport."),
+         div(style="border-left: 5px solid", 
+          markdown(
+          "> For a more comprehensive explanation of PhiPS2, check out 
+          [Genty *et al*., 1989](https://www.sciencedirect.com/science/article/abs/pii/S0304416589800169) or
+          for a simpler explanation, the [chlorophyll fluorescence wikipedia page](https://en.wikipedia.org/wiki/Chlorophyll_fluorescence).")
+          )
+        ) # end phips2 card
+      ), # end dists tab panel
+      tabPanel("Plots",
+        card(card_header("Interactive Stomatal Conductance Scatter", class = "bg-primary"),
+             layout_sidebar(sidebar = sidebar(
+               selectInput("gsw_x","X Variable",
+                           choices = all_gsw_vars, selected = "DaysFromGermination"),
+               selectInput("gsw_y","Y Variable",
+                           choices = all_gsw_vars, selected = "gsw"),
+               selectInput("gsw_col","Color Variable",
+                           choices = all_gsw_vars, selected = "AmbientHumidity"),
+               selectInput("gsw_shape", "Shape Variable",
+                           choices = gsw_vars_d, selected = "Treatment"),
+               sliderInput("gsw_jit", "Jitter Amount",
+                           min=0, max=10, value =3),
+               sliderInput("gsw_size", "Point Size",
+                           min = 1, max=10, value = 2),
+               checkboxInput("gsw_fwrap", "Individual Plot Per Treatment", FALSE)
+             ), # end sidebar
+             card_body(plotOutput("gsw_scatter"))
+          ) # end sidebar layout
+        ), # end gsw scatter plot
+      ), # end plots tab panel
+      tabPanel("Statistics",
+               
+      ), # end stats tab panel
+      tabPanel("Data",
+        card(card_header("Li-600 Data", class = "bg-primary"),
+          DTOutput("gsw_DT")
+          ),
+        card(card_header("PhiPS2 Data", class = "bg-primary"),
+          markdown("This dataset is a combination of data from the LI-COR Li-600
+                   and PhotosynQ MultispeQ V2.0s. For the sake of this app running
+                   efficiently, the data has been pared down to strictly what is needed.
+                   The full datasets can be found [on my github](https://www.github.com/zachpeagler/Thesis/data/TIP24)."),
+          DTOutput("ps2_DT")
+          )
+      ), # end data tab panel
+      tabPanel("Info",
+        card(markdown(
+          "Fluorescence measurements were taken biweekly with a LI-COR LI-600 and 
+          two PhotosynQ MultispeQ V2.0s over the course of the trial.
+          Data is presented in a tidy format with each row representing a single 
+          observation and each column representing a variable. <br>
+          ### Explanatory Variables
+          **Treatment** is the inoculation timing of the tomato. Options are Control, Germination, Transplantation, and Germ+Trans. <br>
+          **Time** is the time at which the measurement was taken. <br>
+          **Date** is the date at which the measurement was taken. <br>
+          **DaysFromGermination** is the number of days from germination (2025-05-01) to the date of measurement. <br>
+          **MinutesFromStart** is the number of minutes from the start of that day's observations to the time of measurement. <br>
+          **Row** is the row of the tomato. (A:D) <br>
+          **Pot** is the pot number of the tomato. (1:12) <br>
+          **Plant** is a combination of *Row* and *Pot*, and acts as an ID for every individual plant. (1 1: 4 12) <br>
+          **AmbientHumidity** is the relative humidity (add units) at the time of measurement. <br>
+          **AmbientLight** is the ambient light level (add units) at the time of measurement. <br>
+          **AmbientPressure** is the ambient pressure (add units) at the time of measurement. <br>
+          **LeafTemperature** is the temperature (C) of the leaf. <br>
+          ### Response Variables
+          **gsw** is the stomatal conductance (mol m-2 s-1) of the leaf. Stomatal conductance refers to the
+          rate at which molecules are moving through the leaf's stomates, and is indicitave of photosynthesis.<br>
+          **PhiPS2** is the quantum yield. It is unitless. (0:1) <br>
+          > It's important to note that **only** the Li-600 can measure gsw, while both
+          the Li-600 and the MultispeQ can measure PhiPS2. Also, even though both devices can 
+          measure PhiPS2, they do so **in different ways**. For our purposes, this is fine
+          so long as the measurements from each device correlate.
+          "))
+      ) # end info tab Panel
+    ) # end tabset Panel
+  ), # end nav panel "Fluorescence"
+  nav_panel("Fruit",
+    tabsetPanel(
       tabPanel("Distributions"),
       tabPanel("Plots"),
       tabPanel("Statistics"),
-      tabPanel("Data"),
-      tabPanel("Info")
+      tabPanel("Data",
+        card(card_header("Fruit Data", class = "bg-primary"),
+            DTOutput("fruit_DT")
+        )
+      ), # end data tab panel
+      tabPanel("Info",
+        markdown("
+        The tomatoes were grown in 4 rows of 12 pots each, with each row corresponding to a different inoculation treatment.
+        The data table is formatted in a tidy format with each row corresponding to one fruit and each column representing a variable.<br>
+        ### Explanatory Variables <br>
+        **Treatment** (factor) is the inoculation timing of the tomato. Options are Control, Germination, Transplantation, and Germ+Trans. <br>
+        **Transplantation** (logical) indicates if the fruit comes from a plant inoculated at transplantation. <br>
+        **Germination** (logical) indicates if the fruit comes from a plant inoculated at germination <br>
+        **Row** (factor) is the row number of the tomato. (1:4) <br>
+        **Pot** (factor) is the pot number of the tomato. (1:12) <br>
+        **Plant** (factor) is a combination of *row* and *plant*, and acts as an ID for every individual plant. (1 1: 4 12) <br>
+        **DateHarvest** (date) is the date the fruit was harvested (August 2024:October 2024) <br>
+        **DateAnalysis** (date) is the date the fruit was analyzed in the lab (August 2024:October 2024) <br>
+        **DaysFromHarvestToAnalysis** (int) is the number of days from harvest to analysis. <br>
+        **DaysFromGermination** (int) is the number of days from germination to fruit analysis. <br>
+        ### Response Variables <br>
+        **Mass** is the mass in grams of the tomato, measured on an Ohaus Scout. (~10:~400) <br>
+        **BER** corresponds to whether or not the tomato has blossom end rot, a disease caused by calcium deficiency that renders the fruit unmarketable. (0,1) <br>
+        **Penetrometer** corresponds to the force in kilograms it takes to penetrate the flesh of the tomato (~0.5:~4) <br>
+        **Ripeness** is the **Penetrometer** value mapped from 0:1 and reversed, so that riper fruit are closer to 1 and unripe fruit are closer to 0. (0:1) <br>
+        **SugarAvg** is the average of two measurements of the tomato juice's sugar concentration taken on a Fisher BRIX Refractometer (~2:~12) <br>
+        **SugarGrams** is the grams of sugar in the tomato, calculated as (**SugarAvg**/100)x**Mass** <br>
+        **Fruit** is an internal variable for lazily summarizing fruit counts. It always equals 1.
+        ")
+      ) # end info tab
+    ) # end tab set panel
+  ), # end fruit nav panel
+  nav_panel("Info",
+    markdown(
+    "This is where we can put the main blurb for this app.<br>
+    Acknowledgements. Explanations. Affiliation disclaimers. Etc.
+    
+    This app only covers data from the **2024** tomato inoculant trial. Mostly 
+    for the sake of my own sanity, as well as the fact that the trials aren't 
+    exactly apples to apples. In **2023** we applied foliar and/or soil applications
+    of *Methylobacterium oryzae CBMB20* (1x10^6 cfu/mL) to salt-stressed tomato plants, cultivar BHN 589.
+    Controls were included for salt and inoculation for a two-factorial experimental
+    design, with 8 replicates per group for a total of 32 plants. <br>
+    The experimental design changed in 2024, opting for purely soil applications of
+    a bacterial consortium: *Azospirillium brasilense*, *Azotobacter chroococcum*,
+    *Bacillus subtilis*, *Methylobacterium oryzae CBMB20*, and *Pseudomonas putida* 
+    (all at 1x10^6 cfu/mL) at two different time points: **germination** and/or **transplantation**.
+    We also increased the sample size to 12 plants per group for a total of 48 plants. <br>
+    "
     )
-  ),
-  nav_panel("Fruit"),
+    ),
   nav_spacer(),
   nav_item(gear),
   nav_item(link_github)
@@ -470,7 +624,81 @@ ui <- navbarPage(
 
 ##### SERVER #####
 server <- function(input, output) {
- 
+# Reactive Expressions
+# you might say "don't make a thousand individual reactive expressions!!! make a reactive values
+# object and store them all in that!!" and to that i say "no"
+# these are all "lazy" so they should (in theory) be more optimized than updating
+# all the inputs in a single reactive values object. Less updates = faster. Right?
+## global reactive expressions
+  Rpalette <- reactive({input$palette})
+## fluorescence reactive expressions
+  ### gsw
+  Rgsw_dists <- reactive({input$gsw_dists})
+  Rgsw_len <- reactive({input$gsw_len})
+  Rgsw_x <- reactive({input$gsw_x})
+  Rgsw_y <- reactive({input$gsw_y})
+  Rgsw_col <- reactive({input$gsw_col})
+  Rgsw_shape <- reactive({input$gsw_shape})
+  Rgsw_jit <- reactive({input$gsw_jit * 0.1})
+  Rgsw_fwrap <- reactive({input$gsw_fwrap})
+  Rgsw_size <- reactive({input$gsw_size})
+  ### ps2
+  Rps2_dists <- reactive({input$ps2_dists})
+  Rps2_len <- reactive({input$ps2_len})
+## fruit reactive expressions
+  
+# Outputs
+## Fluorescence
+### Distributions
+#### gsw
+  # ks
+  output$gsw_KS <- renderPrint({
+    multiKS_cont(data_gsw$gsw, Rgsw_dists())
+  })
+  # pdf
+  output$gsw_pdf <- renderPlot({
+    multiPDF_plot(data_gsw$gsw, Rgsw_len(), Rgsw_dists(), palette = Rpalette())
+    })
+  # cdf
+  output$gsw_cdf <- renderPlot({
+    multiCDF_plot(data_gsw$gsw, Rgsw_len(), Rgsw_dists(), palette = Rpalette())
+  })
+### Plots
+#### gsw
+  output$gsw_scatter <- renderPlot({
+    gs <- ggplot(data=data_gsw, aes(x=.data[[Rgsw_x()]], y=.data[[Rgsw_y()]],
+                                    color = .data[[Rgsw_col()]], shape = .data[[Rgsw_shape()]]))+
+      geom_jitter(width=Rgsw_jit(), height=Rgsw_jit(), size = Rgsw_size())+
+      ylab(gettext(Rgsw_y()))+
+      xlab(gettext(Rgsw_x()))+
+      theme_bw()+
+      theme(
+        text = element_text(size=16, family="mont"),
+        axis.title = element_text(size=20, family = "mont", face= "bold"),
+        title = element_text(size=16, family="open", face="bold", lineheight = .8),
+        legend.title = ggplot2::element_text(size=16, family = "mont", face= "bold"),
+#        legend.position = "bottom",
+        legend.title.position = "top"
+      )
+    if (Rgsw_x() %in% gsw_vars_d) {
+      gs <- gs + scale_x_discrete(guide=guide_axis(check.overlap=TRUE))
+    } else {
+      gs <- gs + scale_x_continuous(guide=guide_axis(check.overlap=TRUE))
+    }
+    if (Rgsw_fwrap() == TRUE){
+      gs <- gs + facet_wrap(~Treatment)
+    }
+    if (Rgsw_col() %in% gsw_vars_d) {
+      gs <- gs + scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())
+    } else {
+      gs <- gs + scale_color_scico(begin=0.9, end=0.1, palette=Rpalette())
+    }
+    return(gs)
+  })
+## Fruit
+  ## DT: gsw_DT, ps2_DT, fruit_DT
+  ## plotOutputs: gsw_pdf, gsw_cdf
+  ## verbatimTextOutputs: gsw_KS
 }
 
 # run it!
