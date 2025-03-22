@@ -7,11 +7,10 @@ library(scico)
 library(showtext)
 library(bslib)
 library(bsicons)
-library(MASS)
 library(DT)
 library(MuMIn)
-library(lme4)
 library(lmerTest)
+library(shinylive)
 
 # graphics
 ## palettes
