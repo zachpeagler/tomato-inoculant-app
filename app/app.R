@@ -20,6 +20,7 @@ p_palettes <- scico_palette_names()
 font_add_google("Open Sans", family = "open")
 font_add_google("Montserrat", family = "mont")
 showtext_auto()
+font_sizes <- c(16,12,10)
 
 # distributions
 ## currently only continuous distributions are supported
@@ -498,11 +499,11 @@ ui <- navbarPage(collapsible = TRUE,
         card(card_header("Interactive Stomatal Conductance Scatter", class = "bg-primary"),
              layout_sidebar(sidebar = sidebar(
                selectInput("gsw_x","X Variable",
-                           choices = all_gsw_vars, selected = "DaysFromGermination"),
+                           choices = all_gsw_vars, selected = "AmbientHumidity"),
                selectInput("gsw_y","Y Variable",
                            choices = all_gsw_vars, selected = "gsw"),
                selectInput("gsw_col","Color Variable",
-                           choices = all_gsw_vars, selected = "AmbientHumidity"),
+                           choices = all_gsw_vars, selected = "Treatment"),
                selectInput("gsw_shape", "Shape Variable",
                            choices = gsw_vars_d, selected = "Treatment"),
                sliderInput("gsw_jit", "Jitter Amount",
@@ -514,6 +515,25 @@ ui <- navbarPage(collapsible = TRUE,
              card_body(plotOutput("gsw_scatter"))
           ) # end sidebar layout
         ), # end gsw scatter plot
+        card(card_header("Interactive Efficiency of Photosystem II (PhiPS2) Scatter", class = "bg-primary"),
+             layout_sidebar(sidebar = sidebar(
+               selectInput("ps2_x","X Variable",
+                           choices = all_ps2_vars, selected = "DaysFromGermination"),
+               selectInput("ps2_y","Y Variable",
+                           choices = all_ps2_vars, selected = "PhiPS2"),
+               selectInput("ps2_col","Color Variable",
+                           choices = all_ps2_vars, selected = "AmbientHumidity"),
+               selectInput("ps2_shape", "Shape Variable",
+                           choices = ps2_vars_d, selected = "Treatment"),
+               sliderInput("ps2_jit", "Jitter Amount",
+                           min=0, max=10, value =3),
+               sliderInput("ps2_size", "Point Size",
+                           min = 1, max=10, value = 2),
+               checkboxInput("ps2_fwrap", "Individual Plot Per Treatment", FALSE)
+             ), # end sidebar
+             card_body(plotOutput("ps2_scatter"))
+             ) # end sidebar layout
+        ), # end phips2 scatter plot
       ), # end plots tab panel
       tabPanel("Statistics",
                
@@ -645,6 +665,13 @@ server <- function(input, output) {
   ### ps2
   Rps2_dists <- reactive({input$ps2_dists})
   Rps2_len <- reactive({input$ps2_len})
+  Rps2_x <- reactive({input$ps2_x})
+  Rps2_y <- reactive({input$ps2_y})
+  Rps2_col <- reactive({input$ps2_col})
+  Rps2_shape <- reactive({input$ps2_shape})
+  Rps2_jit <- reactive({input$ps2_jit * 0.1})
+  Rps2_fwrap <- reactive({input$ps2_fwrap})
+  Rps2_size <- reactive({input$ps2_size})
 ## fruit reactive expressions
   
 # Outputs
@@ -668,15 +695,15 @@ server <- function(input, output) {
   output$gsw_scatter <- renderPlot({
     gs <- ggplot(data=data_gsw, aes(x=.data[[Rgsw_x()]], y=.data[[Rgsw_y()]],
                                     color = .data[[Rgsw_col()]], shape = .data[[Rgsw_shape()]]))+
-      geom_jitter(width=Rgsw_jit(), height=Rgsw_jit(), size = Rgsw_size())+
+      geom_jitter(width=Rgsw_jit(), height=Rgsw_jit()*0.5, size = Rgsw_size())+
       ylab(gettext(Rgsw_y()))+
       xlab(gettext(Rgsw_x()))+
       theme_bw()+
       theme(
-        text = element_text(size=16, family="mont"),
-        axis.title = element_text(size=20, family = "mont", face= "bold"),
-        title = element_text(size=16, family="open", face="bold", lineheight = .8),
-        legend.title = ggplot2::element_text(size=16, family = "mont", face= "bold"),
+        text = element_text(size=font_sizes[3], family="mont"),
+        axis.title = element_text(size=font_sizes[2], family = "mont", face= "bold"),
+        title = element_text(size=font_sizes[1], family="open", face="bold", lineheight = .8),
+        legend.title = ggplot2::element_text(size=font_sizes[2], family = "mont", face= "bold"),
 #        legend.position = "bottom",
         legend.title.position = "top"
       )
@@ -694,6 +721,45 @@ server <- function(input, output) {
       gs <- gs + scale_color_scico(begin=0.9, end=0.1, palette=Rpalette())
     }
     return(gs)
+  })
+#### phips2
+  output$ps2_scatter <- renderPlot({
+    ps <- ggplot(data=data_ps2, aes(x=.data[[Rps2_x()]], y=.data[[Rps2_y()]],
+                                    color = .data[[Rps2_col()]], shape = .data[[Rps2_shape()]]))+
+      geom_jitter(width=Rps2_jit(), height=Rps2_jit()*0.5, size = Rps2_size())+
+      ylab(gettext(Rps2_y()))+
+      xlab(gettext(Rps2_x()))+
+      theme_bw()+
+      theme(
+        text = element_text(size=font_sizes[3], family="mont"),
+        axis.title = element_text(size=font_sizes[2], family = "mont", face= "bold"),
+        title = element_text(size=font_sizes[1], family="open", face="bold", lineheight = .8),
+        legend.title = ggplot2::element_text(size=font_sizes[2], family = "mont", face= "bold"),
+        #        legend.position = "bottom",
+        legend.title.position = "top"
+      )
+    if (Rps2_x() %in% ps2_vars_d) {
+      ps <- ps + scale_x_discrete(guide=guide_axis(check.overlap=TRUE))
+    } else {
+      ps <- ps + scale_x_continuous(guide=guide_axis(check.overlap=TRUE))
+    }
+    if (Rps2_fwrap() == TRUE){
+      ps <- ps + facet_wrap(~Treatment)
+    }
+    if (Rps2_col() %in% ps2_vars_d) {
+      ps <- ps + scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())
+    } else {
+      ps <- ps + scale_color_scico(begin=0.9, end=0.1, palette=Rpalette())
+    }
+    return(ps)
+  })
+### Statistics
+### Data
+  output$gsw_DT <- renderDT({
+    data_gsw
+  })
+  output$ps2_DT <- renderDT({
+    data_ps2
   })
 ## Fruit
   ## DT: gsw_DT, ps2_DT, fruit_DT
