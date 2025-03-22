@@ -1,53 +1,12 @@
 ##### SETUP #####
 ## this code runs on the client at execution
 # load packages
-library(crosstalk)
-library(evaluate)
-library(highr)
-library(htmlwidgets)
-library(knitr)
-library(lazyeval)
-library(rmarkdown)
-library(tinytex)
-library(xfun)
-library(yaml)
-library(colorspace)
-library(fansi)
-library(farver)
-library(gtable)
-library(isoband)
-library(labeling)
-library(lattice)
-library(Matrix)
-library(mgcv)
-library(munsell)
-library(nlme)
-library(pillar)
-library(pkgconfig)
-library(RColorBrewer)
-library(scales)
-library(tibble)
-library(utf8)
-library(vctrs)
-library(viridisLite)
-library(boot)
-library(lme4)
-library(minqa)
-library(nloptr)
-library(numDeriv)
-library(rbibutils)
-library(Rdpack)
-library(reformulas)
-library(insight)
-library(showtextdb)
-library(sysfonts)
 library(shiny)
 library(ggplot2)
-library(showtext)
+#library(showtext)
 library(scico)
 library(bslib)
 library(bsicons)
-library(DT)
 library(MASS)
 library(MuMIn)
 library(lmerTest)
@@ -55,9 +14,9 @@ library(lmerTest)
 # graphics
 p_palettes <- scico_palette_names()
 font_sizes <- c(20,16,14)
-font_add_google("Open Sans", family = "open")
-font_add_google("Montserrat", family = "mont")
-showtext_auto()
+#font_add_google("Open Sans", family = "open")
+#font_add_google("Montserrat", family = "mont")
+#showtext_auto()
 
 # distributions
 ## currently only continuous distributions are supported
@@ -67,6 +26,10 @@ dists <- c("normal", "lognormal", "gamma", "exponential")
 load("data_gsw.RData")
 load("data_fruit.RData")
 load("data_ps2.RData")
+## testing with data hosted on github
+#data_fruit <- read.csv("https://raw.githubusercontent.com/zachpeagler/tomato-inoculant-app/refs/heads/main/data/data_fruit.csv")
+#data_gsw <- read.csv("https://raw.githubusercontent.com/zachpeagler/tomato-inoculant-app/refs/heads/main/data/data_gsw.csv")
+#data_ps2 <- read.csv("https://raw.githubusercontent.com/zachpeagler/tomato-inoculant-app/refs/heads/main/data/data_ps2.csv")
 
 ## preload vars
 ### kind of a funky way of doing this, but it makes it REALLY easy to check if a variable
@@ -577,14 +540,14 @@ ui <- navbarPage(collapsible = TRUE,
       ), # end stats tab panel
       tabPanel("Data",
         card(card_header("Li-600 Data", class = "bg-primary"),
-          DTOutput("gsw_DT")
+          dataTableOutput("gsw_DT")
           ),
         card(card_header("PhiPS2 Data", class = "bg-primary"),
           markdown("This dataset is a combination of data from the LI-COR Li-600
                    and PhotosynQ MultispeQ V2.0s. For the sake of this app running
                    efficiently, the data has been pared down to strictly what is needed.
                    The full datasets can be found [on my github](https://www.github.com/zachpeagler/Thesis/data/TIP24)."),
-          DTOutput("ps2_DT")
+          dataTableOutput("ps2_DT")
           )
       ), # end data tab panel
       tabPanel("Info",
@@ -625,7 +588,7 @@ ui <- navbarPage(collapsible = TRUE,
       tabPanel("Statistics"),
       tabPanel("Data",
         card(card_header("Fruit Data", class = "bg-primary"),
-            DTOutput("fruit_DT")
+            dataTableOutput("fruit_DT")
         )
       ), # end data tab panel
       tabPanel("Info",
@@ -792,10 +755,10 @@ server <- function(input, output) {
   })
 ### Statistics
 ### Data
-  output$gsw_DT <- renderDT({
+  output$gsw_DT <- renderDataTable({
     data_gsw
   })
-  output$ps2_DT <- renderDT({
+  output$ps2_DT <- renderDataTable({
     data_ps2
   })
 ## Fruit
