@@ -1,25 +1,63 @@
 ##### SETUP #####
 ## this code runs on the client at execution
 # load packages
+library(crosstalk)
+library(evaluate)
+library(highr)
+library(htmlwidgets)
+library(knitr)
+library(lazyeval)
+library(rmarkdown)
+library(tinytex)
+library(xfun)
+library(yaml)
+library(colorspace)
+library(fansi)
+library(farver)
+library(gtable)
+library(isoband)
+library(labeling)
+library(lattice)
+library(Matrix)
+library(mgcv)
+library(munsell)
+library(nlme)
+library(pillar)
+library(pkgconfig)
+library(RColorBrewer)
+library(scales)
+library(tibble)
+library(utf8)
+library(vctrs)
+library(viridisLite)
+library(boot)
+library(lme4)
+library(minqa)
+library(nloptr)
+library(numDeriv)
+library(rbibutils)
+library(Rdpack)
+library(reformulas)
+library(insight)
+library(showtextdb)
+library(sysfonts)
 library(shiny)
 library(ggplot2)
-library(scico)
 library(showtext)
+library(scico)
 library(bslib)
 library(bsicons)
 library(DT)
+library(MASS)
 library(MuMIn)
 library(lmerTest)
-library(shinylive)
 
 # graphics
-## palettes
 p_palettes <- scico_palette_names()
-## fonts
+font_sizes <- c(20,16,14)
 font_add_google("Open Sans", family = "open")
 font_add_google("Montserrat", family = "mont")
 showtext_auto()
-font_sizes <- c(16,12,10)
 
 # distributions
 ## currently only continuous distributions are supported
@@ -235,11 +273,11 @@ multiPDF_plot <- function (var, seq_length = 50, distributions = "all", palette 
     scico::scale_color_scico_d(begin=0.9, end=0.1, palette = palette)+
     ggplot2::theme(
       text = ggplot2::element_text(size=10, family="mont"),
-      title = ggplot2::element_text(size=14, family = "mont", face = "bold"),
+      title = ggplot2::element_text(size=14, family = "open", face = "bold"),
       legend.position="bottom",
       legend.title.position = "top",
-      legend.title = ggplot2::element_text(size=12, family = "mont", face= "bold"),
-      axis.title = ggplot2::element_text(size=12, family = "mont", face= "bold"),
+      legend.title = ggplot2::element_text(size=12, family = "open", face= "bold"),
+      axis.title = ggplot2::element_text(size=12, family = "open", face= "bold"),
     )
   return(p)
 }
@@ -282,11 +320,11 @@ multiCDF_plot <- function (var, seq_length = 50, distributions = "all", palette 
     scico::scale_color_scico_d(begin=0.9, end=0.1, palette = palette)+
     ggplot2::theme(
       text = ggplot2::element_text(size=10, family="mont"),
-      title = ggplot2::element_text(size=14, family = "mont", face = "bold"),
+      title = ggplot2::element_text(size=14, family = "open", face = "bold"),
       legend.position="bottom",
       legend.title.position = "top",
-      legend.title = ggplot2::element_text(size=12, family = "mont", face= "bold"),
-      axis.title = ggplot2::element_text(size=12, family = "mont", face= "bold"),
+      legend.title = ggplot2::element_text(size=12, family = "open", face= "bold"),
+      axis.title = ggplot2::element_text(size=12, family = "open", face= "bold"),
     )
   return(p)
 }
@@ -482,7 +520,7 @@ ui <- navbarPage(collapsible = TRUE,
         ), # end gsw card
         card(card_header("Photosystem II Efficiency (PHIPS2)", class = "bg-secondary"),
          markdown("
-                  PhiPS2 is unitless on a scale of 0-1, so we don't need to create PDF and CDF plots and perform KS tests.
+                  PhiPS2 is a **unitless ratio** on a scale of 0-1, so we don't need to create PDF and CDF plots and perform KS tests.
                   Instead, we know that we will wind up logit transforming it and we can use the logit transformed version in
                   our regression models. PhiPS2 is calculated as (maximum fluorescence - steady state fluorescence)/maximum fluorescence,
                   and is useful for estimating changes in the quantum yield of non-cyclic electron transport."),
@@ -700,9 +738,9 @@ server <- function(input, output) {
       theme_bw()+
       theme(
         text = element_text(size=font_sizes[3], family="mont"),
-        axis.title = element_text(size=font_sizes[2], family = "mont", face= "bold"),
+        axis.title = element_text(size=font_sizes[2], family = "open", face= "bold"),
         title = element_text(size=font_sizes[1], family="open", face="bold", lineheight = .8),
-        legend.title = ggplot2::element_text(size=font_sizes[2], family = "mont", face= "bold"),
+        legend.title = ggplot2::element_text(size=font_sizes[2], family = "open", face= "bold"),
 #        legend.position = "bottom",
         legend.title.position = "top"
       )
@@ -731,9 +769,9 @@ server <- function(input, output) {
       theme_bw()+
       theme(
         text = element_text(size=font_sizes[3], family="mont"),
-        axis.title = element_text(size=font_sizes[2], family = "mont", face= "bold"),
+        axis.title = element_text(size=font_sizes[2], family = "open", face= "bold"),
         title = element_text(size=font_sizes[1], family="open", face="bold", lineheight = .8),
-        legend.title = ggplot2::element_text(size=font_sizes[2], family = "mont", face= "bold"),
+        legend.title = ggplot2::element_text(size=font_sizes[2], family = "open", face= "bold"),
         #        legend.position = "bottom",
         legend.title.position = "top"
       )
