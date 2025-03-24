@@ -3,7 +3,7 @@
 # load packages
 library(shiny)
 library(ggplot2)
-#library(showtext)
+library(showtext)
 library(scico)
 library(bslib)
 library(bsicons)
@@ -14,9 +14,9 @@ library(lmerTest)
 # graphics
 p_palettes <- scico_palette_names()
 font_sizes <- c(20,16,14)
-#font_add_google("Open Sans", family = "open")
-#font_add_google("Montserrat", family = "mont")
-#showtext_auto()
+font_add_google("Open Sans", family = "open")
+font_add_google("Montserrat", family = "mont")
+showtext_auto()
 
 # distributions
 ## currently only continuous distributions are supported
@@ -26,10 +26,14 @@ dists <- c("normal", "lognormal", "gamma", "exponential")
 load("data_gsw.RData")
 load("data_fruit.RData")
 load("data_ps2.RData")
-## testing with data hosted on github
-#data_fruit <- read.csv("https://raw.githubusercontent.com/zachpeagler/tomato-inoculant-app/refs/heads/main/data/data_fruit.csv")
-#data_gsw <- read.csv("https://raw.githubusercontent.com/zachpeagler/tomato-inoculant-app/refs/heads/main/data/data_gsw.csv")
-#data_ps2 <- read.csv("https://raw.githubusercontent.com/zachpeagler/tomato-inoculant-app/refs/heads/main/data/data_ps2.csv")
+
+## scale variables for later use in modeling
+## scaling is important so they have equal "weight" in the model
+gsw_scaled_vars <- data.frame(apply(data_gsw[,c(10:14)], 2, scale))
+ps2_scaled_vars <- data.frame(apply(data_ps2[,c(11:15)], 2, scale))
+gsw_mod_data <- cbind(data_gsw[,c(1,5,6,15)], gsw_scaled_vars)
+ps2_mod_data <- cbind(data_ps2[,c(1,5,6,10,16)], ps2_scaled_vars)
+mod_var_names <- c("Date", "DaysFromGermination", "AmbientHumidity", "AmbientPressure", "AmbientTemperature", "AmbientLight", "LeafTemperature")
 
 ## preload vars
 ### kind of a funky way of doing this, but it makes it REALLY easy to check if a variable
@@ -235,12 +239,12 @@ multiPDF_plot <- function (var, seq_length = 50, distributions = "all", palette 
   p <- p +
     scico::scale_color_scico_d(begin=0.9, end=0.1, palette = palette)+
     ggplot2::theme(
-      text = ggplot2::element_text(size=10, family="mont"),
-      title = ggplot2::element_text(size=14, family = "open", face = "bold"),
+      text = ggplot2::element_text(size=font_sizes[3], family="mont"),
+      title = ggplot2::element_text(size=font_sizes[1], family = "open", face = "bold"),
       legend.position="bottom",
       legend.title.position = "top",
-      legend.title = ggplot2::element_text(size=12, family = "open", face= "bold"),
-      axis.title = ggplot2::element_text(size=12, family = "open", face= "bold"),
+      legend.title = ggplot2::element_text(size=font_sizes[2], family = "open", face= "bold"),
+      axis.title = ggplot2::element_text(size=font_sizes[2], family = "open", face= "bold"),
     )
   return(p)
 }
@@ -282,12 +286,12 @@ multiCDF_plot <- function (var, seq_length = 50, distributions = "all", palette 
   p <- p +
     scico::scale_color_scico_d(begin=0.9, end=0.1, palette = palette)+
     ggplot2::theme(
-      text = ggplot2::element_text(size=10, family="mont"),
-      title = ggplot2::element_text(size=14, family = "open", face = "bold"),
+      text = ggplot2::element_text(size=font_sizes[3], family="mont"),
+      title = ggplot2::element_text(size=font_sizes[1], family = "open", face = "bold"),
       legend.position="bottom",
       legend.title.position = "top",
-      legend.title = ggplot2::element_text(size=12, family = "open", face= "bold"),
-      axis.title = ggplot2::element_text(size=12, family = "open", face= "bold"),
+      legend.title = ggplot2::element_text(size=font_sizes[2], family = "open", face= "bold"),
+      axis.title = ggplot2::element_text(size=font_sizes[2], family = "open", face= "bold"),
     )
   return(p)
 }
@@ -437,11 +441,11 @@ predict_plot <- function(mod, data, rvar, pvar, group = NULL, length = 50, inter
     )+
     ggplot2::theme_bw()+
     ggplot2::theme(
-      text = ggplot2::element_text(size=16),
+      text = ggplot2::element_text(size=font_sizes[3]),
       legend.position="right",
-      axis.title = ggplot2::element_text(size=16, face= "bold"),
-      title = ggplot2::element_text(size=20, face="bold", lineheight = .5),
-      plot.subtitle = ggplot2::element_text(size=14, face = "italic")
+      axis.title = ggplot2::element_text(size=font_sizes[2], face= "bold"),
+      title = ggplot2::element_text(size=font_sizes[1], face="bold", lineheight = .5),
+      plot.subtitle = ggplot2::element_text(size=font_sizes[2], face = "italic")
     )
   return(p)
 }
@@ -493,9 +497,33 @@ ui <- navbarPage(collapsible = TRUE,
           [Genty *et al*., 1989](https://www.sciencedirect.com/science/article/abs/pii/S0304416589800169) or
           for a simpler explanation, the [chlorophyll fluorescence wikipedia page](https://en.wikipedia.org/wiki/Chlorophyll_fluorescence).")
           )
-        ) # end phips2 card
+        ), # end phips2 card
       ), # end dists tab panel
       tabPanel("Plots",
+        card(card_header("Interactive Histograms", class = "bg-primary"),
+             div(layout_sidebar(sidebar=sidebar(
+               selectInput("gsw_hist_var", "Select X Variable",
+                           choices = gsw_vars, selected = "AmbientHumidity"),
+               selectInput("gsw_hist_color", "Select Color Variable",
+                           choices = gsw_vars_d, selected = "Treatment"),
+               sliderInput("gsw_hist_bins", "Number of Bins",
+                            value = 30, min = 2, max = 100)
+               ), # end sidebar
+               markdown("###### **Stomatal conductance data histogram**"),
+               plotOutput("gsw_hist")
+             )), # gsw hist div
+             div(layout_sidebar(sidebar=sidebar(
+               selectInput("ps2_hist_var", "Select Variable",
+                           choices = ps2_vars, selected = "AmbientHumidity"),
+               selectInput("ps2_hist_color", "Select Color Variable",
+                           choices = ps2_vars_d, selected = "Treatment"),
+               sliderInput("ps2_hist_bins", "Number of Bins",
+                            value = 30, min = 2, max = 100)
+               ), # end sidebar
+               markdown("###### **Photosystem II efficiency data histogram**"),
+               plotOutput("ps2_hist")
+              )) # ps2 hist div
+          ), # end hist card
         card(card_header("Interactive Stomatal Conductance Scatter", class = "bg-primary"),
              layout_sidebar(sidebar = sidebar(
                selectInput("gsw_x","X Variable",
@@ -509,7 +537,7 @@ ui <- navbarPage(collapsible = TRUE,
                sliderInput("gsw_jit", "Jitter Amount",
                            min=0, max=10, value =3),
                sliderInput("gsw_size", "Point Size",
-                           min = 1, max=10, value = 2),
+                           min = 1, max=10, value = 3),
                checkboxInput("gsw_fwrap", "Individual Plot Per Treatment", FALSE)
              ), # end sidebar
              card_body(plotOutput("gsw_scatter"))
@@ -528,15 +556,44 @@ ui <- navbarPage(collapsible = TRUE,
                sliderInput("ps2_jit", "Jitter Amount",
                            min=0, max=10, value =3),
                sliderInput("ps2_size", "Point Size",
-                           min = 1, max=10, value = 2),
+                           min = 1, max=10, value = 3),
                checkboxInput("ps2_fwrap", "Individual Plot Per Treatment", FALSE)
              ), # end sidebar
              card_body(plotOutput("ps2_scatter"))
              ) # end sidebar layout
-        ), # end phips2 scatter plot
+        ) # end phips2 scatter plot
       ), # end plots tab panel
       tabPanel("Statistics",
-               
+        card(card_header("Stomatal conductance", class = "bg-primary"),
+             div(layout_columns(col_widths = c(8,4),
+              div(
+                selectInput("gsw_mod_var", "Predictor Variable",
+                            choices = mod_var_names, selected = "AmbientHumidity"),
+               card(card_header("Model Summary"),
+                    verbatimTextOutput("gsw_model_summary")
+                    )
+                ),# end model summary div
+               div(# value boxes for AIC and r^2
+                 value_box(
+                   title = "GSW Model AIC",
+                   value = textOutput("gsw_aic"),
+                   theme = "bg-primary",
+                   width = 0.2
+                 ),
+                 value_box(
+                   title = "GSW Model R^2",
+                   value = textOutput("gsw_r2"),
+                   theme = "bg-secondary",
+                   width = 0.2
+                 ),
+                ) # end value box div
+               ) # end column wrap
+             ), # end div
+             div(
+               markdown("###### **Stomatal conductance prediction plot**"),
+               plotOutput("gsw_pred")
+             )
+        ), # end gsw stats card
       ), # end stats tab panel
       tabPanel("Data",
         card(card_header("Li-600 Data", class = "bg-primary"),
@@ -564,7 +621,7 @@ ui <- navbarPage(collapsible = TRUE,
           **MinutesFromStart** is the number of minutes from the start of that day's observations to the time of measurement. <br>
           **Row** is the row of the tomato. (A:D) <br>
           **Pot** is the pot number of the tomato. (1:12) <br>
-          **Plant** is a combination of *Row* and *Pot*, and acts as an ID for every individual plant. (1 1: 4 12) <br>
+          **Plant** is a combination of *Row* and *Pot*, and acts as an ID for every individual plant. (A1: D12) <br>
           **AmbientHumidity** is the relative humidity (add units) at the time of measurement. <br>
           **AmbientLight** is the ambient light level (add units) at the time of measurement. <br>
           **AmbientPressure** is the ambient pressure (add units) at the time of measurement. <br>
@@ -619,10 +676,45 @@ ui <- navbarPage(collapsible = TRUE,
     ) # end tab set panel
   ), # end fruit nav panel
   nav_panel("Info",
+    layout_column_wrap(
     markdown(
-    "This is where we can put the main blurb for this app.<br>
-    Acknowledgements. Explanations. Affiliation disclaimers. Etc.
+    "##### **Tomato inoculant timing trial** <br>
+    This trial accompanies the following objectives laid out in my thesis: <br>
+    **Hypothesis 2** – Microbial bacterial granules (BGs) with the full microbial consortium applied
+    at germination and transplantation will increase fluorescence parameters and fruit yield and quality
+    more than either germination or transplantation inoculations. <br>
+    **Objective 2.1** - Determine the effect of BG inoculation timing on tomato crop quality and yield. <br>
+    **Objective 2.2** - Determine the effect of BG inoculation timing on tomato plant fluorescence parameters."),
     
+    card(img(src="TIP24_1.jpg", align = "center"), max_height = 500)),
+    markdown("##### **Microbial Consortium** <br>
+    - *Azospirillum brasilense Sp7*- PGPB that benefits the plant via nitrogen fixation, siderophore production,
+      and by increasing lateral root growth ([Sahoo et al, 2014](https://pubmed.ncbi.nlm.nih.gov/24414168/); [Li et al, 2005](https://pubmed.ncbi.nlm.nih.gov/16121231/)),
+      and has been shown to increase plant stress tolerance ([Casanovas et al, 2002](https://www.jstor.org/stable/23787082?seq=1)).
+      It has been shown to increase crop yield and plant nitrogen, phosphorous, and potassium content
+      ([Askary et al, 2009](https://www.researchgate.net/publication/347438334_Influence_of_the_Co-inoculation_Azospirillum_brasilense_and_Rhizobium_meliloti_plus_24-D_on_Grain_Yield_and_N_P_K_Content_of_Triticum_aestivum_Cv_Baccros_and_Mahdavi)).
+      It has also been reported to work well with Methylobacterium oryzae ([Madhaiyan et al, 2009](https://www.researchgate.net/publication/225966871_Effect_of_co-inoculation_of_methylotrophic_Methylobacterium_oryzae_with_Azospirillum_brasilense_and_Burkholderia_pyrrocinia_on_the_growth_and_nutrient_uptake_of_tomato_red_pepper_and_rice)). <br>
+    - *Azotobacter chroococcum 43* - PGPB that operates via nitrogen fixation, phosphate solubilization,
+      and vitamin, indole acetic acid (IAA), gibberellin (GA), hydrogen cyanide (HCN), siderophore,
+      and cytokinin (CK) production ([Abd El-Fattah et al, 2013](https://www.researchgate.net/publication/259130343_Effect_of_carrier_materials_sterilization_method_and_storage_temperature_on_survival_and_biological_activities_of_Azotobacter_chroococcum_inoculant); [Revillas et al, 2000](https://pubmed.ncbi.nlm.nih.gov/11021581/); [Wani et al, 2007](https://www.researchgate.net/publication/240762870_Co-inoculation_of_nitrogen-fixing_and_phosphate-solubilizing_bacteria_to_promote_growth_yield_and_nutrient_uptake_in_chickpea)).
+      Shown to increase germination rates and aboveground biomass and crop quality and yield in maize ([Zahir et al, 2005](https://www.researchgate.net/publication/233130106_Precursor_L-tryptophan-Inoculum_Azotobacter_Interaction_for_Improving_Yields_and_Nitrogen_Uptake_of_Maize)). <br>
+    - *Bacillus subtilis* - PGPB that has been shown to improve fruit quality and yield in tomato
+      ([Mena-Violante & Olalde-Portugal, 2007](https://www.researchgate.net/publication/222326135_Alteration_of_tomato_fruit_quality_by_root_inoculation_with_plant_growth-promoting_rhizobacteria_PGPR_Bacillus_subtilis_BEB-13bs); [Kokalis-Burelle et al, 2002](https://link.springer.com/article/10.1023/A:1014464716261))
+      and shown to increase metabolite production ([Sharaf-Eldin et al, 2008](https://pubmed.ncbi.nlm.nih.gov/18622904/)).
+      Shown to solubilize phosphate, fix nitrogen, produce IAA, CK, GA, HCN, and antibiotics,
+      as well as exhibiting phytase activity ([Ahmad et al, 2008](https://pubmed.ncbi.nlm.nih.gov/16735107/); [Arkhipova et al, 2005](https://link.springer.com/article/10.1007/s11104-004-5047-x); [Yao et al, 2006](https://www.researchgate.net/publication/233193377_Effect_of_FZB_24_Bacillus_subtilis_as_biofertilizer_on_cotton_yields_in_field_tests)).
+      It has been used as a biocontrol agent against aphids and pathogenic bacteria ([Kokalis-Burelle et al, 2002](https://link.springer.com/article/10.1023/A:1014464716261)). <br>
+    - *Methylobacterium oryzae CBMB20* - PGPB that has been shown to improve fruit quality and yield in tomato
+      in both foliar and chitosan encapsulated inoculations ([Chanratana et al., 2019](https://www.researchgate.net/profile/Aritra-Choudhury/publication/323564168_Evaluation_of_chitosan_and_alginate_immobilized_Methylobacterium_oryzae_CBMB20_on_tomato_plant_growth/links/5a9e6fcfa6fdcc214af2b315/Evaluation-of-chitosan-and-alginate-immobilized-Methylobacterium-oryzae-CBMB20-on-tomato-plant-growth.pdf)). 
+      Operates through phytohormone (auxin and cytokinin) production, stress reduction via ACC deaminase production, 
+      increased nutrient availability through nitrogen fixation, and as a biopesticide ([Chauhan et al., 2015](https://www.sciencedirect.com/science/article/abs/pii/S0929139315300159)). <br>
+    - *Pseudomonas putida 90* - PGPB that increases plant growth by solubilizing phosphate and producing
+      IAA and siderophores ([Hariprasad & Niranjana, 2009](https://link.springer.com/article/10.1007/s11104-008-9754-6)). Shown to inhibit ethylene production ([Mayak et al, 1999](https://pubmed.ncbi.nlm.nih.gov/10552131/)).
+      Shown to significantly increase tomato fruit macro- and micronutrient content ([He et al, 2019](https://pubmed.ncbi.nlm.nih.gov/30955229/)). 
+      Shown to increase potassium, magnesium, and calcium uptake and decrease sodium uptake ([Yao et al, 2010](https://www.sciencedirect.com/science/article/abs/pii/S1164556309001046)). 
+      Also shown to increase root and shoot growth ([Glick et al, 1997](https://www.researchgate.net/publication/223543401_Early_development_of_canola_seedlings_in_the_presence_of_the_plant_growth-promoting_rhizobacterium_Pseudomonas_putida_GR12-2); [Hall et al, 1996](https://ui.adsabs.harvard.edu/abs/1996IsJPS..44...37H/abstract)). 
+    "),
+    markdown("
     This app only covers data from the **2024** tomato inoculant trial. Mostly 
     for the sake of my own sanity, as well as the fact that the trials aren't 
     exactly apples to apples. In **2023** we applied foliar and/or soil applications
@@ -634,8 +726,31 @@ ui <- navbarPage(collapsible = TRUE,
     *Bacillus subtilis*, *Methylobacterium oryzae CBMB20*, and *Pseudomonas putida* 
     (all at 1x10^6 cfu/mL) at two different time points: **germination** and/or **transplantation**.
     We also increased the sample size to 12 plants per group for a total of 48 plants. <br>
-    "
-    )
+    "),
+    markdown(" ##### **References**
+    - Abd El-Fattah, D.A., *et al*. 2013. *Effect of carrier materials, sterilization method, and storage temperature on survival and biological activities of* Azotobacter chroococcum *inoculants*. Ann. Agric. Sci. 58:111-118. <br>
+    - Ahmad, F., *et al*. 2008. *Screening of free-living rhizospheric bacteria for their multiple plant growth promoting activities*. Microbiological Research, 163(2):173-181. <br>
+    - Arkhipova, T., *et al*. 2005. *Ability of bacterium* Bacillus subtilis *to produce cytokinins and to influence the growth and endogenous hormone content of lettuce plants*. Plant Soil. 272:201-209. <br>
+    - Askary, M. *et al*. 2009. *Influence of the co-inoculation* Azospirillum brasilense *and* Rhizobium meliloti *plus 2,4-D on Grain Yield and N, P, K content of* Triticum aestivum. American-Eurasian J. Agric. & Environ. Sci., 5(3):296-307 <br>
+    - Casanovas, E.M., *et al*. 2002. *Azospirillum inoculation mitigates water stress effects in Maize Seedlings*. Cereal Res. Comm. 30:343-350. <br>
+    - Chanratana, M., *et al.* 2018. *Evaluation of chitosan and alginate immobilized* Methylobacterium oryzae CBMB20 *on tomato plant growth*. Archives of Agronomy and Soil Sci. 64(11):1489-1502. 
+    - Chauhan, H., *et al.* (2015). *Novel plant growth promoting rhizobacteria—Prospects and potential*. Applied Soil Ecology, 95, 38–53. doi:10.1016/j.apsoil.2015.05.011 <br>
+    - Glick, B. R., *et al*. 1997. *Early development of canola seedlings in the presence of the plant growth-promoting rhizobacterium* Pseudomonas putida GR12-2. Soil Biology and Biochemistry, 28(8):1233-1239 DOI 10.1016/S0038-0717(97)00026-6 <br>
+    - Hall, J.A., *et al*. 1996. *Root elongation in various crops by the plant growth promoting rhizobacteria* Pseudomonas putida GR12-2. Isr. J. Plant Sci. 44:37-42. <br>
+    - Hariprasad, P., Niranjana, S.R. 2009. *Isolation and characterization of phosphate solubilizing rhizobacteria to improve plant health of tomato*. Plant Soil. 316:13-24. <br>
+    - He, Y., *et al*. 2019. *Co-inoculation of* Bacillus sp. *and* Pseudomonas putida *at different development stages acts as a biostimulant to promoted growth, yield and nutrient uptake of tomato*. J. Appl. Micro. DOI: 10.1111/jam.14273. <br>
+    - Kokalis-Burelle, N., *et al*. 2002. *Field evaluation of plant growth-promoting rhizobacteria amended transplant mixes and soil solarization for tomato and pepper production in Florida*. Plant Soil. 238:257-266. <br>
+    - Li, Q., *et al*. 2005. *The effect of native and ACC deaminase-containing* Azospirillum brasilense Cd1843 *on the rooting of carnation cuttings*. Can. J. Microbiol. 51:511-514. <br>
+    - Madhaiyan, M. *et al*. 2009. *Effect of co-inoculation of methylotrophic* Methylobacterium oryzae *with* Azospirillum brasilense *and* Burkholderia pyrrocinia *on the growth and nutrient uptake of tomato, red pepper and rice*. Plant Soil 328:71-82 DOI 10.1007/s11104-009-0083-1 <br>
+    - Mayak, S. et al. 1999. *Effect of wild-type and mutant plant growth-promoting rhizobacteria on the rooting of mung bean cuttings*. J. Plant Growth Regul. 18:49-53. <br>
+    - Mena-Violante, H., Olalde-Portugal, V. 2007. *Alteration of tomato fruit quality by root inoculation with plant growth-promoting rhizobacteria (PGPR)*: Bacillus subtilis BEB-13s. Sci. Hortic-Amsterdam 113:103-106. <br>
+    - Revillas, J.J., *et al*. 2000. *Production of B-Group vitamins by two Azotobacter strains with phenolic compounds as sole carbon source under diazotrophic and adiazotrophic conditions*. J. Appl. Microbiol. 89:486-493. <br>
+    - Sahoo, R.K., *et al*. 2014. *Phenotypic and molecular characterization of efficient native Azospirillum strains from rice fields for crop improvement*. Protoplasma. 251(4):943-953. <br>
+    - Sharaf-Eldin, M., *et al*. 2008. Bacillus subtilis FZB24 *affects flower quantity and quality of Saffron* (Crocus sativus). Planta Med. 74:1316-1320. <br>
+    - Yao, A.V., *et al*. 2006. *Effect of* FZB 24 Bacillus subtilis *as a biofertilizer on cotton yields in field tests*. Arch. Phytopathol. Plant Prot. 39:323-328. <br>
+    - Yao, Y., *et al*. 2010. *Growth promotion and protection against salt stress by* Pseudomonas putida Rs-198 *on cotton*. European J. Soil Biol. 46:49-54. <br>
+    - Zahir, Z.A., *et al*. 2005. *Precursor (L-tryptophan)-inoculum (Azotobacter) interaction for improving yields and nitrogen uptake in maize*. J. Plant Nutr. 28:805-817. <br>
+             ")
     ),
   nav_spacer(),
   nav_item(gear),
@@ -654,6 +769,9 @@ server <- function(input, output) {
 ## fluorescence reactive expressions
   ### gsw
   Rgsw_dists <- reactive({input$gsw_dists})
+  Rgsw_hist_var <- reactive({input$gsw_hist_var})
+  Rgsw_hist_color <- reactive({input$gsw_hist_color})
+  Rgsw_hist_bins <- reactive({input$gsw_hist_bins})
   Rgsw_len <- reactive({input$gsw_len})
   Rgsw_x <- reactive({input$gsw_x})
   Rgsw_y <- reactive({input$gsw_y})
@@ -662,8 +780,12 @@ server <- function(input, output) {
   Rgsw_jit <- reactive({input$gsw_jit * 0.1})
   Rgsw_fwrap <- reactive({input$gsw_fwrap})
   Rgsw_size <- reactive({input$gsw_size})
+  Rgsw_mod_var <- reactive({input$gsw_mod_var})
   ### ps2
   Rps2_dists <- reactive({input$ps2_dists})
+  Rps2_hist_var <- reactive({input$ps2_hist_var})
+  Rps2_hist_color <- reactive({input$ps2_hist_color})
+  Rps2_hist_bins <- reactive({input$ps2_hist_bins})
   Rps2_len <- reactive({input$ps2_len})
   Rps2_x <- reactive({input$ps2_x})
   Rps2_y <- reactive({input$ps2_y})
@@ -691,7 +813,36 @@ server <- function(input, output) {
     multiCDF_plot(data_gsw$gsw, Rgsw_len(), Rgsw_dists(), palette = Rpalette())
   })
 ### Plots
-#### gsw
+# hists
+  output$gsw_hist <- renderPlot({
+    gh <- ggplot(data_gsw, aes(x=.data[[Rgsw_hist_var()]], color = .data[[Rgsw_hist_color()]],
+                               fill = .data[[Rgsw_hist_color()]]))+
+      geom_histogram(bins = Rgsw_hist_bins())+
+      theme_bw() +
+      theme(
+        text = element_text(size=font_sizes[3], family="mont"),
+        axis.title = element_text(size=font_sizes[2], family = "open", face= "bold"),
+        legend.title = ggplot2::element_text(size=font_sizes[2], family = "open", face= "bold"),
+      )
+    gh <- gh + scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())
+    gh <- gh + scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())
+    return(gh)
+  })
+  output$ps2_hist <- renderPlot({
+    ph <- ggplot(data_ps2, aes(x=.data[[Rps2_hist_var()]], color = .data[[Rps2_hist_color()]],
+                               fill = .data[[Rps2_hist_color()]]))+
+      geom_histogram(bins = Rps2_hist_bins()) + 
+      theme_bw() +
+      theme(
+        text = element_text(size=font_sizes[3], family="mont"),
+        axis.title = element_text(size=font_sizes[2], family = "open", face= "bold"),
+        legend.title = ggplot2::element_text(size=font_sizes[2], family = "open", face= "bold"),
+      )
+    ph <- ph + scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())
+    ph <- ph + scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())
+    return(ph)
+  })
+# scatters
   output$gsw_scatter <- renderPlot({
     gs <- ggplot(data=data_gsw, aes(x=.data[[Rgsw_x()]], y=.data[[Rgsw_y()]],
                                     color = .data[[Rgsw_col()]], shape = .data[[Rgsw_shape()]]))+
@@ -704,7 +855,6 @@ server <- function(input, output) {
         axis.title = element_text(size=font_sizes[2], family = "open", face= "bold"),
         title = element_text(size=font_sizes[1], family="open", face="bold", lineheight = .8),
         legend.title = ggplot2::element_text(size=font_sizes[2], family = "open", face= "bold"),
-#        legend.position = "bottom",
         legend.title.position = "top"
       )
     if (Rgsw_x() %in% gsw_vars_d) {
@@ -722,7 +872,6 @@ server <- function(input, output) {
     }
     return(gs)
   })
-#### phips2
   output$ps2_scatter <- renderPlot({
     ps <- ggplot(data=data_ps2, aes(x=.data[[Rps2_x()]], y=.data[[Rps2_y()]],
                                     color = .data[[Rps2_col()]], shape = .data[[Rps2_shape()]]))+
@@ -754,6 +903,11 @@ server <- function(input, output) {
     return(ps)
   })
 ### Statistics
+#### gsw
+  # model summary
+  # AIC
+  # R^2
+  # prediction plot
 ### Data
   output$gsw_DT <- renderDataTable({
     data_gsw
@@ -762,9 +916,14 @@ server <- function(input, output) {
     data_ps2
   })
 ## Fruit
-  ## DT: gsw_DT, ps2_DT, fruit_DT
-  ## plotOutputs: gsw_pdf, gsw_cdf
-  ## verbatimTextOutputs: gsw_KS
+### Distributions
+### Plots
+### Stats
+### Data
+  output$fruit_DT <- renderDataTable({
+    data_fruit
+  })
+### Info
 }
 
 # run it!
