@@ -462,9 +462,92 @@ link_github <- tags$a(bs_icon("GitHub"), href = "https://github.com/zachpeagler/
 ui <- navbarPage(collapsible = TRUE,
   title = "Tomato Inoculants",
   theme = bs_theme(version = 5, bootswatch = "flatly"),
+  nav_panel("Background",
+  # treat it like the background section of a paper
+  # start with the WHY. traditional fertilizers bad, etc.
+    ## HARMFUL ALGAE BLOOM PICTURE
+  # introduce bacterial fertilizers as a solution, but one lacking viable application methods.
+  # explain the shift from just M. oryzae to a microbial consortium.
+    ## BACTERIA PICS
+  # introduce alginate and chitosan, and WHY I chose to pursue chitosan over alginate.
+    ## CHITOSAN AND ALGINATE BEAD PICS
+  # introduce tomato as the model organism
+    ## TOMATO PICTURE
+  # introduce stomates and stomatal conductance
+    ## STOMATE PICTURE
+  # introduce Photosystem II and basic electron transport stuff
+    ## GRAPHIC SHOWING WHERE PSII is
+  # introduce blossom end-rot
+    ## BER PICTURE
+  ),
+  nav_panel("Development",
+  # storytell the development of the bacterial granules
+  # the journey from chitosan to alginate
+  # end with the recommendation of alginate over chitosan
+  # "and here's why" type shit
+  ),
+  nav_panel("Tomato Inoculant Trials",
+    tabsetPanel(
+      tabPanel("Inoculant Location Trial",
+      # big trial in 2023 in Hydro greenhouse at KSU Field Station - looked at soil vs foliar inoculation in salt-stressed tomato
+      # - only M. oryzae - long enough to gather fruit - no salt-control
+      # Li-600 and MultispeQs - no destructive sampling
+      # spider mites and white lies
+        tabsetPanel( # interior ILT tabsetpanel
+          tabPanel("Exploratory",
+            # shit from ass
+          ),
+          tabPanel("Statistics",
+          ),
+          tabPanel("Data",
+          ),
+          tabPanel("Info",
+            # restate much of what's already been said, but make sure to clarify differences between this trial and the other trials
+          )
+        ) # end ILT tabsetpanel
+      ),
+      tabPanel("Inoculant Method Trial",
+      # small trial in the greenhouse on KSU campus - chitosan granule, inoculated chitosan granule, liquid inoculant 
+      # - no salt stress - all 5 bacteria - only 40 days
+      # Li-600 only - destructive sampling - no pests
+      ),
+      tabPanel("Inoculant Timing Trial",
+      # big trial in 2024 in the Hydro greenhouse - germination vs transplantation
+      # - no salt stress - all 5 bacteria - long enough to gather fruit
+      # Li-600 and MultispeQs - spider mites and white flies
+      )
+    )
+  ),
+  nav_panel("Info",
+  # this is where information about the app and how to use it goes. as well as info about me perhaps
+  # also add references here
+  # acknowledgements as well, maybe?
+    card(card_header("About the project"),
+      markdown(
+        "yuuuuuurp"
+      )
+    ),
+    card(card_header("About the author", class="bg-primary"),
+      markdown(
+        "mememe"
+      )
+    ),
+    card(card_header("References", class="bg-primary"),
+      markdown(
+        "yabababa"
+      )
+    )
+  ),
   nav_panel("Fluorescence",
     tabsetPanel(
-      tabPanel("Distributions",
+      tabPanel("Plots",
+        accordion(
+          accordion_panel(title = "Density and Distribution",
+        markdown("
+        A critical component of an exploratory data analysis is the creation of **probability density function** (PDF) plots
+        and **cumulative distribution function** (CDF) plots. They tell us the shape the data takes and helps inform if we need to 
+        apply a mathematical correction or use a certain type of distribution in our statistical model.
+        "),
         card(card_header("Stomatal Conductance (gsw)", class = "bg-primary"),
           layout_sidebar(
             sidebar=sidebar(open=FALSE,
@@ -498,10 +581,10 @@ ui <- navbarPage(collapsible = TRUE,
           for a simpler explanation, the [chlorophyll fluorescence wikipedia page](https://en.wikipedia.org/wiki/Chlorophyll_fluorescence).")
           )
         ), # end phips2 card
-      ), # end dists tab panel
-      tabPanel("Plots",
-        card(card_header("Interactive Histograms", class = "bg-primary"),
-             div(layout_sidebar(sidebar=sidebar(
+          ), # end dist accordion panel
+        accordion_panel(title="Histograms",
+        card(card_header("Interactive Stomatal Conductance Histogram", class = "bg-primary"),
+              layout_sidebar(sidebar=sidebar(
                selectInput("gsw_hist_var", "Select X Variable",
                            choices = gsw_vars, selected = "AmbientHumidity"),
                selectInput("gsw_hist_color", "Select Color Variable",
@@ -512,7 +595,8 @@ ui <- navbarPage(collapsible = TRUE,
                markdown("###### **Stomatal conductance data histogram**"),
                plotOutput("gsw_hist")
              )), # gsw hist div
-             div(layout_sidebar(sidebar=sidebar(
+          card(card_header("Interactive Photosystem II Histogram", class = "bg-primary"),
+             layout_sidebar(sidebar=sidebar(
                selectInput("ps2_hist_var", "Select Variable",
                            choices = ps2_vars, selected = "AmbientHumidity"),
                selectInput("ps2_hist_color", "Select Color Variable",
@@ -522,8 +606,9 @@ ui <- navbarPage(collapsible = TRUE,
                ), # end sidebar
                markdown("###### **Photosystem II efficiency data histogram**"),
                plotOutput("ps2_hist")
-              )) # ps2 hist div
-          ), # end hist card
+              )) # ps2 hist card
+          ), # end hist accordion panel
+        accordion_panel(title = "Scatter Plots", class = "fg-primary",
         card(card_header("Interactive Stomatal Conductance Scatter", class = "bg-primary"),
              layout_sidebar(sidebar = sidebar(
                selectInput("gsw_x","X Variable",
@@ -562,6 +647,11 @@ ui <- navbarPage(collapsible = TRUE,
              card_body(plotOutput("ps2_scatter"))
              ) # end sidebar layout
         ) # end phips2 scatter plot
+        ), # end scatterplot accordion panel
+        accordion_panel(title="Box Plots",
+        
+        )
+      ) # end accordion
       ), # end plots tab panel
       tabPanel("Statistics",
         card(card_header("Stomatal conductance", class = "bg-primary"),
@@ -622,14 +712,14 @@ ui <- navbarPage(collapsible = TRUE,
           **Row** is the row of the tomato. (A:D) <br>
           **Pot** is the pot number of the tomato. (1:12) <br>
           **Plant** is a combination of *Row* and *Pot*, and acts as an ID for every individual plant. (A1: D12) <br>
-          **AmbientHumidity** is the relative humidity (add units) at the time of measurement. <br>
-          **AmbientLight** is the ambient light level (add units) at the time of measurement. <br>
-          **AmbientPressure** is the ambient pressure (add units) at the time of measurement. <br>
+          **AmbientHumidity** is the relative humidity (%) at the time of measurement. <br>
+          **AmbientLight** is the ambient light level (lumens) at the time of measurement. <br>
+          **AmbientPressure** is the ambient pressure (Pascals) at the time of measurement. <br>
           **LeafTemperature** is the temperature (C) of the leaf. <br>
           ### Response Variables
           **gsw** is the stomatal conductance (mol m-2 s-1) of the leaf. Stomatal conductance refers to the
           rate at which molecules are moving through the leaf's stomates, and is indicitave of photosynthesis.<br>
-          **PhiPS2** is the quantum yield. It is unitless. (0:1) <br>
+          **PhiPS2** is the efficiency of Photosystem II. It is unitless. (0:1) <br>
           > It's important to note that **only** the Li-600 can measure gsw, while both
           the Li-600 and the MultispeQ can measure PhiPS2. Also, even though both devices can 
           measure PhiPS2, they do so **in different ways**. For our purposes, this is fine
@@ -640,7 +730,6 @@ ui <- navbarPage(collapsible = TRUE,
   ), # end nav panel "Fluorescence"
   nav_panel("Fruit",
     tabsetPanel(
-      tabPanel("Distributions"),
       tabPanel("Plots"),
       tabPanel("Statistics"),
       tabPanel("Data",
@@ -763,7 +852,9 @@ server <- function(input, output) {
 # you might say "don't make a thousand individual reactive expressions!!! make a reactive values
 # object and store them all in that!!" and to that i say "no"
 # these are all "lazy" so they should (in theory) be more optimized than updating
-# all the inputs in a single reactive values object. Less updates = faster. Right?
+# all the inputs in a single reactive values object. less updates = faster. right?
+# this is a really stupid way of doing this, and i'll freely admit that.
+# but it works and is actually pretty fast? so uhhhh... it stays
 ## global reactive expressions
   Rpalette <- reactive({input$palette})
 ## fluorescence reactive expressions
@@ -781,7 +872,7 @@ server <- function(input, output) {
   Rgsw_fwrap <- reactive({input$gsw_fwrap})
   Rgsw_size <- reactive({input$gsw_size})
   Rgsw_mod_var <- reactive({input$gsw_mod_var})
-  ### ps2
+### ps2
   Rps2_dists <- reactive({input$ps2_dists})
   Rps2_hist_var <- reactive({input$ps2_hist_var})
   Rps2_hist_color <- reactive({input$ps2_hist_color})
