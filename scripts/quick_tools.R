@@ -1,8 +1,8 @@
-#quick and dirty deployment script
-shinylive::export("C:/Github/tomato-inoculant-app/app", "C:/Github/tomato-inoculant-app/site")
-
 # set wd
 setwd("C:/Github/tomato-inoculant-app/app")
+
+#quick and dirty deployment script
+shinylive::export("C:/Github/tomato-inoculant-app/app", "C:/Github/tomato-inoculant-app/site")
 
 # profiling
 profvis::profvis({

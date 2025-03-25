@@ -23,30 +23,70 @@ showtext_auto()
 dists <- c("normal", "lognormal", "gamma", "exponential")
 
 # load data
-load("data_gsw.RData")
-load("data_fruit.RData")
-load("data_ps2.RData")
+## TIM
+load("data_tim_ds.RData")
+load("data_tim_fluoro.RData")
+load("data_tim_height.RData")
+## TIL
+load("data_til_fruit.RData")
+load("data_til_fruit_summary.RData")
+load("data_til_fluoro.RData")
+## TIT
+load("data_tit_fluoro.RData")
+load("data_tit_fruit.RData")
 
 ## scale variables for later use in modeling
 ## scaling is important so they have equal "weight" in the model
-gsw_scaled_vars <- data.frame(apply(data_gsw[,c(10:14)], 2, scale))
-ps2_scaled_vars <- data.frame(apply(data_ps2[,c(11:15)], 2, scale))
-gsw_mod_data <- cbind(data_gsw[,c(1,5,6,15)], gsw_scaled_vars)
-ps2_mod_data <- cbind(data_ps2[,c(1,5,6,10,16)], ps2_scaled_vars)
-mod_var_names <- c("Date", "DaysFromGermination", "AmbientHumidity", "AmbientPressure", "AmbientTemperature", "AmbientLight", "LeafTemperature")
+#scaled_tim_fluoro_vars
+#scaled_tim_ds_vars
+#scaled_tim_height_vars
+
+#### OLD - REMOVE SHORTLY
+#gsw_scaled_vars <- data.frame(apply(data_gsw[,c(10:14)], 2, scale))
+#ps2_scaled_vars <- data.frame(apply(data_ps2[,c(11:15)], 2, scale))
+#gsw_mod_data <- cbind(data_gsw[,c(1,5,6,15)], gsw_scaled_vars)
+#ps2_mod_data <- cbind(data_ps2[,c(1,5,6,10,16)], ps2_scaled_vars)
+#mod_var_names <- c("Date", "DaysFromGermination", "AmbientHumidity", "AmbientPressure", "AmbientTemperature", "AmbientLight", "LeafTemperature")
 
 ## preload vars
 ### kind of a funky way of doing this, but it makes it REALLY easy to check if a variable
 ### is continuous or discrete later with [if (var %in% vars_d)]
-gsw_vars <- c("DaysFromGermination", "AmbientHumidity", "AmbientPressure", "AmbientTemperature", "AmbientLight", "LeafTemperature", "gsw")
-gsw_vars_d <- c("Treatment", "Transplantation", "Germination", "Row", "Pot", "Plant", "Time", "Date")
-all_gsw_vars <- c(gsw_vars_d, gsw_vars)
-ps2_vars <- c("DaysFromGermination", "AmbientHumidity", "AmbientPressure", "AmbientTemperature", "AmbientLight", "LeafTemperature", "PhiPS2", "LogitPhiPS2")
-ps2_vars_d <- c("Treatment", "Transplantation", "Germination", "Row", "Pot", "Plant", "Device", "Time", "Date")
-all_ps2_vars <- c(ps2_vars_d, ps2_vars)
-fruit_vars <- c("DateHarvest", "DateAnalysis", "DaysFromHarvestToAnalysis", "DaysFromGermination", "Mass", "Ripeness", "SugarAvg", "SugarGrams")
-fruit_vars_d <- c("Treatment", "Transplantation", "Germination", "Row", "Pot", "Plant", "BER")
-all_fruit_vars <- c(fruit_vars_d, fruit_vars)
+#### tim
+##### fluoro
+tim_fluoro_vars <- c("DaysFromGermination", "AmbientHumidity", "AmbientPressure", "AmbientTemperature", "AmbientLight", "LeafTemperature", "gsw", "PhiPS2", "LogitPhiPS2")
+tim_fluoro_vars_d <- c("Treatment", "Inoculation", "Chitosan", "Row", "Pot", "Plant", "Time", "Date", "Device")
+all_tim_fluoro_vars <- c(tim_fluoro_vars_d, tim_fluoro_vars)
+##### height
+tim_height_vars <- c("DaysFromGermination", "Height")
+tim_height_vars_d <- c("Treatment", "Inoculation", "Chitosan", "Row", "Pot", "Plant", "Date")
+all_tim_height_vars <- c(tim_height_vars_d, tim_height_vars)
+##### ds
+tim_ds_vars <- c("AG_Length", "AG_Mass", "BG_Length", "BG_Mass", "RS_Length", "RS_Mass")
+tim_ds_vars_d <- c("Treatment", "Inoculation", "Chitosan", "Row", "Pot", "Plant")
+all_tim_ds_vars <- c(tim_ds_vars_d, tim_ds_vars)
+### til
+#### fluoro
+til_fluoro_vars <- c("DaysFromGermination", "AmbientHumidity", "AmbientPressure", "AmbientTemperature", "AmbientLight", "LeafTemperature", "gsw", "PhiPS2", "LogitPhiPS2")
+til_fluoro_vars_d <- c("Treatment", "Soil", "Foliar", "Row", "Pot", "Plant", "Time", "Date", "Device")
+all_til_fluoro_vars <- c(til_fluoro_vars_d, til_fluoro_vars)
+#### fruit
+til_fruit_vars <- c("DaysFromGermination", "Mass", "Ripeness", "SugarAvg", "SugarGrams")
+til_fruit_vars_d <- c("Treatment", "Soil", "Foliar", "Date", "Row", "Pot", "Plant")
+all_til_fruit_vars <- c(til_fruit_vars_d, til_fruit_vars)
+#### fruit sums
+til_fruit_sum_vars <- c("Fruit_sum", "BER_sum", "Mass_sum", "Mass_mean", "pBER")
+til_fruit_sum_vars_d <- c("Treatment", "Soil", "Foliar", "Plant")
+all_til_fruit_sum_vars <- c(til_fruit_sum_vars_d, til_fruit_sum_vars)
+#### tit
+##### fluoro
+tit_fluoro_vars <- c("DaysFromGermination", "AmbientHumidity", "AmbientPressure", "AmbientTemperature", "AmbientLight", "LeafTemperature", "gsw", "PhiPS2", "LogitPhiPS2")
+tit_fluoro_vars_d <- c("Treatment", "Transplantation", "Germination", "Row", "Pot", "Plant", "Time", "Date", "Device")
+all_tit_fluoro_vars <- c(tit_fluoro_vars_d, tit_fluoro_vars)
+##### fruit
+tit_fruit_vars <- c("DaysFromHarvestToAnalysis", "DaysFromGermination", "Mass", "Ripeness", "SugarAvg", "SugarGrams")
+tit_fruit_vars_d <- c("Treatment", "Transplantation", "Germination", "DateHarvest", "DateAnalysis", "Row", "Pot", "Plant", "BER")
+all_tit_fruit_vars <- c(tit_fruit_vars_d, tit_fruit_vars)
+
 
 # custom functions
 ## i *think* this is faster and smaller than including these as a dependency via a custom package
