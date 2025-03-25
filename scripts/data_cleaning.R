@@ -1,5 +1,6 @@
 # cleaning
-
+library(tidyverse)
+library(gtools)
 ##### TOMATO INOCULANT METHOD (2024) #####
 
 ## TIM EXPERIMENTAL CONSTANTS
@@ -284,8 +285,11 @@ data_til_fruit <- d23_fl[,c(10,11,12,1,2,16,9,17,4,5,13,8,15)] %>%
          Date = date,
          Mass = mass,
          Penetrometer = penetrometer,
-         SugarAvg = sugar_avg,
+         pSugar = sugar_avg,
          SugarGrams = Sugar_grams
+         ) %>%
+  mutate(pSugar = pSugar/100,
+         LogitpSugar = logit(pSugar)
          )
 
 save(data_til_fruit, file = "C:/Github/tomato-inoculant-app/app/data_til_fruit.RData")
@@ -493,12 +497,14 @@ data_tit_fruit <- d24_f[,c(13,14,15,1,2,19,11,12,17,18,3,4,7,20,10,21)] %>%
          Mass = mass,
          Penetrometer = penetrometer,
          Ripeness = ripeness,
-         SugarAvg = sugar_avg,
+         pSugar = sugar_avg,
          SugarGrams = sugar_grams
          ) %>%
   mutate(Row = as.factor(Row),
          DateHarvest = as.factor(DateHarvest),
-         DateAnalysis = as.factor(DateAnalysis)
+         DateAnalysis = as.factor(DateAnalysis),
+         pSugar = pSugar/100,
+         LogitpSugar = logit(pSugar)
          )
 
 save(data_tit_fruit, file = "C:/Github/tomato-inoculant-app/app/data_tit_fruit.RData")

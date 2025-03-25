@@ -35,18 +35,29 @@ load("data_til_fluoro.RData")
 load("data_tit_fluoro.RData")
 load("data_tit_fruit.RData")
 
-## scale variables for later use in modeling
+# scale variables for later use in modeling
 ## scaling is important so they have equal "weight" in the model
-#scaled_tim_fluoro_vars
-#scaled_tim_ds_vars
-#scaled_tim_height_vars
+## especially in multidimensional modeling (PCA, tSNE, UDME)
+## we only scale our independent (explanatory) variables
+### tim ds
+scaled_tim_ds_vars <- data.frame(apply(data_tim_ds[,c(7:10)], 2, scale))
+mod_data_tim_ds <- cbind(data_tim_ds[,c(1:5)], scaled_tim_ds_vars)
+ds_mod_var_names <- c("AG_Length", "AG_Mass", "BG_Length", "BG_Mass")
+### tim fluoro
+scaled_tim_fluoro_vars <- data.frame(apply(data_tim_fluoro[,c(10:14)], 2, scale))
+mod_data_tim_fluoro <- cbind(data_tim_fluoro[,c(1:9, 15:17)], scaled_tim_fluoro_vars)
+### tim height
+#### nothing to scale here. we have no continuous predictor variables in the height dataset.
+### til fruit
+#### nothing to scale here (we could scale mass for use in sugar modeling, but ehhhhhhh i doubt we need to
+#### we're not performing dimension reduction or multiple linear regression, so it shouldn't much matter)
+### til fluoro
+scaled_til_fluoro_vars <- data.frame(apply(data_til_fluoro[,c(10:14)], 2, scale))
+mod_data_til_fluoro <- cbind(data_til_fluoro[,c(1:9, 15:18)], scaled_til_fluoro_vars)
+### tit fluoro
 
-#### OLD - REMOVE SHORTLY
-#gsw_scaled_vars <- data.frame(apply(data_gsw[,c(10:14)], 2, scale))
-#ps2_scaled_vars <- data.frame(apply(data_ps2[,c(11:15)], 2, scale))
-#gsw_mod_data <- cbind(data_gsw[,c(1,5,6,15)], gsw_scaled_vars)
-#ps2_mod_data <- cbind(data_ps2[,c(1,5,6,10,16)], ps2_scaled_vars)
-#mod_var_names <- c("Date", "DaysFromGermination", "AmbientHumidity", "AmbientPressure", "AmbientTemperature", "AmbientLight", "LeafTemperature")
+
+fluoro_mod_var_names <- c("DaysFromGermination", "AmbientHumidity", "AmbientPressure", "AmbientTemperature", "AmbientLight", "LeafTemperature")
 
 ## preload vars
 ### kind of a funky way of doing this, but it makes it REALLY easy to check if a variable
