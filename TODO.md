@@ -1,5 +1,10 @@
 - [x] add TIM data (cleaned)
 - [x] add 2023 TIP data (cleaned)
-- [ ] finish reformatting
+- [x] finish reformatting
+- [ ] TIL page
+- [ ] TIM page
+- [ ] development page
+- [ ] add photos to background page
+- [ ] TIT statistics
 - [ ] consider leaflet? it would make for some compelling visuals
   - [ ] compare speed of rendering a map with leaflet vs including a screenshot from google maps

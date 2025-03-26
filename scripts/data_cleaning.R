@@ -37,7 +37,7 @@ li_data <- read.csv(li_data_file)[,c(2,3,7,8,9,10,17,28,32,34,35,36,39,40)] %>%
   filter(leak_pct<10 & gsw > 0) %>%
   mutate(Date = parse_date_time(Date, orders = "mdy"),
          DaysFromGermination = as.numeric(round(difftime(Date, tim_germ_date, units = c("days")), 0)),
-         Date = as.factor(as.Date(Date)),
+         Date = as.Date(Date),
          Time = parse_date_time(Time, orders = "T"),
          Time = as.factor(format(Time, "%H:%M:%S")),
          Treatment = factor(Treatment, 
@@ -91,7 +91,7 @@ h_data_file <- "C:/Github/Thesis/data/TIM/TIM24_Height.csv"
 h_data <- read.csv(h_data_file) %>%
   mutate(Date = parse_date_time(Date, orders = "mdy"),
          DaysFromGermination = as.numeric(round(difftime(Date, tim_germ_date, units = c("days")), 0)),
-         Date = as.factor(as.Date(Date)),
+         Date = as.Date(Date),
          Column = case_when(
            Column==1~"A",
            Column==2~"B",
@@ -216,8 +216,7 @@ d23_fg <- read.csv(d23_fg_file) %>%
     Pot = as.factor(Pot),
     Row = as.factor(Row),
     Cluster = as.factor(Cluster),
-    Date = as.Date(Date, "%m/%d/%Y"),
-    Date = as.factor(Date)
+    Date = as.Date(Date, "%m/%d/%Y")
   ) %>%
   rename(Mass = Weight)
 
@@ -274,8 +273,7 @@ d23_fl <- read.csv(d23_fl_file) %>%
     cluster = as.factor(cluster),
     plant = as.factor(paste0(row, pot)),
     date = as.Date(date, "%m/%d/%Y"),
-    DaysFromGermination = as.numeric(round(difftime(date, germdate23, units = c("days")), 0)),
-    date = as.factor(date)
+    DaysFromGermination = as.numeric(round(difftime(date, germdate23, units = c("days")), 0))
   )
 
 data_til_fruit <- d23_fl[,c(10,11,12,1,2,16,9,17,4,5,13,8,15)] %>%
@@ -382,7 +380,6 @@ data_til_fluoro <- d23_li[,c(61,62,63,2,3,64,8,7,65,31,33,35,39,34,9,27,66)] %>%
          ) %>%
   mutate(
     Time = as.factor(Time),
-    Date = as.factor(Date),
     Row = as.factor(Row),
     Pot = as.factor(Pot),
     AmbientLight = as.numeric(AmbientLight),
@@ -402,7 +399,6 @@ temp_til_fluoro <- d23_m[,c(59,60,61,67,64,65,4,3,63,6,8,7,30,23,45,37,68)] %>%
   ) %>% mutate(
     Treatment = factor(Treatment, levels = treatment_order23),
     Time = as.factor(Time),
-    Date = as.factor(Date),
     gsw = as.numeric("NA"),
     Device = "MultispeQ"
   )
@@ -470,6 +466,8 @@ d24_f <- read.csv(d24_f_file) %>%
     fruit = 1,
     date_analysis = parse_date_time(date_analysis, orders = "mdy"),
     date_harvest = parse_date_time(date_harvest, orders = "mdy"),
+    date_analysis = as.Date(date_analysis),
+    date_harvest = as.Date(date_harvest),
     daysfromharvesttoanalysis = as.numeric(round(difftime(date_analysis, date_harvest, units = c("days")), 0)),
     daysfromgermination = as.numeric(round(difftime(date_analysis, germdate24, units = c("days")), 0)),
     plant = as.factor(paste0(row, pot)),
@@ -501,8 +499,6 @@ data_tit_fruit <- d24_f[,c(13,14,15,1,2,19,11,12,17,18,3,4,7,20,10,21)] %>%
          SugarGrams = sugar_grams
          ) %>%
   mutate(Row = as.factor(Row),
-         DateHarvest = as.factor(DateHarvest),
-         DateAnalysis = as.factor(DateAnalysis),
          pSugar = pSugar/100,
          LogitpSugar = logit(pSugar)
          )
@@ -535,9 +531,10 @@ d24_li <- read.csv(d24_li_file, stringsAsFactors = F) %>%
       row_let=="C"~TRUE,
       row_let=="D"~TRUE
     )) %>%
-  filter(leak_pct<10) %>%
+  filter(leak_pct<10 & gsw > 0) %>%
   rename(Date_ref = Date, row_num = Row) %>%
   mutate(Date = parse_date_time(Date_ref, orders = "mdy"),
+         Date = as.Date(Date),
          Time = parse_date_time(Time, orders = "T"),
          DaysFromGermination = as.numeric(round(difftime(Date, germdate24, units = c("days")), 0)),
          plant = as.factor(paste0(row_let, Pot)),
@@ -607,7 +604,6 @@ data_tit_fluoro <- d24_li %>% mutate(
              ) %>%
   mutate(AmbientPressure = AmbientPressure * 10,
          Time = as.factor(Time),
-         Date = as.factor(Date),
          AmbientLight = as.numeric(AmbientLight),
          Row = as.factor(Row),
          Pot = as.factor(Pot)
@@ -626,7 +622,6 @@ temp_tit_fluoro <- d24_m[,c(63,64,65,70,68,69,8,7,67,10,12,11,34,27,49,41,71)] %
          gsw = pump) %>%
   mutate(Time = as.factor(Time),
          Treatment = factor(Treatment, levels = treatment_order24),
-         Date = as.factor(Date),
          gsw = as.numeric("NA")
          )
 
