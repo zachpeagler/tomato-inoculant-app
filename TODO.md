@@ -3,7 +3,8 @@
 - [x] finish reformatting
 - [ ] TIL page
 - [ ] TIM page
-- [ ] development page
+- [ ] fix predict_plot function to work with the reactive models
+- [ ] flesh out background
 - [ ] add photos to background page
 - [ ] TIT statistics
 - [ ] consider leaflet? it would make for some compelling visuals

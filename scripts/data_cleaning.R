@@ -505,6 +505,16 @@ data_tit_fruit <- d24_f[,c(13,14,15,1,2,19,11,12,17,18,3,4,7,20,10,21)] %>%
 
 save(data_tit_fruit, file = "C:/Github/tomato-inoculant-app/app/data_tit_fruit.RData")
 
+data_tit_fruit_summary <- data_tit_fruit %>%
+  mutate(Fruit = 1) %>%
+  group_by(Treatment, Transplantation, Germination, Plant) %>%
+  summarise_at(vars(Fruit, BER, Mass),
+               list(sum=sum, mean=mean)) %>%
+  mutate(pBER = round(BER_sum/Fruit_sum, 4)) %>%
+  ungroup()
+data_tit_fruit_summary <- data_tit_fruit_summary[,c(1,2,3,4,5,6,7,10,11)]
+
+save(data_tit_fruit_summary, file = "C:/Github/tomato-inoculant-app/app/data_tit_fruit_summary.RData")
 
 ## Li-600
 d24_li <- read.csv(d24_li_file, stringsAsFactors = F) %>%

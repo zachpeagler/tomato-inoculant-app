@@ -3,10 +3,10 @@
 # load packages
 library(shiny)
 library(ggplot2)
-library(showtext)
 library(scico)
 library(bslib)
 library(bsicons)
+library(multcomp)
 library(MASS)
 library(MuMIn)
 library(lmerTest)
@@ -14,9 +14,6 @@ library(lmerTest)
 # graphics
 p_palettes <- scico_palette_names()
 font_sizes <- c(20,16,14)
-font_add_google("Open Sans", family = "open")
-font_add_google("Montserrat", family = "mont")
-showtext_auto()
 
 # distributions
 ## currently only continuous distributions are supported
@@ -34,6 +31,7 @@ load("data_til_fluoro.RData")
 ## TIT
 load("data_tit_fluoro.RData")
 load("data_tit_fruit.RData")
+load("data_tit_fruit_summary.RData")
 
 # scale variables for later use in modeling
 ## scaling is important so they have equal "weight" in the model
@@ -64,6 +62,7 @@ fluoro_mod_var_names <- c("DaysFromGermination", "AmbientHumidity", "AmbientPres
 ## preload var names in continuous and discrete groups
 ### kind of a funky way of doing this, but it makes it REALLY easy to check if a variable
 ### is continuous or discrete later with [if (var %in% vars_d)] etc.
+### you could also use the type attribute of your variables, but i didn't feel like it
 #### tim (2024 small)
 ##### fluoro
 tim_fluoro_vars <- c("Date", "DaysFromGermination", "AmbientHumidity", "AmbientPressure", "AmbientTemperature", "AmbientLight", "LeafTemperature", "gsw", "PhiPS2", "LogitPhiPS2")
@@ -99,6 +98,10 @@ all_tit_fluoro_vars <- c(tit_fluoro_vars_d, tit_fluoro_vars)
 tit_fruit_vars <- c("DateHarvest", "DateAnalysis", "DaysFromHarvestToAnalysis", "DaysFromGermination", "Mass", "Ripeness", "pSugar", "SugarGrams")
 tit_fruit_vars_d <- c("Treatment", "Transplantation", "Germination", "Row", "Pot", "Plant", "BER")
 all_tit_fruit_vars <- c(tit_fruit_vars_d, tit_fruit_vars)
+##### fruit sum
+tit_fruit_sum_vars <- c("Fruit_sum", "BER_sum", "Mass_sum", "Mass_mean", "pBER")
+tit_fruit_sum_vars_d <- c("Treatment", "Transplantation", "Germination", "Plant")
+all_tit_fruit_sum_vars <- c(tit_fruit_sum_vars_d, tit_fruit_sum_vars)
 
 fruit_lab_vars  <- c("pSugar", "SugarGrams", "Ripeness")
 
@@ -294,12 +297,12 @@ multiPDF_plot <- function (var, seq_length = 50, distributions = "all", palette 
   p <- p +
     scico::scale_color_scico_d(begin=0.9, end=0.1, palette = palette)+
     ggplot2::theme(
-      text = ggplot2::element_text(size=font_sizes[3], family="mont"),
-      title = ggplot2::element_text(size=font_sizes[1], family = "open", face = "bold"),
+      text = ggplot2::element_text(size=font_sizes[3]),
+      title = ggplot2::element_text(size=font_sizes[1], face = "bold"),
       legend.position="bottom",
       legend.title.position = "top",
-      legend.title = ggplot2::element_text(size=font_sizes[2], family = "open", face= "bold"),
-      axis.title = ggplot2::element_text(size=font_sizes[2], family = "open", face= "bold"),
+      legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold"),
+      axis.title = ggplot2::element_text(size=font_sizes[2], face= "bold"),
     )
   return(p)
 }
@@ -341,12 +344,12 @@ multiCDF_plot <- function (var, seq_length = 50, distributions = "all", palette 
   p <- p +
     scico::scale_color_scico_d(begin=0.9, end=0.1, palette = palette)+
     ggplot2::theme(
-      text = ggplot2::element_text(size=font_sizes[3], family="mont"),
-      title = ggplot2::element_text(size=font_sizes[1], family = "open", face = "bold"),
+      text = ggplot2::element_text(size=font_sizes[3]),
+      title = ggplot2::element_text(size=font_sizes[1], face = "bold"),
       legend.position="bottom",
       legend.title.position = "top",
-      legend.title = ggplot2::element_text(size=font_sizes[2], family = "open", face= "bold"),
-      axis.title = ggplot2::element_text(size=font_sizes[2], family = "open", face= "bold"),
+      legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold"),
+      axis.title = ggplot2::element_text(size=font_sizes[2], face= "bold"),
     )
   return(p)
 }
@@ -358,14 +361,14 @@ predict_plot  <- function(mod, data, rvar, pvar, group = NULL, length = 50, inte
     d_group  <- deparse(substitute(group))
     ### get explicit names  of deparsed variables
     ### weird, but necessary for renaming the newdata (dx) columns \>_>/
-    pvar_name <- colnames(data[d_pvar])
+    pvar_name <- colnames(d_pvar)
     rvar_name <- colnames(data[d_rvar])
     group_name  <- colnames(data[d_group])
     ## get group data ready
     groups  <- sort(unique(data[[d_group]]))
     ngroups <- length(groups)
     ## get predictor range for each group
-    agg <- aggregate(data[[d_pvar]] ~ data[[d_group]], data = data, range)
+    agg <- aggregate(pvar ~ data[[d_group]], data = data, range)
     dx_pvar <- data.frame(pvar = numeric(0))
     for (i in 1:ngroups) {
       tpvar <- data.frame(pvar = seq(agg[[2]][i,1], agg[[2]][i,2], length = length))
@@ -412,19 +415,19 @@ predict_plot  <- function(mod, data, rvar, pvar, group = NULL, length = 50, inte
     } ### end prediction interval
     ## initialize plot with real data
     p <- ggplot2::ggplot() + 
-      ggplot2::geom_point(data = data, ggplot2::aes(x=.data[[d_pvar]], y=.data[[d_rvar]], color=.data[[d_group]]))
+      ggplot2::geom_point(data = data, ggplot2::aes(x=pvar, y=.data[[d_rvar]], color=.data[[d_group]]))
     ## loop through treatments
     for (g in 1:ngroups) {
       flag <- which(dx[[d_group]] == groups[g])
       tdx <- dx[flag,]
       p <- p + 
-        ggplot2::geom_line(data=tdx, ggplot2::aes(x=.data[[d_pvar]], y=lo, color = .data[[d_group]]),
+        ggplot2::geom_line(data=tdx, ggplot2::aes(x=.data[[pvar_name]], y=lo, color = .data[[d_group]]),
                            linewidth=1, show.legend=FALSE)+
-        ggplot2::geom_line(data=tdx, ggplot2::aes(x=.data[[d_pvar]], y=mn, color = .data[[d_group]]),
+        ggplot2::geom_line(data=tdx, ggplot2::aes(x=.data[[pvar_name]], y=mn, color = .data[[d_group]]),
                            linewidth=2, show.legend=FALSE)+
-        ggplot2::geom_line(data=tdx, ggplot2::aes(x=.data[[d_pvar]], y=up, color = .data[[d_group]]),
+        ggplot2::geom_line(data=tdx, ggplot2::aes(x=.data[[pvar_name]], y=up, color = .data[[d_group]]),
                            linewidth=1, show.legend=FALSE)+
-        ggplot2::geom_ribbon(data=tdx, ggplot2::aes(x=.data[[d_pvar]], ymin=lo, ymax=up,
+        ggplot2::geom_ribbon(data=tdx, ggplot2::aes(x=.data[[pvar_name]], ymin=lo, ymax=up,
                                                     fill=.data[[d_group]]), alpha = 0.5)
     }
   } else { ### non-grouped prediction plot
@@ -517,6 +520,7 @@ link_github <- tags$a(bs_icon("GitHub"), href = "https://github.com/zachpeagler/
 ui <- navbarPage(collapsible = TRUE,
   title = "Tomato Inoculants",
   theme = bs_theme(version = 5, bootswatch = "flatly"),
+  ##### BACKGROUND NAV PANEL #####
   nav_panel("Background",
     # treat it like the background section of a paper
     # start with the WHY. traditional fertilizers bad, etc.
@@ -595,12 +599,7 @@ ui <- navbarPage(collapsible = TRUE,
       ")
     )
   ),
-  nav_panel("Development",
-  # storytell the development of the bacterial granules
-  # the journey from chitosan to alginate
-  # end with the recommendation of alginate over chitosan
-  # "and here's why" type shit
-  ),
+  ##### TOMATO INOCULANT TRIALS NAV PANEL #####
   nav_panel("Tomato Inoculant Trials",
     tabsetPanel(
       ##### TOMATO INOCULANT LOCATION #####
@@ -627,6 +626,17 @@ ui <- navbarPage(collapsible = TRUE,
       # small trial in the greenhouse on KSU campus - chitosan granule, inoculated chitosan granule, liquid inoculant 
       # - no salt stress - all 5 bacteria - only 40 days
       # Li-600 only - destructive sampling - no pests
+        tabsetPanel(
+          tabPanel("Exploratory",
+          ),
+          tabPanel("Statistics",
+          ),
+          tabPanel("Data",
+          ),
+          tabPanel("Info",
+          # restate much of what's already been said, but make sure to clarify differences between this trial and the other trials
+          )
+        ) # end ILT tabsetpanel
       ),
       ##### TOMATO INOCULANT TIMING #####
       tabPanel("Inoculant Timing",
@@ -784,6 +794,15 @@ ui <- navbarPage(collapsible = TRUE,
                                  choices = tit_fruit_vars, selected = "Mass")
                    ), # end sidebar
                    plotOutput("tit_fruit_box")
+                   )),
+              card(card_header("Interactive Fruit Summary Boxplot", class = "bg-primary"),
+                   layout_sidebar(sidebar = sidebar(
+                     selectInput("tit_fruit_sum_box_x","X Variable",
+                                 choices = tit_fruit_sum_vars_d, selected = "Treatment"),
+                     selectInput("tit_fruit_sum_box_y","Y Variable",
+                                 choices = tit_fruit_sum_vars, selected = "Mass_sum")
+                   ), # end sidebar
+                   plotOutput("tit_fruit_sum_box")
                    ))
             ) # end boxplot accordion panel
           ) # end accordion
@@ -791,40 +810,46 @@ ui <- navbarPage(collapsible = TRUE,
         tabPanel("Statistics",
           accordion(
             accordion_panel("Fluorescence",
+              card(card_header("Stomatal conductance (gsw)", class = "bg-primary"),
+                selectInput("tit_gsw_mod_var", "Predictor Variable",
+                            choices = fluoro_mod_var_names, selected = "AmbientHumidity"),
+                div(layout_columns(col_widths = c(7,5),
+                  div(
+                    card(card_header("Model Summary"),
+                         verbatimTextOutput("tit_gsw_mod_summary")
+                    )
+                  ),# end model summary div
+                  div(# value boxes for AIC and r^2
+                    card(card_header("Model Call", class = "bg-primary"),
+                         verbatimTextOutput("tit_gsw_mod_call")
+                         ),
+                    value_box(
+                      title = "GSW Model AIC",
+                      value = textOutput("tit_gsw_aic"),
+                      theme = "bg-primary",
+                      width = 0.2
+                    ),
+                    value_box(
+                      title = "GSW Model R^2",
+                      value = textOutput("tit_gsw_r2"),
+                      theme = "bg-secondary",
+                      width = 0.2
+                    ),
+                    card(card_header("Treatment Letters", class="bg-secondary"),
+                         verbatimTextOutput("tit_gsw_letters")
+                         )
+                  ) # end value box div
+               ) # end column wrap
+               ), # end div
+               div(
+                 markdown("###### **Stomatal conductance prediction plot**"),
+                 plotOutput("tit_gsw_pred")
+               )
+              ), # end gsw stats card
             ),
             accordion_panel("Fruit",
             )
           ),
-          card(card_header("Stomatal conductance", class = "bg-primary"),
-            div(layout_columns(col_widths = c(8,4),
-             div(
-               selectInput("gsw_mod_var", "Predictor Variable",
-                           choices = fluoro_mod_var_names, selected = "AmbientHumidity"),
-               card(card_header("Model Summary"),
-                    verbatimTextOutput("gsw_model_summary")
-               )
-             ),# end model summary div
-             div(# value boxes for AIC and r^2
-               value_box(
-                 title = "GSW Model AIC",
-                 value = textOutput("gsw_aic"),
-                 theme = "bg-primary",
-                 width = 0.2
-               ),
-               value_box(
-                 title = "GSW Model R^2",
-                 value = textOutput("gsw_r2"),
-                 theme = "bg-secondary",
-                 width = 0.2
-               ),
-             ) # end value box div
-            ) # end column wrap
-            ), # end div
-            div(
-              markdown("###### **Stomatal conductance prediction plot**"),
-              plotOutput("gsw_pred")
-            )
-          ), # end gsw stats card
         ), # end stats tab panel
         tabPanel("Data",
          card(card_header("Fluorescence Data", class = "bg-primary"),
@@ -836,6 +861,9 @@ ui <- navbarPage(collapsible = TRUE,
          ),
          card(card_header("Fruit Data", class = "bg-primary"),
               dataTableOutput("tit_fruit_DT")
+         ),
+         card(card_header("Fruit Summary Data", class = "bg-primary"),
+              dataTableOutput("tit_fruit_sum_DT")
          )
         ), # end data tab panel
         tabPanel("Info",
@@ -939,6 +967,7 @@ ui <- navbarPage(collapsible = TRUE,
       ) # end TIT tabpanel
     )# end "Tomato Inoculant Trials" tabsetpanel
   ),
+  ##### INFO NAV PANEL #####
   nav_panel("Info",
   # this is where information about the app and how to use it goes. as well as info about me perhaps
   # also add references here
@@ -947,7 +976,7 @@ ui <- navbarPage(collapsible = TRUE,
       div(layout_columns(col_widths = c(8,4),
        markdown(
          "This app is built using **R** 4.4.3 and uses a myriad of packages, 
-         including **shiny**, **ggplot2**, **showtext**, **bslib**, **bsicons**, **MASS**, **MuMIn**, and **lmerTest**.
+         including **shiny**, **ggplot2**, **bslib**, **bsicons**, **MASS**, **MuMIn**, and **lmerTest**.
          It also uses several custom functions for calculating multiple Kolmorogov-Smirnov tests simultaneous and producing
          PDF, CDF, and prediction plots. These functions are from my package [ztils](github.com/zachpeagler/ztils), but as that package
          is not on CRAN, downloading it would've required adding the **devtools** package to this app, so it wound up being faster to include them
@@ -956,8 +985,10 @@ ui <- navbarPage(collapsible = TRUE,
          reduces cost at the price of performance. As a broke college student, this is a tradeoff I'm willing to accept.
          Instead of the app running on the server, the app runs locally in the browser using WebR. 
          The diagram to the right illustrates the shinylive architecture (in broad strokes). I briefly considered using Quarto to develop this app,
-         but Quarto's integration with Shiny has a few features lacking that I really wanted to implement in this app, so I stuck with base R. The 
-         source code for this app can be found on the [Github repository](github.com/zachpeagler/tomato-inoculant-app).
+         but Quarto's integration with Shiny has a few features lacking that I really wanted to implement in this app, so I stuck with base R. The switch
+         to shinylive also came at the cost of custom fonts, much to my chagrin. While it's still possible to use custom fonts with shinylive, since shinylive is incompatible with **curl**, it's not possible
+         to fetch them remotely using **showtext** (i.e. using the font_add_google() command) and would've required multiple megabytes of space and a whole bunch of custom CSS.
+         Thesource code for this app can be found on the app [Github repository](github.com/zachpeagler/tomato-inoculant-app), accessible via that link or the GitHub icon in the top right corner.
          "
        ),
        card(img(src="shinylive-architecture.jpg"),
@@ -1014,12 +1045,12 @@ ui <- navbarPage(collapsible = TRUE,
 ##### SERVER #####
 server <- function(input, output) {
 # Reactive Expressions
-# you might say "don't make a thousand individual reactive expressions!!! make a reactive values
-# object and store them all in that!!" and to that i say "no"
-# these are all "lazy" so they should (in theory) be more optimized than updating
-# all the inputs in a single reactive values object. less updates = faster. right?
-# this is a really stupid way of doing this, and i'll freely admit that.
-# but it works and is actually pretty fast? so uhhhh... it stays
+### you might say "don't make a thousand individual reactive expressions!!! make a reactive values
+### object and store them all in that!!" and to that i say "no"
+### these are all "lazy" so they should (in theory) be more optimized than updating
+### all the inputs in a single reactive values object. less updates = faster. right?
+#### this is a really stupid way of doing this, and i'll freely admit that.
+#### but it works and is actually pretty fast? so uhhhh... it stays
 ## global reactive expressions
   Rpalette <- reactive({input$palette})
 ## tit reactive expressions
@@ -1037,9 +1068,19 @@ server <- function(input, output) {
   Rtit_fluoro_scatter_jit <- reactive({input$tit_fluoro_scatter_jit * 0.1})
   Rtit_fluoro_scatter_fwrap <- reactive({input$tit_fluoro_scatter_fwrap})
   Rtit_fluoro_scatter_size <- reactive({input$tit_fluoro_scatter_size})
-  Rtit_fluoro_mod_var <- reactive({input$tit_fluoro_mod_var})
   Rtit_fluoro_box_x <- reactive({input$tit_fluoro_box_x})
   Rtit_fluoro_box_y <- reactive({input$tit_fluoro_box_y})
+  Rtit_gsw_mod_var <- reactive({input$tit_gsw_mod_var})
+  Rtit_gsw_mod <- reactive({
+    lm(log(gsw) ~ Treatment + data_tit_fluoro[[Rtit_gsw_mod_var()]], data = data_tit_fluoro)
+    })
+### works, but badly
+#  Rtit_gsw_mod <- reactive({
+#    lm(log(gsw) ~ Treatment + data_tit_fluoro[[Rtit_gsw_mod_var()]], data = data_tit_fluoro)
+#  })
+  # this is stupid, but because we call it multiple times, its better to cache it than recompute from 
+  # the above model every time
+  Rtit_gsw_mod_sum <- reactive({summary(Rtit_gsw_mod())})
   
 ### fruit
   Rtit_fruit_dist_var <- reactive({input$tit_fruit_dist_var})
@@ -1058,6 +1099,8 @@ server <- function(input, output) {
   Rtit_fruit_mod_var <- reactive({input$tit_fruit_mod_var})
   Rtit_fruit_box_x <- reactive({input$tit_fruit_box_x})
   Rtit_fruit_box_y <- reactive({input$tit_fruit_box_y})
+  Rtit_fruit_sum_box_x <- reactive({input$tit_fruit_sum_box_x})
+  Rtit_fruit_sum_box_y <- reactive({input$tit_fruit_sum_box_y})
 # Outputs
 ##### TIT OUTPUTS #####
 ### Distributions
@@ -1119,9 +1162,9 @@ server <- function(input, output) {
       geom_histogram(bins = Rtit_fluoro_hist_bins())+
       theme_bw() +
       theme(
-        text = element_text(size=font_sizes[3], family="mont"),
-        axis.title = element_text(size=font_sizes[2], family = "open", face= "bold"),
-        legend.title = ggplot2::element_text(size=font_sizes[2], family = "open", face= "bold"),
+        text = element_text(size=font_sizes[3]),
+        axis.title = element_text(size=font_sizes[2], face= "bold"),
+        legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold"),
       )
     gh <- gh + scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())
     gh <- gh + scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())
@@ -1133,9 +1176,9 @@ server <- function(input, output) {
       geom_histogram(bins = Rtit_fruit_hist_bins()) + 
       theme_bw() +
       theme(
-        text = element_text(size=font_sizes[3], family="mont"),
-        axis.title = element_text(size=font_sizes[2], family = "open", face= "bold"),
-        legend.title = ggplot2::element_text(size=font_sizes[2], family = "open", face= "bold"),
+        text = element_text(size=font_sizes[3]),
+        axis.title = element_text(size=font_sizes[2], face= "bold"),
+        legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold"),
       )
     ph <- ph + scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())
     ph <- ph + scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())
@@ -1150,10 +1193,10 @@ server <- function(input, output) {
       xlab(gettext(Rtit_fluoro_scatter_x()))+
       theme_bw()+
       theme(
-        text = element_text(size=font_sizes[3], family="mont"),
-        axis.title = element_text(size=font_sizes[2], family = "open", face= "bold"),
-        title = element_text(size=font_sizes[1], family="open", face="bold", lineheight = .8),
-        legend.title = ggplot2::element_text(size=font_sizes[2], family = "open", face= "bold"),
+        text = element_text(size=font_sizes[3]),
+        axis.title = element_text(size=font_sizes[2], face= "bold"),
+        title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
+        legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold"),
         legend.title.position = "top"
       )
     if (Rtit_fluoro_scatter_x() %in% tit_fluoro_vars_d) {
@@ -1179,10 +1222,10 @@ server <- function(input, output) {
       xlab(gettext(Rtit_fruit_scatter_x()))+
       theme_bw()+
       theme(
-        text = element_text(size=font_sizes[3], family="mont"),
-        axis.title = element_text(size=font_sizes[2], family = "open", face= "bold"),
-        title = element_text(size=font_sizes[1], family="open", face="bold", lineheight = .8),
-        legend.title = ggplot2::element_text(size=font_sizes[2], family = "open", face= "bold"),
+        text = element_text(size=font_sizes[3]),
+        axis.title = element_text(size=font_sizes[2], face= "bold"),
+        title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
+        legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold"),
         #        legend.position = "bottom",
         legend.title.position = "top"
       )
@@ -1214,10 +1257,10 @@ server <- function(input, output) {
       scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
       theme_bw()+
       theme(
-        text = element_text(size=font_sizes[3], family="mont"),
-        axis.title = element_text(size=font_sizes[2], family = "open", face= "bold"),
-        title = element_text(size=font_sizes[1], family="open", face="bold", lineheight = .8),
-        legend.title = ggplot2::element_text(size=font_sizes[2], family = "open", face= "bold"),
+        text = element_text(size=font_sizes[3]),
+        axis.title = element_text(size=font_sizes[2], face= "bold"),
+        title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
+        legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold"),
         #        legend.position = "bottom",
         legend.title.position = "top"
       )
@@ -1234,27 +1277,76 @@ server <- function(input, output) {
       scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
       theme_bw()+
       theme(
-        text = element_text(size=font_sizes[3], family="mont"),
-        axis.title = element_text(size=font_sizes[2], family = "open", face= "bold"),
-        title = element_text(size=font_sizes[1], family="open", face="bold", lineheight = .8),
-        legend.title = ggplot2::element_text(size=font_sizes[2], family = "open", face= "bold"),
+        text = element_text(size=font_sizes[3]),
+        axis.title = element_text(size=font_sizes[2], face= "bold"),
+        title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
+        legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold"),
+        #        legend.position = "bottom",
+        legend.title.position = "top"
+      )
+  })
+  ## fruit sum box
+  output$tit_fruit_sum_box <- renderPlot({
+    ggplot(data=data_tit_fruit_summary, aes(x=.data[[Rtit_fruit_sum_box_x()]], y=.data[[Rtit_fruit_sum_box_y()]],
+                                    color = .data[[Rtit_fruit_sum_box_x()]], fill = .data[[Rtit_fruit_sum_box_x()]]))+
+      geom_violin(alpha = 0.5)+
+      geom_boxplot(width=0.25, alpha = 0.8)+
+      ylab(gettext(Rtit_fruit_sum_box_y()))+
+      xlab(gettext(Rtit_fruit_sum_box_x()))+
+      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      theme_bw()+
+      theme(
+        text = element_text(size=font_sizes[3]),
+        axis.title = element_text(size=font_sizes[2], face= "bold"),
+        title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
+        legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold"),
         #        legend.position = "bottom",
         legend.title.position = "top"
       )
   })
 ### Statistics
 #### fluoro
+##### gsw
   # model summary
+  output$tit_gsw_mod_summary <- renderPrint({
+    Rtit_gsw_mod_sum()
+  })
+  output$tit_gsw_mod_call <- renderPrint({
+    Rtit_gsw_mod()$call
+  })
+  output$tit_gsw_aic <- renderText({
+    round(AIC(Rtit_gsw_mod()), 0)
+  })
+  output$tit_gsw_r2 <- renderText({
+    r1 <- round(Rtit_gsw_mod_sum()$adj.r.squared, 4)
+    r2 <- r1 *100
+    return(paste0(r1, "  (", r2, "%)"))
+  })
+  output$tit_gsw_letters <- renderPrint({
+    cld(glht(Rtit_gsw_mod(), linfct = mcp(Treatment = "Tukey")))
+  })
+  output$tit_gsw_pred <- renderPlot({
+    predict_plot(Rtit_gsw_mod(), data_tit_fluoro, gsw, data_tit_fluoro[[Rtit_gsw_mod_var()]], Treatment,
+                 50, correction = "exponential")
+  })
   # AIC
   # R^2
   # prediction plot
+##### phips2
 #### fruit
+##### mass
+##### sugar
+##### ber
 ### Data
   output$tit_fluoro_DT <- renderDataTable({
     data_tit_fluoro
   })
   output$tit_fruit_DT <- renderDataTable({
     data_tit_fruit
+  })
+  output$tit_fruit_sum_DT <- renderDataTable({
+    data_tit_fruit_summary
   })
 }
 
