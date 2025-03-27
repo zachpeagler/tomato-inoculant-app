@@ -604,7 +604,7 @@ ui <- navbarPage(collapsible = TRUE,
   nav_panel("Tomato Inoculant Trials",
     tabsetPanel(
       ##### TOMATO INOCULANT LOCATION #####
-      tabPanel("Inoculant Location Trial",
+      tabPanel("Inoculant Location",
       # big trial in 2023 in Hydro greenhouse at KSU Field Station - looked at soil vs foliar inoculation in salt-stressed tomato
       # - only M. oryzae - long enough to gather fruit - no salt-control
       # Li-600 and MultispeQs - no destructive sampling
@@ -623,13 +623,13 @@ ui <- navbarPage(collapsible = TRUE,
         ) # end ILT tabsetpanel
       ),
       ##### TOMATO INOCULANT METHOD #####
-      tabPanel("Inoculant Method Trial",
+      tabPanel("Inoculant Method",
       # small trial in the greenhouse on KSU campus - chitosan granule, inoculated chitosan granule, liquid inoculant 
       # - no salt stress - all 5 bacteria - only 40 days
       # Li-600 only - destructive sampling - no pests
       ),
       ##### TOMATO INOCULANT TIMING #####
-      tabPanel("Inoculant Timing Trial",
+      tabPanel("Inoculant Timing",
       # big trial in 2024 in the Hydro greenhouse - germination vs transplantation
       # - no salt stress - all 5 bacteria - long enough to gather fruit
       # Li-600 and MultispeQs - spider mites and white flies
@@ -680,7 +680,7 @@ ui <- navbarPage(collapsible = TRUE,
                   )
                 ) # end sidebar layout
               ), # end fluorescence card
-              card(card_header("Fruit", class = "bg-secondary"),
+              card(card_header("Fruit", class = "bg-primary"),
                  layout_sidebar(sidebar=sidebar(open=FALSE,
                     selectInput("tit_fruit_dist_var", "Variable", choices = tit_fruit_vars,
                                 selected = "Mass"),
@@ -717,7 +717,7 @@ ui <- navbarPage(collapsible = TRUE,
               card(card_header("Interactive Fruit Histogram", class = "bg-primary"),
                 layout_sidebar(sidebar=sidebar(
                   selectInput("tit_fruit_hist_var", "Select Variable",
-                              choices = tit_fruit_vars, selected = "AmbientHumidity"),
+                              choices = tit_fruit_vars, selected = "Ripeness"),
                   selectInput("tit_fruit_hist_color", "Select Color Variable",
                               choices = tit_fruit_vars_d, selected = "Treatment"),
                   sliderInput("tit_fruit_hist_bins", "Number of Bins",
@@ -726,7 +726,7 @@ ui <- navbarPage(collapsible = TRUE,
                   plotOutput("tit_fruit_hist")
                 )) # ps2 hist card
               ), # end hist accordion panel
-              accordion_panel(title = "Scatter Plots", class = "fg-primary",
+              accordion_panel(title = "Scatter Plots",
                 card(card_header("Interactive Fluorescence Scatter", class = "bg-primary"),
                     layout_sidebar(sidebar = sidebar(
                       selectInput("tit_fluoro_scatter_x","X Variable",
@@ -767,11 +767,34 @@ ui <- navbarPage(collapsible = TRUE,
                 ) # end fruit scatter plot
             ), # end scatterplot accordion panel
             accordion_panel(title="Box Plots",
-              
-            )
+              card(card_header("Interactive Fluorescence Boxplot", class = "bg-primary"),
+                   layout_sidebar(sidebar = sidebar(
+                     selectInput("tit_fluoro_box_x","X Variable",
+                                 choices = tit_fluoro_vars_d, selected = "Treatment"),
+                     selectInput("tit_fluoro_box_y","Y Variable",
+                                 choices = tit_fluoro_vars, selected = "gsw")
+                   ), # end sidebar
+                   plotOutput("tit_fluoro_box")
+                   )),
+              card(card_header("Interactive Fruit Boxplot", class = "bg-primary"),
+                   layout_sidebar(sidebar = sidebar(
+                     selectInput("tit_fruit_box_x","X Variable",
+                                 choices = tit_fruit_vars_d, selected = "Treatment"),
+                     selectInput("tit_fruit_box_y","Y Variable",
+                                 choices = tit_fruit_vars, selected = "Mass")
+                   ), # end sidebar
+                   plotOutput("tit_fruit_box")
+                   ))
+            ) # end boxplot accordion panel
           ) # end accordion
         ), # end plots tab panel
         tabPanel("Statistics",
+          accordion(
+            accordion_panel("Fluorescence",
+            ),
+            accordion_panel("Fruit",
+            )
+          ),
           card(card_header("Stomatal conductance", class = "bg-primary"),
             div(layout_columns(col_widths = c(8,4),
              div(
@@ -816,18 +839,24 @@ ui <- navbarPage(collapsible = TRUE,
          )
         ), # end data tab panel
         tabPanel("Info",
-          card(markdown(
-            "##### **Tomato inoculant timing trial** <br>
+          div(style = "padding: 10px", align = "center",
+              markdown("#### **Tomato Inoculant Timing Trial**")
+              ),
+          card(card_header("Hypothesis and Objectives", class = "bg-primary"),
+            markdown("
             This trial accompanies the following hypothesis and objectives laid out in my thesis: <br>
-              **Hypothesis 2** – Microbial bacterial granules (BGs) with the full microbial consortium applied
+            **Hypothesis 2** – Microbial bacterial granules (BGs) with the full microbial consortium applied
             at germination and transplantation will increase fluorescence parameters and fruit yield and quality
             more than either germination or transplantation inoculations. <br>
-              **Objective 2.1** - Determine the effect of BG inoculation timing on tomato crop quality and yield. <br>
-              **Objective 2.2** - Determine the effect of BG inoculation timing on tomato plant fluorescence parameters. <br>
+            **Objective 2.1** - Determine the effect of BG inoculation timing on tomato crop quality and yield. <br>
+            **Objective 2.2** - Determine the effect of BG inoculation timing on tomato plant fluorescence parameters. <br>
             > It should be noted that this hypothesis is *technically* a *predictive hypothesis*, as not only does it hypothesize a 
             change, it specifies a prediction for that change. I.E. Fluorescence parameters will not only *change*, they will *increase*.
             This is a very minor distinction, but important to those in the science realm. <br>
-            
+            ")
+               ), # end hypothesis and objective card
+          card(card_header("Methods", class = "bg-secondary"),
+            markdown("
             The tomatoes were grown in 4 rows of 12 pots each, with each row corresponding to a different inoculation treatment.
             Fluorescence measurements were taken biweekly with a LI-COR LI-600 and two PhotosynQ MultispeQ V2.0s over the course of the trial.
             Fruit were harvested upon ripening, as determined by color and firmness. Upon harvesting, fruit were taken back to the lab for analysis, 
@@ -841,61 +870,70 @@ ui <- navbarPage(collapsible = TRUE,
             It has been shown to increase crop yield and plant nitrogen, phosphorous, and potassium content
             ([Askary et al, 2009](https://www.researchgate.net/publication/347438334_Influence_of_the_Co-inoculation_Azospirillum_brasilense_and_Rhizobium_meliloti_plus_24-D_on_Grain_Yield_and_N_P_K_Content_of_Triticum_aestivum_Cv_Baccros_and_Mahdavi)).
             It has also been reported to work well with Methylobacterium oryzae ([Madhaiyan et al, 2009](https://www.researchgate.net/publication/225966871_Effect_of_co-inoculation_of_methylotrophic_Methylobacterium_oryzae_with_Azospirillum_brasilense_and_Burkholderia_pyrrocinia_on_the_growth_and_nutrient_uptake_of_tomato_red_pepper_and_rice)). <br>
-              - *Azotobacter chroococcum 43* - PGPB that operates via nitrogen fixation, phosphate solubilization,
+            - *Azotobacter chroococcum 43* - PGPB that operates via nitrogen fixation, phosphate solubilization,
             and vitamin, indole acetic acid (IAA), gibberellin (GA), hydrogen cyanide (HCN), siderophore,
             and cytokinin (CK) production ([Abd El-Fattah et al, 2013](https://www.researchgate.net/publication/259130343_Effect_of_carrier_materials_sterilization_method_and_storage_temperature_on_survival_and_biological_activities_of_Azotobacter_chroococcum_inoculant); [Revillas et al, 2000](https://pubmed.ncbi.nlm.nih.gov/11021581/); [Wani et al, 2007](https://www.researchgate.net/publication/240762870_Co-inoculation_of_nitrogen-fixing_and_phosphate-solubilizing_bacteria_to_promote_growth_yield_and_nutrient_uptake_in_chickpea)).
             Shown to increase germination rates and aboveground biomass and crop quality and yield in maize ([Zahir et al, 2005](https://www.researchgate.net/publication/233130106_Precursor_L-tryptophan-Inoculum_Azotobacter_Interaction_for_Improving_Yields_and_Nitrogen_Uptake_of_Maize)). <br>
-              - *Bacillus subtilis* - PGPB that has been shown to improve fruit quality and yield in tomato
+            - *Bacillus subtilis* - PGPB that has been shown to improve fruit quality and yield in tomato
             ([Mena-Violante & Olalde-Portugal, 2007](https://www.researchgate.net/publication/222326135_Alteration_of_tomato_fruit_quality_by_root_inoculation_with_plant_growth-promoting_rhizobacteria_PGPR_Bacillus_subtilis_BEB-13bs); [Kokalis-Burelle et al, 2002](https://link.springer.com/article/10.1023/A:1014464716261))
             and shown to increase metabolite production ([Sharaf-Eldin et al, 2008](https://pubmed.ncbi.nlm.nih.gov/18622904/)).
             Shown to solubilize phosphate, fix nitrogen, produce IAA, CK, GA, HCN, and antibiotics,
             as well as exhibiting phytase activity ([Ahmad et al, 2008](https://pubmed.ncbi.nlm.nih.gov/16735107/); [Arkhipova et al, 2005](https://link.springer.com/article/10.1007/s11104-004-5047-x); [Yao et al, 2006](https://www.researchgate.net/publication/233193377_Effect_of_FZB_24_Bacillus_subtilis_as_biofertilizer_on_cotton_yields_in_field_tests)).
             It has been used as a biocontrol agent against aphids and pathogenic bacteria ([Kokalis-Burelle et al, 2002](https://link.springer.com/article/10.1023/A:1014464716261)). <br>
-              - *Methylobacterium oryzae CBMB20* - PGPB that has been shown to improve fruit quality and yield in tomato
+            - *Methylobacterium oryzae CBMB20* - PGPB that has been shown to improve fruit quality and yield in tomato
             in both foliar and chitosan encapsulated inoculations ([Chanratana et al., 2019](https://www.researchgate.net/profile/Aritra-Choudhury/publication/323564168_Evaluation_of_chitosan_and_alginate_immobilized_Methylobacterium_oryzae_CBMB20_on_tomato_plant_growth/links/5a9e6fcfa6fdcc214af2b315/Evaluation-of-chitosan-and-alginate-immobilized-Methylobacterium-oryzae-CBMB20-on-tomato-plant-growth.pdf)). 
             Operates through phytohormone (auxin and cytokinin) production, stress reduction via ACC deaminase production, 
             increased nutrient availability through nitrogen fixation, and as a biopesticide ([Chauhan et al., 2015](https://www.sciencedirect.com/science/article/abs/pii/S0929139315300159)). <br>
-              - *Pseudomonas putida 90* - PGPB that increases plant growth by solubilizing phosphate and producing
+            - *Pseudomonas putida 90* - PGPB that increases plant growth by solubilizing phosphate and producing
             IAA and siderophores ([Hariprasad & Niranjana, 2009](https://link.springer.com/article/10.1007/s11104-008-9754-6)). Shown to inhibit ethylene production ([Mayak et al, 1999](https://pubmed.ncbi.nlm.nih.gov/10552131/)).
             Shown to significantly increase tomato fruit macro- and micronutrient content ([He et al, 2019](https://pubmed.ncbi.nlm.nih.gov/30955229/)). 
             Shown to increase potassium, magnesium, and calcium uptake and decrease sodium uptake ([Yao et al, 2010](https://www.sciencedirect.com/science/article/abs/pii/S1164556309001046)). 
             Also shown to increase root and shoot growth ([Glick et al, 1997](https://www.researchgate.net/publication/223543401_Early_development_of_canola_seedlings_in_the_presence_of_the_plant_growth-promoting_rhizobacterium_Pseudomonas_putida_GR12-2); [Hall et al, 1996](https://ui.adsabs.harvard.edu/abs/1996IsJPS..44...37H/abstract)). <br>
-            
-            ##### Explanatory Variables
-            **Treatment** is the inoculation timing of the tomato. Options are Control, Germination, Transplantation, and Germ+Trans. <br>
-            **Time** is the time at which the measurement was taken. <br>
-            **Date** is the date at which the measurement was taken. <br>
-            **DaysFromGermination** is the number of days from germination (2025-05-01) to the date of measurement. <br>
-            **MinutesFromStart** is the number of minutes from the start of that day's observations to the time of measurement. <br>
-            **Row** is the row of the tomato. (A:D) <br>
-            **Pot** is the pot number of the tomato. (1:12) <br>
-            **Plant** is a combination of *Row* and *Pot*, and acts as an ID for every individual plant. (A1: D12) <br>
-            **AmbientHumidity** is the relative humidity (%) at the time of measurement. <br>
-            **AmbientLight** is the ambient light level (lumens) at the time of measurement. <br>
-            **AmbientPressure** is the ambient pressure (Pascals) at the time of measurement. <br>
-            **LeafTemperature** is the temperature (C) of the leaf. <br>
-            
-            ##### Response Variables
-            **gsw** is the stomatal conductance (mol m-2 s-1) of the leaf. Stomatal conductance refers to the
+            ")
+          ), # end methods card
+          card(card_header("Variables", class = "bg-primary"),
+            markdown("
+            ##### **Explanatory Variables**
+            - **Treatment** is the inoculation timing of the tomato. Options are Control, Germination, Transplantation, and Germ+Trans. <br>
+            - **Time** is the time at which the measurement was taken (fluorescence only). <br>
+            - **Date** is the date at which the measurement was taken (fluorescence only). <br>
+            - **DaysFromGermination** is the number of days from germination (2025-05-01) to the date of measurement. <br>
+            - **DateHarvest** (date) is the date the fruit was harvested (August 2024:October 2024) <br>
+            - **DateAnalysis** (date) is the date the fruit was analyzed in the lab (August 2024:October 2024) <br>
+            - **DaysFromHarvestToAnalysis** (int) is the number of days from harvest to analysis (fruit only). <br>
+            - **MinutesFromStart** is the number of minutes from the start of that day's observations to the time of measurement. <br>
+            - **Row** is the row of the tomato. (A:D) <br>
+            - **Pot** is the pot number of the tomato. (1:12) <br>
+            - **Plant** is a combination of *Row* and *Pot*, and acts as an ID for every individual plant. (A1: D12) <br>
+            - **AmbientHumidity** is the relative humidity (%) at the time of measurement. <br>
+            - **AmbientLight** is the ambient light level (lumens) at the time of measurement. <br>
+            - **AmbientPressure** is the ambient pressure (Pascals) at the time of measurement. <br>
+            - **LeafTemperature** is the temperature (C) of the leaf. <br>
+            - **Penetrometer** corresponds to the force in kilograms it takes to penetrate the flesh of the tomato (~0.5:~4) <br>
+            - **Ripeness** is the **Penetrometer** value mapped from 0:1 and reversed, so that riper fruit are closer to 1 and unripe fruit are closer to 0. (0:1) <br>
+            ---
+            ##### **Response Variables**
+            - **gsw** is the stomatal conductance (mol m-2 s-1) of the leaf. Stomatal conductance refers to the
             rate at which molecules are moving through the leaf's stomates, and is indicitave of photosynthesis.<br>
-            **PhiPS2** is the efficiency of Photosystem II. It is unitless. (0:1) <br>
-            **DateHarvest** (date) is the date the fruit was harvested (August 2024:October 2024) <br>
-            **DateAnalysis** (date) is the date the fruit was analyzed in the lab (August 2024:October 2024) <br>
-            **DaysFromHarvestToAnalysis** (int) is the number of days from harvest to analysis. <br>
-            **DaysFromGermination** (int) is the number of days from germination to fruit analysis. <br>
-            **Mass** is the mass in grams of the tomato, measured on an Ohaus Scout. (~10:~400) <br>
-            **BER** corresponds to whether or not the tomato has blossom end rot, a disease caused by calcium deficiency that renders the fruit unmarketable. (0,1) <br>
-            **Penetrometer** corresponds to the force in kilograms it takes to penetrate the flesh of the tomato (~0.5:~4) <br>
-            **Ripeness** is the **Penetrometer** value mapped from 0:1 and reversed, so that riper fruit are closer to 1 and unripe fruit are closer to 0. (0:1) <br>
-            **pSugar** is the average of two measurements of the tomato juice's sugar concentration taken on a Fisher BRIX Refractometer (~2:~12) <br>
-            **SugarGrams** is the grams of sugar in the tomato, calculated as (**SugarAvg**/100)x**Mass** <br>
+            - **PhiPS2** is the efficiency of Photosystem II. It is unitless. (0:1) <br>
+            - **Mass** is the mass in grams of the tomato, measured on an Ohaus Scout. (~10:~400) <br>
+            - **BER** corresponds to whether or not the tomato has blossom end rot, a disease caused by calcium deficiency that renders the fruit unmarketable. (0,1) <br>
+            - **pSugar** is the average of two measurements of the tomato juice's sugar concentration taken on a Fisher BRIX Refractometer (~2:~12) <br>
+            - **SugarGrams** is the grams of sugar in each tomato, calculated as **pSugar** x **Mass** <br>
             
             > It's important to note that **only** the Li-600 can measure gsw, while both
             the Li-600 and the MultispeQ can measure PhiPS2. Also, even though both devices can 
             measure PhiPS2, they do so **in different ways**. For our purposes, this is fine
             so long as the measurements from each device correlate. <br>
-            "
-            )) # end markdown and card
+            "),
+            div(style="border-left: 5px solid", 
+              markdown(
+                "> For a more comprehensive explanation of PhiPS2, check out 
+                [Genty *et al*., 1989](https://www.sciencedirect.com/science/article/abs/pii/S0304416589800169) or
+                for a simpler explanation, the [chlorophyll fluorescence wikipedia page](https://en.wikipedia.org/wiki/Chlorophyll_fluorescence)."
+              )
+            )
+          ) # end variable card
           ) # end info tab Panel
         ) # end tabset Panel
       ) # end TIT tabpanel
@@ -905,16 +943,42 @@ ui <- navbarPage(collapsible = TRUE,
   # this is where information about the app and how to use it goes. as well as info about me perhaps
   # also add references here
   # acknowledgements as well, maybe?
-    card(card_header("About the project"),
-      markdown(
-        "yuuuuuurp"
-      )
-    ),
+    card(card_header("About the app", class = "bg-primary"),
+      div(layout_columns(col_widths = c(8,4),
+       markdown(
+         "This app is built using **R** 4.4.3 and uses a myriad of packages, 
+         including **shiny**, **ggplot2**, **showtext**, **bslib**, **bsicons**, **MASS**, **MuMIn**, and **lmerTest**.
+         It also uses several custom functions for calculating multiple Kolmorogov-Smirnov tests simultaneous and producing
+         PDF, CDF, and prediction plots. These functions are from my package [ztils](github.com/zachpeagler/ztils), but as that package
+         is not on CRAN, downloading it would've required adding the **devtools** package to this app, so it wound up being faster to include them
+         directly, rather than as a package. This app was originally intended to be containerized with Docker and hosted to an Amazon Web Services
+         Elastic Kubernetes Cluster, but with the recent advent of shinylive, it is now deployed as a static webpage on Github Pages. This significantly
+         reduces cost at the price of performance. As a broke college student, this is a tradeoff I'm willing to accept.
+         Instead of the app running on the server, the app runs locally in the browser using WebR. 
+         The diagram to the right illustrates the shinylive architecture (in broad strokes). I briefly considered using Quarto to develop this app,
+         but Quarto's integration with Shiny has a few features lacking that I really wanted to implement in this app, so I stuck with base R. The 
+         source code for this app can be found on the [Github repository](github.com/zachpeagler/tomato-inoculant-app).
+         "
+       ),
+       card(img(src="shinylive-architecture.jpg"),
+            markdown("Image courtesy of [Posit](https://shiny.posit.co/py/docs/shinylive.html)"))
+      )),
+    ), # end about the app card
     card(card_header("About the author", class="bg-primary"),
-      markdown(
-        "mememe"
-      )
-    ),
+      div(layout_columns(col_widths = c(3,6,3),
+        card(img(src="me_1.png")),
+        markdown(
+          "Zach Peagler graduated from Kennesaw State University (KSU) in 2022 with a 
+          Bachelor's of Science in Biology with a Minor in Chemistry. He then (assuming this presentation goes well)
+          graduated from KSU with a Master's of Science in Integrative Biology in May 2025.
+          
+          In his free time, he enjoys reading, writing, and spending time with his wife and two dogs.
+          "
+        ),
+        card(img(src="me_2.png"))
+      ) # end column layout
+      ) # end div
+    ), # end about the author card
     card(card_header("References", class="bg-primary"),
       markdown(" ##### **References**
       - Abd El-Fattah, D.A., *et al*. 2013. *Effect of carrier materials, sterilization method, and storage temperature on survival and biological activities of* Azotobacter chroococcum *inoculants*. Ann. Agric. Sci. 58:111-118. <br>
@@ -974,6 +1038,9 @@ server <- function(input, output) {
   Rtit_fluoro_scatter_fwrap <- reactive({input$tit_fluoro_scatter_fwrap})
   Rtit_fluoro_scatter_size <- reactive({input$tit_fluoro_scatter_size})
   Rtit_fluoro_mod_var <- reactive({input$tit_fluoro_mod_var})
+  Rtit_fluoro_box_x <- reactive({input$tit_fluoro_box_x})
+  Rtit_fluoro_box_y <- reactive({input$tit_fluoro_box_y})
+  
 ### fruit
   Rtit_fruit_dist_var <- reactive({input$tit_fruit_dist_var})
   Rtit_fruit_dists <- reactive({input$tit_fruit_dists})
@@ -989,7 +1056,8 @@ server <- function(input, output) {
   Rtit_fruit_scatter_fwrap <- reactive({input$tit_fruit_scatter_fwrap})
   Rtit_fruit_scatter_size <- reactive({input$tit_fruit_scatter_size})
   Rtit_fruit_mod_var <- reactive({input$tit_fruit_mod_var})
-
+  Rtit_fruit_box_x <- reactive({input$tit_fruit_box_x})
+  Rtit_fruit_box_y <- reactive({input$tit_fruit_box_y})
 # Outputs
 ##### TIT OUTPUTS #####
 ### Distributions
@@ -1132,6 +1200,47 @@ server <- function(input, output) {
       ps <- ps + scale_color_scico(begin=0.9, end=0.1, palette=Rpalette())
     }
     return(ps)
+  })
+# boxplots
+  ## fluoro box
+  output$tit_fluoro_box <- renderPlot({
+    ggplot(data=data_tit_fluoro, aes(x=.data[[Rtit_fluoro_box_x()]], y=.data[[Rtit_fluoro_box_y()]],
+                                          color = .data[[Rtit_fluoro_box_x()]], fill = .data[[Rtit_fluoro_box_x()]]))+
+      geom_violin(alpha = 0.5)+
+      geom_boxplot(width = 0.25,  alpha = 0.8)+
+      ylab(gettext(Rtit_fluoro_box_y()))+
+      xlab(gettext(Rtit_fluoro_box_x()))+
+      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      theme_bw()+
+      theme(
+        text = element_text(size=font_sizes[3], family="mont"),
+        axis.title = element_text(size=font_sizes[2], family = "open", face= "bold"),
+        title = element_text(size=font_sizes[1], family="open", face="bold", lineheight = .8),
+        legend.title = ggplot2::element_text(size=font_sizes[2], family = "open", face= "bold"),
+        #        legend.position = "bottom",
+        legend.title.position = "top"
+      )
+  })
+  ## fruit box
+  output$tit_fruit_box <- renderPlot({
+    ggplot(data=data_tit_fruit, aes(x=.data[[Rtit_fruit_box_x()]], y=.data[[Rtit_fruit_box_y()]],
+                                     color = .data[[Rtit_fruit_box_x()]], fill = .data[[Rtit_fruit_box_x()]]))+
+      geom_violin(alpha = 0.5)+
+      geom_boxplot(width=0.25, alpha = 0.8)+
+      ylab(gettext(Rtit_fruit_box_y()))+
+      xlab(gettext(Rtit_fruit_box_x()))+
+      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      theme_bw()+
+      theme(
+        text = element_text(size=font_sizes[3], family="mont"),
+        axis.title = element_text(size=font_sizes[2], family = "open", face= "bold"),
+        title = element_text(size=font_sizes[1], family="open", face="bold", lineheight = .8),
+        legend.title = ggplot2::element_text(size=font_sizes[2], family = "open", face= "bold"),
+        #        legend.position = "bottom",
+        legend.title.position = "top"
+      )
   })
 ### Statistics
 #### fluoro
