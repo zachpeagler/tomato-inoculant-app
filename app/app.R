@@ -525,9 +525,20 @@ ui <- navbarPage(collapsible = TRUE,
     # treat it like the background section of a paper
     # start with the WHY. traditional fertilizers bad, etc.
       ## HARMFUL ALGAE BLOOM PICTURE
-    card(card_header("Fertilizer bad", class = "bg-primary"),
+    card(card_header("The Green Revolution and Synthetic Fertilizers", class = "bg-primary"),
      markdown("
-      yapyapyapyap
+      In the 20th century, new methods were required to feed an expanding human population,
+      and the solution was the creation of synthetic fertilizers: inorganic sources of nitrogen (N),
+      phosphorous (P), and sodium (K) that (along with synthetic pesticides) became the foundation
+      for the Green Revolution. However, these solutions quickly became problems in their own right.
+      Synthetic pesticides wreaked havoc on the ecosystem, destroying large bird populations and causing
+      cancer at alarming rates. Synthetic fertilizers followed suit with harmful algal blooms. In recent years,
+      big agriculture supply companies have told the '4R Lie' where synthetic fertilizers are
+      perfectly safe for the environment when applied with the four R's in mind: Right time, Right place,
+      Right source, and Right rate. However, this is not enough to stop the historic runoff rates that we're seeing.
+      Up to 60% of applied fertilizers run off into the environment, and with fertilizers being more expensive than ever, 
+      taking up over a third of the average American farmer's budget, with fertilizer prices tripling in 
+      recent years, don't our farmers deserve better? Doesn't our Earth deserve better?
       ")
     ),
     # introduce bacterial fertilizers as a solution, but one lacking viable application methods.
@@ -535,7 +546,8 @@ ui <- navbarPage(collapsible = TRUE,
       ## BACTERIA PICS
     card(card_header("Microbes as sustainable agriculture solutions", class = "bg-secondary"),
      markdown("
-      bacteria can do lots of things. Plant growth promoting bacteria (PGPB) and arbuscular mycorrhical fungi (AMF)
+      In recent years, microbes have garnered much attention for their potetial in sustainable agriculture.
+      Plant growth promoting bacteria (PGPB) and arbuscular mycorrhical fungi (AMF)
       are two of the most common microbe archetypes for sustainable agriculture purposes. PGPBs can do lots of things,
       but act in four main ways: increasing photosynthesis, increasing available nutrients to the plant, 
       increasing stress resistance, and a fourth one. <br>
@@ -548,6 +560,13 @@ ui <- navbarPage(collapsible = TRUE,
       ## CHITOSAN AND ALGINATE BEAD PICS
     card(card_header("Biopolymer immobilization of microbes", class = "bg-primary"),
      markdown("
+      Then comes the question of how we get the microbes to the plants. This is the
+      core question that I was interested in answering with my thesis. Current 
+      application methods are severely lacking, either being extremely expensive or 
+      not very effective at getting benefits to the plant. This is where biopoylmer
+      immobilization comes in. By entrapping the microbes in a biopolymer, we can
+      effectively put them in stasis until they are at the plant and reactivated with
+      water.
       Chitosan and alginate
       ")
     ),
@@ -571,6 +590,8 @@ ui <- navbarPage(collapsible = TRUE,
          ## change this title, for the love of god
       markdown("
       Stomates are holes that plants breathe through. Carbon dioxide goes in, oxygen and water comes out.
+      By measuring the rate at which molecules move through the stomates, we can get a relative
+      estimate of the plant's photosynthesis and water use.
       ")
     ),
     # introduce Photosystem II and basic electron transport stuff
@@ -595,8 +616,26 @@ ui <- navbarPage(collapsible = TRUE,
       ## BER PICTURE
     card(card_header("Pests and Pathogens", class = "bg-primary"),
       markdown("
-      Blossom end-rot, spidermites, and whiteflies, oh my!
-      ")
+      These trials were performed in a greenhouse, and the plants accumulated a number of 
+      ailments over the course of the trials. The plants were subject to aphid, spidermite, and
+      whitefly infestations, for which we attempted treatment with organic pesticides. They
+      didn't work very well. Tissue infested with spidermites was removed as it was discovered, 
+      with an equal amount of tissue being removed from each other plant.
+      Blossom end-rot, of which there was a great deal, encourages the growth of 
+      secondary infections. These infections were generally fungal in nature and
+      did not spread through the plant, remaining isolated to the affected fruit.
+      "),
+      div(layout_column_wrap(
+        card(card_header("Aphids", class = "bg-primary"),
+             img(src="")
+             ),
+        card(card_header("Spidermites", class = "bg-secondary"),
+             img(src="")
+        ),
+        card(card_header("Whiteflies"),
+             img(src="")
+        )
+      ))
     )
   ),
   ##### TOMATO INOCULANT TRIALS NAV PANEL #####
