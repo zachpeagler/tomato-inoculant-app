@@ -70,7 +70,7 @@ li_data <- read.csv(li_data_file)[,c(2,3,7,8,9,10,17,28,32,34,35,36,39,40)] %>%
          Row = as.factor(Row),
          Plant = as.factor(Plant),
          Plant = factor(Plant, levels = tim_levels),
-         P_atm = P_atm * 10
+         P_atm = P_atm
   ) %>%
   rename(Pot=Column)
 
@@ -238,11 +238,10 @@ d23_fg_summary <- d23_fg %>%
            Treatment=="Soil"~FALSE,
            Treatment=="Foliar"~TRUE,
            Treatment=="Soil+Foliar"~TRUE
-         ))
+         ),
+         LogitpBER = logit(pBER + 0.0001))
 
-data_til_fruit_summary <- d23_fg_summary[,c(1,10,11,2,3,4,5,8,9)]
-
-save(data_til_fruit_summary, file = "C:/Github/tomato-inoculant-app/app/data_til_fruit_summary.RData")
+data_til_fruit_summary <- d23_fg_summary[,c(1,10,11,2,3,4,5,8,9,12)]
 
 d23_fl <- read.csv(d23_fl_file) %>%
   rename(pot = plant) %>%
@@ -290,6 +289,17 @@ data_til_fruit <- d23_fl[,c(10,11,12,1,2,16,9,17,4,5,13,8,15)] %>%
          LogitpSugar = logit(pSugar)
          )
 
+data_til_fruit_sug <- na.omit(data_til_fruit) %>%
+  group_by(Treatment, Soil, Foliar, Plant) %>%
+  summarise_at(vars(pSugar),
+               list(mean=mean)) %>%
+  ungroup() %>%
+  rename(pSugar_mean = mean) %>%
+  mutate(LogitpSugar_mean = logit(pSugar_mean))
+
+data_til_fruit_summary <- cbind(data_til_fruit_summary, data_til_fruit_sug[,c(5:6)])
+
+save(data_til_fruit_summary, file = "C:/Github/tomato-inoculant-app/app/data_til_fruit_summary.RData")
 save(data_til_fruit, file = "C:/Github/tomato-inoculant-app/app/data_til_fruit.RData")
 
 d23_li <- read.csv(d23_li_file, stringsAsFactors = T) %>%
@@ -383,7 +393,6 @@ data_til_fluoro <- d23_li[,c(61,62,63,2,3,64,8,7,65,31,33,35,39,34,9,27,66)] %>%
     Row = as.factor(Row),
     Pot = as.factor(Pot),
     AmbientLight = as.numeric(AmbientLight),
-    AmbientPressure = AmbientPressure * 10,
     Device = "Li-600"
   )
 
@@ -398,6 +407,7 @@ temp_til_fluoro <- d23_m[,c(59,60,61,67,64,65,4,3,63,6,8,7,30,23,45,37,68)] %>%
     PhiPS2 = Phi2
   ) %>% mutate(
     Treatment = factor(Treatment, levels = treatment_order23),
+    AmbientPressure = AmbientPressure / 10,
     Time = as.factor(Time),
     gsw = as.numeric("NA"),
     Device = "MultispeQ"
@@ -407,12 +417,7 @@ data_til_fluoro <- rbind(data_til_fluoro, temp_til_fluoro) %>%
   mutate(Device = as.factor(Device))
 
 save(data_til_fluoro, file = "C:/Github/tomato-inoculant-app/app/data_til_fluoro.RData")
-
-
 # end up with one combined fluoro file, one summarized fruit file, and one fruit lab file
-
-
-
 
 ##### TOMATO INOCULANT TIMING (2024) #####
 
@@ -510,9 +515,20 @@ data_tit_fruit_summary <- data_tit_fruit %>%
   group_by(Treatment, Transplantation, Germination, Plant) %>%
   summarise_at(vars(Fruit, BER, Mass),
                list(sum=sum, mean=mean)) %>%
-  mutate(pBER = round(BER_sum/Fruit_sum, 4)) %>%
+  mutate(pBER = round(BER_sum/Fruit_sum, 4),
+         LogitpBER = logit(pBER + 0.0001)) %>%
   ungroup()
-data_tit_fruit_summary <- data_tit_fruit_summary[,c(1,2,3,4,5,6,7,10,11)]
+data_tit_fruit_summary <- data_tit_fruit_summary[,c(1,2,3,4,5,6,7,10,11,12)]
+
+data_tit_fruit_sug <- na.omit(data_tit_fruit) %>%
+  group_by(Treatment, Transplantation, Germination, Plant) %>%
+  summarise_at(vars(pSugar),
+               list(mean=mean)) %>%
+  ungroup() %>%
+  rename(pSugar_mean = mean) %>%
+  mutate(LogitpSugar_mean = logit(pSugar_mean))
+
+data_tit_fruit_summary <- cbind(data_tit_fruit_summary, data_tit_fruit_sug[,c(5:6)])
 
 save(data_tit_fruit_summary, file = "C:/Github/tomato-inoculant-app/app/data_tit_fruit_summary.RData")
 
@@ -612,7 +628,7 @@ data_tit_fluoro <- d24_li %>% mutate(
              Plant = plant,
              LogitPhiPS2 = logitPS2
              ) %>%
-  mutate(AmbientPressure = AmbientPressure * 10,
+  mutate(
          Time = as.factor(Time),
          AmbientLight = as.numeric(AmbientLight),
          Row = as.factor(Row),
@@ -631,6 +647,7 @@ temp_tit_fluoro <- d24_m[,c(63,64,65,70,68,69,8,7,67,10,12,11,34,27,49,41,71)] %
          LogitPhiPS2 = logitPS2,
          gsw = pump) %>%
   mutate(Time = as.factor(Time),
+         AmbientPressure = AmbientPressure / 10,
          Treatment = factor(Treatment, levels = treatment_order24),
          gsw = as.numeric("NA")
          )
