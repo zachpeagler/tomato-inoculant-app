@@ -1,7 +1,7 @@
 # Code based on: 
 # https://github.com/posit-dev/r-shinylive/blob/actions-v1/.github/workflows/deploy-app.yaml
 
-name: Build and Deploy App
+name: Deploy App
 
 on:
   workflow_call:
@@ -20,34 +20,10 @@ jobs:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
       
-    permissions:
-      contents: write # to export to the "site" folder in our repo
-      pages: write # this might not be necessary for the "build" job. consider removing
-      id-token: write # this might not be necessary for the "build" job. consider removing
-
     steps:
       # get repo contents
       - name: "Checkout repository"
         uses: actions/checkout@v4
-
-      # setup R
-      - name: "Setup R"
-        uses: r-lib/actions/setup-r@v2
-
-      # install dependencies
-      - name: "Setup R dependency for shinylive app export"
-        uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          ## install shinylive v0.3.0
-          ## this should also install dependencies from DESCRIPTION file
-          packages: |
-            cran::shinylive@0.3.0
-            local::.
-      # export app folder to site folder
-      - name: "Create shinylive app from app folder"
-        shell: Rscript {0}
-        run: |
-          shinylive::export("app", "site")
       # upload a tar file that will work with Github Pages
       # set retention days to automatically flush it out after one day
       # make sure to only upload from the "site" folder
