@@ -109,7 +109,8 @@ fruit_lab_vars  <- c("pSugar", "SugarGrams", "Ripeness")
 
 # custom functions
 ## i *think* this is faster and smaller than including these as a dependency via a custom package
-## that being said, these functions are taken from my package ztils (github.com/zachpeagler/ztils)
+## that being said, these functions are (mostly) taken from my package ztils (github.com/zachpeagler/ztils)
+## some of these functions are bespoke (i.e. shitty and unreliable)
 multiKS_cont  <- function(var, distributions) {
   # check if "all" was passed to distributions
   if ("all" %in% distributions) {
@@ -355,6 +356,98 @@ multiCDF_plot <- function (var, seq_length = 50, distributions = "all", palette 
     )
   return(p)
 }
+predict_plot <- function(mod, data, rvar, pvar, group = NULL, length = 50, interval = "confidence", correction = "normal") {
+    ### deparse variables
+    d_pvar <- deparse(substitute(pvar))
+    d_rvar <- deparse(substitute(rvar))
+    d_group  <- deparse(substitute(group))
+    ### get explicit names  of deparsed variables
+    ### weird, but necessary for renaming the newdata (dx) columns \>_>/
+    pvar_name <- colnames(data[d_pvar])
+    rvar_name <- colnames(data[d_rvar])
+    group_name  <- colnames(data[d_group])
+    ## get group data ready
+    groups  <- sort(unique(data[[d_group]]))
+    ngroups <- length(groups)
+    ## get predictor range for each group
+    agg <- aggregate(data[[d_pvar]] ~ data[[d_group]], data = data, range)
+    dx_pvar <- data.frame(pvar = numeric(0))
+    for (i in 1:ngroups) {
+      tpvar <- data.frame(pvar = seq(agg[[2]][i,1], agg[[2]][i,2], length = length))
+      dx_pvar <- rbind(dx_pvar, tpvar)
+    }
+    dx <- data.frame(group = rep(agg[[1]], each = length),
+                     pvar = dx_pvar)
+    colnames(dx) <- c(group_name, pvar_name)
+    ## make prediction
+    if (interval == "confidence") {
+      ### we don't need to explicitly declare that it's a confidence interval, the predict function defaults to it
+      pred <- predict(mod, newdata = dx, se.fit = TRUE, type = "response")
+      ### check for correction type
+      if (correction == "exponential") {
+        dx$mn <- exp(qnorm(0.5,   pred$fit, pred$se.fit))
+        dx$lo <- exp(qnorm(0.025, pred$fit, pred$se.fit))
+        dx$up <- exp(qnorm(0.975, pred$fit, pred$se.fit))
+      } else if (correction == "logit") {
+        dx$mn <- plogis(qnorm(0.5,   pred$fit, pred$se.fit))
+        dx$lo <- plogis(qnorm(0.025, pred$fit, pred$se.fit))
+        dx$up <- plogis(qnorm(0.975, pred$fit, pred$se.fit))
+      } else {
+        dx$mn <- qnorm(0.5,   pred$fit, pred$se.fit)
+        dx$lo <- qnorm(0.025, pred$fit, pred$se.fit)
+        dx$up <- qnorm(0.975, pred$fit, pred$se.fit)
+      }
+    } else { ### end confidence interval
+      pred <- predict(mod, newdata = dx, se.fit = TRUE,
+                      type = "response", interval = "prediction")
+      ### check for correction type
+      if (correction == "exponential") {
+        dx$mn <- exp(pred$fit[,"fit"])
+        dx$lo <- exp(pred$fit[,"lwr"])
+        dx$up <- exp(pred$fit[,"upr"])
+      } else if (correction == "logit") {
+        dx$mn <- plogis(pred$fit[,"fit"])
+        dx$lo <- plogis(pred$fit[,"lwr"])
+        dx$up <- plogis(pred$fit[,"upr"])
+      } else {
+        dx$mn <- pred$fit[,"fit"]
+        dx$lo <- pred$fit[,"lwr"]
+        dx$up <- pred$fit[,"upr"]
+      }
+    } ### end prediction interval
+    ## initialize plot with real data
+    p <- ggplot2::ggplot() + 
+      ggplot2::geom_point(data = data, ggplot2::aes(x=.data[[d_pvar]], y=.data[[d_rvar]], color=.data[[d_group]]))
+    ## loop through treatments
+    for (g in 1:ngroups) {
+      flag <- which(dx[[d_group]] == groups[g])
+      tdx <- dx[flag,]
+      p <- p + 
+        ggplot2::geom_line(data=tdx, ggplot2::aes(x=.data[[d_pvar]], y=lo, color = .data[[d_group]]),
+                           linewidth=1, show.legend=FALSE)+
+        ggplot2::geom_line(data=tdx, ggplot2::aes(x=.data[[d_pvar]], y=mn, color = .data[[d_group]]),
+                           linewidth=2, show.legend=FALSE)+
+        ggplot2::geom_line(data=tdx, ggplot2::aes(x=.data[[d_pvar]], y=up, color = .data[[d_group]]),
+                           linewidth=1, show.legend=FALSE)+
+        ggplot2::geom_ribbon(data=tdx, ggplot2::aes(x=.data[[d_pvar]], ymin=lo, ymax=up,
+                                                    fill=.data[[d_group]]), alpha = 0.5)
+    }
+  ### make the plot look good (group agnostic)
+  p <- p +
+    ggplot2::labs(
+      title = paste("Real data vs predicted 95%", interval, "interval"),
+      subtitle = paste("Model:", deparse(mod$call))
+    )+
+    ggplot2::theme_bw()+
+    ggplot2::theme(
+      text = ggplot2::element_text(size=16),
+      legend.position="right",
+      axis.title = ggplot2::element_text(size=16, face= "bold"),
+      title = ggplot2::element_text(size=20, face="bold", lineheight = .5),
+      plot.subtitle = ggplot2::element_text(size=14, face = "italic")
+    )
+  return(p)
+}
 pca_plot <- function(group, pcavars) {
   gr <- sort(unique(group))
   Groups <- gr[match(group, gr)]
@@ -389,23 +482,41 @@ no_extremes <- function(data, var) {
                    data[[d_var]] < (Qvar[2]+3*iqr_var))
   return(data)
 }
-
+## this is dumb
+p_from_modsum <- function(modsum) {
+  f <- modsum$fstatistic
+  p <- pf(f[1], f[2], f[3], lower.tail=FALSE)
+  attributes(p) <- NULL
+  if (p > 0.0001) {
+    p <- round(p, 4)
+  } else if (p < 2.2e-16) {
+    p = "< 2.2e-16"
+  }
+  return(p)
+}
 # calculate models that don't have user inputs (PCRs and fruit mods)
 ## tit fluoro
 tit_pca <- rda(scaled_tit_fluoro_vars)
 tit_pcr_data <- pca_data(mod_data_tit_fluoro, scaled_tit_fluoro_vars)
 tit_pcr_gsw <- lm(log(gsw) ~ Treatment + PC1 + PC2, data = tit_pcr_data)
+tit_pcr_gsw_pmod <- lm(log(gsw) ~ Treatment + PC1, data = tit_pcr_data)
+tit_pcr_gsw_sum <- summary(tit_pcr_gsw)
 tit_pcr_ps2 <- lm(LogitPhiPS2 ~ Treatment + PC1 + PC2, data = tit_pcr_data)
+tit_pcr_ps2_pmod <- lm(LogitPhiPS2 ~ Treatment + PC1, data = tit_pcr_data)
+tit_pcr_ps2_sum <- summary(tit_pcr_ps2)
 ## tit fruit
 tit_mass_mod <- lm(log(Mass_mean) ~ Treatment, data = data_tit_fruit_summary)
 tit_mass_mod_sum <- summary(tit_mass_mod)
 tit_mass_letters <- cld(glht(tit_mass_mod, linfct = mcp(Treatment = "Tukey")))
-tit_count_mod <- glm(Fruit_sum ~ Treatment, data = data_tit_fruit_summary, family = poisson())
-tit_count_mod_sum <- summary(tit_count_mod)
+tit_fc_mod <- glm(Fruit_sum ~ Treatment, data = data_tit_fruit_summary, family = poisson())
+tit_fc_mod_sum <- summary(tit_fc_mod)
+tit_fc_letters <- cld(glht(tit_fc_mod, linfct = mcp(Treatment = "Tukey")))
 tit_sug_mod <- lm(LogitpSugar_mean ~ Treatment, data = data_tit_fruit_summary)
 tit_sug_mod_sum <- summary(tit_sug_mod)
+tit_sug_letters <- cld(glht(tit_sug_mod, linfct = mcp(Treatment = "Tukey")))
 tit_ber_mod <- lm(LogitpBER ~ Treatment, data = no_extremes(data_tit_fruit_summary, LogitpBER))
 tit_ber_mod_sum <- summary(tit_ber_mod)
+tit_ber_letters <- cld(glht(tit_ber_mod, linfct = mcp(Treatment = "Tukey")))
 
 # options popover
 gear <- popover(bs_icon("gear"),
@@ -424,7 +535,7 @@ ui <- navbarPage(collapsible = TRUE,
     # treat it like the background section of a paper
     # start with the WHY. traditional fertilizers bad, etc.
       ## HARMFUL ALGAE BLOOM PICTURE
-    card(card_header("The Green Revolution and Synthetic Fertilizers", class = "bg-primary"),
+    card(card_header("The Green Revolution and Synthetic Fertilizers", class = "bg-primary", style = "font-size: 25px"),
      markdown("
       In the 20th century, new methods were required to feed an expanding human population,
       and the solution was the creation of synthetic fertilizers: inorganic sources of nitrogen (N),
@@ -432,32 +543,38 @@ ui <- navbarPage(collapsible = TRUE,
       for the Green Revolution. However, these solutions quickly became problems in their own right.
       Synthetic pesticides wreaked havoc on the ecosystem, destroying large bird populations and causing
       cancer at alarming rates. Synthetic fertilizers followed suit with harmful algal blooms. In recent years,
-      big agriculture supply companies have told the '4R Lie' where synthetic fertilizers are
-      perfectly safe for the environment when applied with the four R's in mind: Right time, Right place,
+      the 4R method has garnered much attention, where synthetic fertilizers, when applied with the four R's in mind: Right time, Right place,
       Right source, and Right rate. However, this is not enough to stop the historic runoff rates that we're seeing.
       Up to 60% of applied fertilizers run off into the environment, and with fertilizers being more expensive than ever, 
       taking up over a third of the average American farmer's budget, with fertilizer prices tripling in 
-      recent years, don't our farmers deserve better? Doesn't our Earth deserve better?
+      recent years, we can do better.
       ")
     ),
     # introduce bacterial fertilizers as a solution, but one lacking viable application methods.
     # explain the shift from just M. oryzae to a microbial consortium.
       ## BACTERIA PICS
-    card(card_header("Microbes as sustainable agriculture solutions", class = "bg-secondary"),
-     markdown("
-      In recent years, microbes have garnered much attention for their potetial in sustainable agriculture.
-      Plant growth promoting bacteria (PGPB) and arbuscular mycorrhical fungi (AMF)
-      are two of the most common microbe archetypes for sustainable agriculture purposes. PGPBs can do lots of things,
-      but act in four main ways: increasing photosynthesis, increasing available nutrients to the plant, 
-      increasing stress resistance, and a fourth one. <br>
-      
-      > Note: I did not use AMF in this study, but *spoiler warning* I do recommend the use of AMFs in future 
-      sustainable agriculture solutions, if economically viable.
-      ")
-    ),
+    card(card_header("Microbes as sustainable agriculture solutions", class = "bg-secondary", style = "font-size: 25px"),
+     layout_columns(col_widths = c(7,5),
+       markdown("
+        In recent years, microbes have garnered much attention for their potetial in sustainable agriculture.
+        Plant growth promoting bacteria (PGPB) and arbuscular mycorrhical fungi (AMF)
+        are two of the most common microbe archetypes for sustainable agriculture purposes. PGPBs can do lots of things,
+        but act in four main ways: increasing photosynthesis, increasing available nutrients to the plant, 
+        increasing stress resistance, and a fourth one. <br>
+        
+        > Note: I did not use AMF in this study, but *spoiler warning* I do recommend the use of AMFs in future 
+        sustainable agriculture solutions, if economically viable.
+        "),
+       card(
+         img(src="moryzae.jpg", height = 400, width = 400, style="display: block; margin-left: auto; margin-right: auto;"),
+         markdown("A plate containing *Methylobacterium oryzae CBMB20*")
+       )
+     ) # end column wrap
+    ), # end microbe card
     # introduce alginate and chitosan, and WHY I chose to pursue chitosan over alginate.
       ## CHITOSAN AND ALGINATE BEAD PICS
-    card(card_header("Biopolymer immobilization of microbes", class = "bg-primary"),
+    card(card_header("Biopolymer immobilization of microbes", class = "bg-primary", style = "font-size: 25px"),
+     layout_columns(col_widths = c(5,7),
      markdown("
       Then comes the question of how we get the microbes to the plants. This is the
       core question that I was interested in answering with my thesis. Current 
@@ -467,53 +584,83 @@ ui <- navbarPage(collapsible = TRUE,
       effectively put them in stasis until they are at the plant and reactivated with
       water.
       Chitosan and alginate
-      ")
+      "),
+     div(
+       card(
+       img(src="cbg_comparison.png", height = 200, width = 600, style="display: block; margin-left: auto; margin-right: auto;"),
+       markdown("A comparison of chitosan bacterial granules at different desiccation points: **a** is fresh,
+                **b** is at 36 hours, **c** is at 72 hours.")
+       ),
+       card(
+       img(src="cbg_morphology.png", height = 400, width = 600, style="display: block; margin-left: auto; margin-right: auto;"),
+       markdown("Chitosan bacterial granules at 400x magnification. This photo does a good job
+                showing the morphological variation between beads from the same batch.")
+       )
+     )
+     ) # end column layout
     ),
     # introduce tomato as the model organism
       ## TOMATO PICTURE
-    card(card_header("Model organism: Tomato", class = "bg-secondary"),
+    card(card_header("Model organism: Tomato", class = "bg-secondary", style = "font-size: 25px"),
+      layout_column_wrap(
+        card(
+        img(src="tomato.png", height = 400, width = 475, style="display: block; margin-left: auto; margin-right: auto;")
+        ),
      markdown("
       Tomatoes are the second most-grown crop in the United States,
       grow like weeds, produce lots of fruit, and have easily identifiable stress responses,
-      making them an excellent model organism. <br>
+      making them an excellent model organism. For this study, we used tomato cultivar **BHN 589**, a
+      determinate variety (they produce one flush of fruit and are done).
+      <br>
       
       > Note: While tomatoes are an excellent model organism for measuring fruit yield and 
       stress response, a shift to shorter lifecycle crops may help to speed up SAS development.
       Tomatoes take months to grow, with our studies generally running from  April to October. 
       As you may be able to guess, this does not do a great job facilitating rapid development.
       ")
+      )
     ),
     # introduce stomates and stomatal conductance
       ## STOMATE PICTURE
-    card(card_header("Stomates: Plant Lungs", class = "bg-primary"),
-         ## change this title, for the love of god
-      markdown("
-      Stomates are holes that plants breathe through. Carbon dioxide goes in, oxygen and water comes out.
-      By measuring the rate at which molecules move through the stomates, we can get a relative
-      estimate of the plant's photosynthesis and water use.
-      ")
+    card(card_header("Stomates: Plant Lungs", class = "bg-primary", style = "font-size: 25px"),
+      layout_column_wrap(
+        markdown("
+        Stomates are holes that plants breathe through. Carbon dioxide goes in, oxygen and water comes out.
+        By measuring the rate at which molecules move through the stomates, we can get a relative
+        estimate of the plant's photosynthesis and water use.
+        "),
+        card(
+        img(src="stomates.png", height = 350, width = 600, style="display: block; margin-left: auto; margin-right: auto;"),
+        markdown("Tomato stomates at 1000x magnification.")
+        )
+      )
     ),
     # introduce Photosystem II and basic electron transport stuff
       ## GRAPHIC SHOWING WHERE PSII is
-    card(card_header("Photosystem II and you", class = "bg-secondary"),
-      markdown("
-      Plants perform photosynthesis inside of a specialized organelle called the chloroplast. <br>
-      
-      Specifically, chloroplasts have these things called thylakoids, and photosynthesis happens *across*
-      the thylakoid membrane. It's complicated, but for our purposes we can think of it like a gas station (or charging center).
-      Depleted molecules come in (ADP and NADP) and exit *recharged* (ATP and NADPH). There's a series of reactions that happen
-      in two distinct reaction centers, Photosystem I and Photosystem II. By doing some funky stuff with light, we can use math
-      to figure out the efficiency of Photosystem II (PhiPS2). PhiPS2 is calculated as (maximum fluorescence - steady state fluorescence)/maximum fluorescence,
-      and is useful for estimating changes in the quantum yield of non-cyclic electron transport. <br>
-      
-      > For a more comprehensive explanation of PhiPS2, check out 
-      [Genty *et al*., 1989](https://www.sciencedirect.com/science/article/abs/pii/S0304416589800169) or
-      for a simpler explanation, the [chlorophyll fluorescence wikipedia page](https://en.wikipedia.org/wiki/Chlorophyll_fluorescence).
-      ")
+    card(card_header("Photosystem II and you", class = "bg-secondary", style = "font-size: 25px"),
+      layout_column_wrap(
+        card(img(src="thylakoid_membrane.png", height = 350, width = 600, style="display: block; margin-left: auto; margin-right: auto;"),
+          markdown("Diagram of the photosystem complexes on the thylakoid membrane, courtesy of [Wikipedia](https://en.wikipedia.org/wiki/Photosystem).")
+        ),
+        markdown("
+        Plants perform photosynthesis inside of a specialized organelle called the chloroplast. <br>
+        
+        Specifically, chloroplasts have these things called thylakoids, and photosynthesis happens *across*
+        the thylakoid membrane. It's complicated, but for our purposes we can think of it like a gas station (or charging center).
+        Depleted molecules come in (ADP and NADP) and exit *recharged* (ATP and NADPH). There's a series of reactions that happen
+        in two distinct reaction centers, Photosystem I and Photosystem II. By doing some funky stuff with light, we can use math
+        to figure out the efficiency of Photosystem II (PhiPS2). PhiPS2 is calculated as (maximum fluorescence - steady state fluorescence)/maximum fluorescence,
+        and is useful for estimating changes in the quantum yield of non-cyclic electron transport. <br>
+        
+        > For a more comprehensive explanation of PhiPS2, check out 
+        [Genty *et al*., 1989](https://www.sciencedirect.com/science/article/abs/pii/S0304416589800169) or
+        for a simpler explanation, the [chlorophyll fluorescence wikipedia page](https://en.wikipedia.org/wiki/Chlorophyll_fluorescence).
+        ")
+      )
     ),
     # introduce blossom end-rot, spidermites, whiteflies, etc.
       ## BER PICTURE
-    card(card_header("Pests and Pathogens", class = "bg-primary"),
+    card(card_header("Pests and Pathogens", class = "bg-primary", style = "font-size: 25px"),
       markdown("
       These trials were performed in a greenhouse, and the plants accumulated a number of 
       ailments over the course of the trials. The plants were subject to aphid, spidermite, and
@@ -599,7 +746,7 @@ ui <- navbarPage(collapsible = TRUE,
                 making dedicated PDF and CDF plots for our response variables and not our explanatory variables. However,
                 we can see the shape of our explanatory variables using histograms (a couple accordion panels down).
                 "),
-              card(card_header("Fluorescence", class = "bg-primary"),
+              card(card_header("Fluorescence", class = "bg-primary", style = "font-size: 25px"),
                 layout_sidebar(sidebar=sidebar(
                   selectInput("tit_fluoro_dist_var", "Variable", choices = tit_fluoro_vars,
                                selected = "gsw"),
@@ -629,7 +776,7 @@ ui <- navbarPage(collapsible = TRUE,
                   ))
                 ) # end sidebar layout
               ), # end fluorescence card
-              card(card_header("Fruit", class = "bg-primary"),
+              card(card_header("Fruit", class = "bg-primary", style = "font-size: 25px"),
                  layout_sidebar(sidebar=sidebar(
                     selectInput("tit_fruit_dist_var", "Variable", choices = tit_fruit_vars,
                                 selected = "Mass"),
@@ -658,7 +805,7 @@ ui <- navbarPage(collapsible = TRUE,
               ) # end phips2 card
             ), # end dist accordion panel
             accordion_panel(title="Histograms",
-              card(card_header("Interactive Fluorescence Histogram", class = "bg-primary"),
+              card(card_header("Interactive Fluorescence Histogram", class = "bg-primary", style = "font-size: 25px"),
                 layout_sidebar(sidebar=sidebar(
                   selectInput("tit_fluoro_hist_var", "Select X Variable",
                               choices = tit_fluoro_vars, selected = "AmbientHumidity"),
@@ -669,7 +816,7 @@ ui <- navbarPage(collapsible = TRUE,
                   ), # end sidebar
                   plotOutput("tit_fluoro_hist")
               )), # gsw hist card
-              card(card_header("Interactive Fruit Histogram", class = "bg-primary"),
+              card(card_header("Interactive Fruit Histogram", class = "bg-primary", style = "font-size: 25px"),
                 layout_sidebar(sidebar=sidebar(
                   selectInput("tit_fruit_hist_var", "Select Variable",
                               choices = tit_fruit_vars, selected = "Ripeness"),
@@ -682,7 +829,7 @@ ui <- navbarPage(collapsible = TRUE,
                 )) # ps2 hist card
               ), # end hist accordion panel
               accordion_panel(title = "Scatter Plots",
-                card(card_header("Interactive Fluorescence Scatter", class = "bg-primary"),
+                card(card_header("Interactive Fluorescence Scatter", class = "bg-primary", style = "font-size: 25px"),
                     layout_sidebar(sidebar = sidebar(
                       selectInput("tit_fluoro_scatter_x","X Variable",
                                   choices = all_tit_fluoro_vars, selected = "AmbientHumidity"),
@@ -701,7 +848,7 @@ ui <- navbarPage(collapsible = TRUE,
                     card_body(plotOutput("tit_fluoro_scatter"))
                     ) # end sidebar layout
                 ), # end gsw scatter plot
-                card(card_header("Interactive Fruit Scatter", class = "bg-primary"),
+                card(card_header("Interactive Fruit Scatter", class = "bg-primary", style = "font-size: 25px"),
                     layout_sidebar(sidebar = sidebar(
                       selectInput("tit_fruit_scatter_x","X Variable",
                                   choices = all_tit_fruit_vars, selected = "Mass"),
@@ -722,7 +869,7 @@ ui <- navbarPage(collapsible = TRUE,
                 ) # end fruit scatter plot
             ), # end scatterplot accordion panel
             accordion_panel(title="Box Plots",
-              card(card_header("Interactive Fluorescence Boxplot", class = "bg-primary"),
+              card(card_header("Interactive Fluorescence Boxplot", class = "bg-primary", style = "font-size: 25px"),
                    layout_sidebar(sidebar = sidebar(
                      selectInput("tit_fluoro_box_x","X Variable",
                                  choices = tit_fluoro_vars_d, selected = "Treatment"),
@@ -731,7 +878,7 @@ ui <- navbarPage(collapsible = TRUE,
                    ), # end sidebar
                    plotOutput("tit_fluoro_box")
                    )),
-              card(card_header("Interactive Fruit Boxplot", class = "bg-primary"),
+              card(card_header("Interactive Fruit Boxplot", class = "bg-primary", style = "font-size: 25px"),
                    layout_sidebar(sidebar = sidebar(
                      selectInput("tit_fruit_box_x","X Variable",
                                  choices = tit_fruit_vars_d, selected = "Treatment"),
@@ -740,7 +887,7 @@ ui <- navbarPage(collapsible = TRUE,
                    ), # end sidebar
                    plotOutput("tit_fruit_box")
                    )),
-              card(card_header("Interactive Fruit Summary Boxplot", class = "bg-primary"),
+              card(card_header("Interactive Fruit Summary Boxplot", class = "bg-primary", style = "font-size: 25px"),
                    layout_sidebar(sidebar = sidebar(
                      selectInput("tit_fruit_sum_box_x","X Variable",
                                  choices = tit_fruit_sum_vars_d, selected = "Treatment"),
@@ -755,7 +902,7 @@ ui <- navbarPage(collapsible = TRUE,
         tabPanel("Statistics",
           accordion(
             accordion_panel("Fluorescence",
-              card(card_header("Stomatal conductance (gsw)", class = "bg-primary"),
+              card(card_header("Stomatal conductance (gsw)", class = "bg-primary", style = "font-size: 25px"),
                 selectInput("tit_gsw_mod_var", "Predictor Variable",
                             choices = fluoro_mod_var_names, selected = "AmbientHumidity"),
                 div(layout_columns(col_widths = c(7,5),
@@ -775,6 +922,11 @@ ui <- navbarPage(collapsible = TRUE,
                       width = 0.2
                     ),
                     value_box(
+                      title = "GSW Model P Value",
+                      value = textOutput("tit_gsw_p"),
+                      width = 0.2
+                    ),
+                    value_box(
                       title = "GSW Model R^2",
                       value = textOutput("tit_gsw_r2"),
                       theme = "bg-secondary",
@@ -786,9 +938,8 @@ ui <- navbarPage(collapsible = TRUE,
                   ) # end value box div
                 ) # end column wrap
                 ), # end div
-                
               ), # end gsw stats card
-              card(card_header("Photosystem II Efficiency (PhiPS2", class = "bg-primary"),
+              card(card_header("Photosystem II Efficiency (PhiPS2", class = "bg-primary", style = "font-size: 25px"),
                    selectInput("tit_ps2_mod_var", "Predictor Variable",
                                choices = fluoro_mod_var_names, selected = "AmbientHumidity"),
                    div(layout_columns(col_widths = c(7,5),
@@ -808,6 +959,11 @@ ui <- navbarPage(collapsible = TRUE,
                             width = 0.2
                           ),
                           value_box(
+                            title = "PhiPS2 Model P Value",
+                            value = textOutput("tit_ps2_p"),
+                            width = 0.2
+                          ),
+                          value_box(
                             title = "PhiPS2 Model R^2",
                             value = textOutput("tit_ps2_r2"),
                             theme = "bg-secondary",
@@ -820,13 +976,13 @@ ui <- navbarPage(collapsible = TRUE,
                    ) # end column wrap
                 ) # end div
               ), # end ps2 stats card
-              card(card_header("Multivariate", class = "bg-secondary"),
+              card(card_header("Multivariate", class = "bg-secondary", style = "font-size: 25px"),
                 div(layout_columns(col_widths = c(6,6),
                   div(
                     markdown("
                       Maybe instead of looking at a single environmental variable, we want to look at all of them (or at least the ones
-                      that actually make an impact on our target response variables). To do this we can use **principal component analysis** (PCA).
-                      To do this, we scale our environmental variables so they all have an equal influence on the output, then use the **vegan** package
+                      that actually make an impact on our target response variables). To accomplish this, we can use **principal component analysis** (PCA).
+                      First, we scale our environmental variables so they all have an equal influence on the output, then use the **rda** function from the **vegan** package
                       to reduce the dimensionality."
                     ),
                     card(card_header("PCA Summary"), 
@@ -836,20 +992,25 @@ ui <- navbarPage(collapsible = TRUE,
                   plotOutput("tit_fluoro_pca")
                 )),
                 div(layout_column_wrap(
-                  card(card_header("Multivariate Stomatal Conductance", class = "bg-primary"),
+                  card(card_header("Multivariate Stomatal Conductance (GSW)", class = "bg-primary", style = "font-size: 20px"),
                        div(# value boxes for AIC and r^2
                          card(card_header("Model Summary", class = "bg-primary"),
                               verbatimTextOutput("tit_pcr_gsw_summary"),
                               max_height = 500
                          ),
                          value_box(
-                           title = "Multivariate gsw AIC",
+                           title = "Multivariate GSW AIC",
                            value = textOutput("tit_pcr_gsw_aic"),
                            theme = "bg-primary",
                            width = 0.2
                          ),
                          value_box(
-                           title = "Multivariate gsw R^2",
+                           title = "Multivariate GSW P Value",
+                           value = textOutput("tit_pcr_gsw_p"),
+                           width = 0.2
+                         ),
+                         value_box(
+                           title = "Multivariate GSW R^2",
                            value = textOutput("tit_pcr_gsw_r2"),
                            theme = "bg-secondary",
                            width = 0.2
@@ -857,9 +1018,10 @@ ui <- navbarPage(collapsible = TRUE,
                          card(card_header("Treatment Letters", class="bg-secondary"),
                               verbatimTextOutput("tit_pcr_gsw_letters")
                          )
-                       ) # end value box div
+                       ), # end value box div
+                       plotOutput("tit_pcr_gsw_pred")
                        ),
-                  card(card_header("Multivariate Photosystem II Efficiency", class = "bg-primary"),
+                  card(card_header("Multivariate Photosystem II Efficiency", class = "bg-primary", style = "font-size: 20px"),
                        div(# value boxes for AIC and r^2
                          card(card_header("Model Summary", class = "bg-primary"),
                               verbatimTextOutput("tit_pcr_ps2_summary"),
@@ -872,6 +1034,11 @@ ui <- navbarPage(collapsible = TRUE,
                            width = 0.2
                          ),
                          value_box(
+                           title = "Multivariate PhiPS2 P Value",
+                           value = textOutput("tit_pcr_ps2_p"),
+                           width = 0.2
+                         ),
+                         value_box(
                            title = "Multivariate PhiPS2 R^2",
                            value = textOutput("tit_pcr_ps2_r2"),
                            theme = "bg-secondary",
@@ -880,10 +1047,11 @@ ui <- navbarPage(collapsible = TRUE,
                          card(card_header("Treatment Letters", class="bg-secondary"),
                               verbatimTextOutput("tit_pcr_ps2_letters")
                          )
-                       ) # end value box div
-                  ),
-                ))
-              )
+                       ), # end value box div
+                       plotOutput("tit_pcr_ps2_pred")
+                  ), # end phips2 card
+                )) # end column wrap and div
+              ) # end multivariate card
             ),
             accordion_panel("Fruit",
               div(
@@ -894,7 +1062,7 @@ ui <- navbarPage(collapsible = TRUE,
                 our actual experimental design.
                 ")
               ),
-              card(card_header("Mass", class = "bg-primary"),
+              card(card_header("Mass", class = "bg-primary", style = "font-size: 25px"),
                 div(layout_columns(col_widths = c(7,5),
                   div(
                     card(card_header("Model Summary"),
@@ -913,6 +1081,11 @@ ui <- navbarPage(collapsible = TRUE,
                       width = 0.2
                     ),
                     value_box(
+                      title = "Mass Model P Value",
+                      value = textOutput("tit_mass_p"),
+                      width = 0.2
+                    ),
+                    value_box(
                       title = "Mass Model R^2",
                       value = textOutput("tit_mass_r2"),
                       theme = "bg-secondary",
@@ -925,21 +1098,121 @@ ui <- navbarPage(collapsible = TRUE,
                 ) # end column wrap
                 ) # end div
               ), # end mass stats card
+              card(card_header("Sugar", class = "bg-primary", style = "font-size: 25px"),
+                div(layout_columns(col_widths = c(7,5),
+                  div(
+                    card(card_header("Model Summary"),
+                         verbatimTextOutput("tit_sug_mod_summary")
+                    ),
+                    plotOutput("tit_sug_annotated")
+                  ),# end model summary div
+                  div(# value boxes for AIC and r^2
+                    card(card_header("Model Call", class = "bg-primary"),
+                         verbatimTextOutput("tit_sug_mod_call")
+                         ),
+                    value_box(
+                      title = "Sugar Model AIC",
+                      value = textOutput("tit_sug_aic"),
+                      theme = "bg-primary",
+                      width = 0.2
+                    ),
+                    value_box(
+                      title = "Sugar Model P Value",
+                      value = textOutput("tit_sug_p"),
+                      width = 0.2
+                    ),
+                    value_box(
+                      title = "Sugar Model R^2",
+                      value = textOutput("tit_sug_r2"),
+                      theme = "bg-secondary",
+                      width = 0.2
+                    ),
+                    card(card_header("Treatment Letters", class="bg-secondary"),
+                         verbatimTextOutput("tit_sug_letters")
+                    )
+                  ) # end value box div
+                ) # end column wrap
+                ) # end div
+              ), # end sugar stats card
+              card(card_header("Blossom End-Rot", class = "bg-primary", style = "font-size: 25px"),
+                div(layout_columns(col_widths = c(7,5),
+                  div(
+                    card(card_header("Model Summary"),
+                         verbatimTextOutput("tit_ber_mod_summary")
+                    ),
+                    plotOutput("tit_ber_annotated")
+                  ),# end model summary div
+                  div(# value boxes for AIC and r^2
+                    card(card_header("Model Call", class = "bg-primary"),
+                         verbatimTextOutput("tit_ber_mod_call")
+                         ),
+                    value_box(
+                      title = "BER Model AIC",
+                      value = textOutput("tit_ber_aic"),
+                      theme = "bg-primary",
+                      width = 0.2
+                    ),
+                    value_box(
+                      title = "BER Model P Value",
+                      value = textOutput("tit_ber_p"),
+                      width = 0.2
+                    ),
+                    value_box(
+                      title = "BER Model R^2",
+                      value = textOutput("tit_ber_r2"),
+                      theme = "bg-secondary",
+                      width = 0.2
+                    ),
+                    card(card_header("Treatment Letters", class="bg-secondary"),
+                         verbatimTextOutput("tit_ber_letters")
+                    )
+                  ) # end value box div
+                ) # end column wrap
+                ) # end div
+              ), # end ber stats card
+              card(card_header("Fruit Count", class = "bg-primary", style = "font-size: 25px"),
+                div(layout_columns(col_widths = c(7,5),
+                  div(
+                    card(card_header("Model Summary"),
+                         verbatimTextOutput("tit_fc_mod_summary")
+                    ),
+                    plotOutput("tit_fc_annotated")
+                  ),# end model summary div
+                  div(# value boxes for AIC and r^2
+                    card(card_header("Model Call", class = "bg-primary"),
+                         verbatimTextOutput("tit_fc_mod_call")
+                         ),
+                    value_box(
+                      title = "Fruit Count Model AIC",
+                      value = textOutput("tit_fc_aic"),
+                      theme = "bg-primary",
+                      width = 0.2
+                    ),
+                    card(card_header("Fruit Count Model R^2", class = "bg-secondary"),
+                         verbatimTextOutput("tit_fc_r2")
+                    ),
+                    card(card_header("Treatment Letters", class="bg-secondary"),
+                         verbatimTextOutput("tit_fc_letters")
+                    )
+                  ) # end value box div
+                ) # end column wrap
+                ) # end div
+              ) # end fruit count stats card
             ) # end fruit accordion panel
           ) # end stats accordion
         ), # end stats tab panel
         tabPanel("Data",
-         card(card_header("Fluorescence Data", class = "bg-primary"),
-              dataTableOutput("tit_fluoro_DT"),
+         card(card_header("Fluorescence Data", class = "bg-primary", style = "font-size: 25px"),
+              div(dataTableOutput("tit_fluoro_DT")),
               markdown("This dataset is a combination of data from the LI-COR Li-600
            and PhotosynQ MultispeQ V2.0s. For the sake of this app running
            efficiently, the data has been pared down to strictly what is needed.
            The full datasets can be found [on my github](https://www.github.com/zachpeagler/Thesis/data/TIP24).")
          ),
-         card(card_header("Fruit Data", class = "bg-primary"),
+         card(card_header("Fruit Data", class = "bg-primary", style = "font-size: 25px"),
               dataTableOutput("tit_fruit_DT")
          ),
-         card(card_header("Fruit Summary Data", class = "bg-primary"),
+         card(card_header("Fruit Summary Data", class = "bg-primary", style = "font-size: 25px"),
               dataTableOutput("tit_fruit_sum_DT")
          )
         ), # end data tab panel
@@ -947,20 +1220,21 @@ ui <- navbarPage(collapsible = TRUE,
           div(style = "padding: 10px", align = "center",
               markdown("#### **Tomato Inoculant Timing Trial**")
               ),
-          card(card_header("Hypothesis and Objectives", class = "bg-primary"),
+          card(card_header("Hypothesis and Objectives", class = "bg-primary", style = "font-size: 25px"),
             markdown("
             This trial accompanies the following hypothesis and objectives laid out in my thesis: <br>
-            **Hypothesis 2** – Microbial bacterial granules (BGs) with the full microbial consortium applied
-            at germination and transplantation will increase fluorescence parameters and fruit yield and quality
-            more than either germination or transplantation inoculations. <br>
-            **Objective 2.1** - Determine the effect of BG inoculation timing on tomato crop quality and yield. <br>
-            **Objective 2.2** - Determine the effect of BG inoculation timing on tomato plant fluorescence parameters. <br>
-            > It should be noted that this hypothesis is *technically* a *predictive hypothesis*, as not only does it hypothesize a 
-            change, it specifies a prediction for that change. I.E. Fluorescence parameters will not only *change*, they will *increase*.
-            This is a very minor distinction, but important to those in the science realm. <br>
+            **Objective 2** – Determine the effect of BG inoculation timing on tomato plant
+            fluorescence parameters and crop quality and yield. <br>
+            **Hypothesis 2.1** - Inoculation with BGs at germination and transplantation will increase fluorescence parameters
+            more than inoculation at either germination or transplantation. <br>
+            **Hypothesis 2.2** - Inoculation with BGs at germination and transplantation will increase crop quality and yield
+            more than inoculation at either germination or transplantation. <br>
+            > It should be noted that these hypotheses are technically *predictive hypotheses*, as not only do they hypothesize a 
+            change, they also specify a prediction for that change. I.E. Fluorescence parameters will not only *change*, they will *increase*.
+            This is a very minor distinction, but important to those in the science realm (nerds). <br>
             ")
                ), # end hypothesis and objective card
-          card(card_header("Methods", class = "bg-secondary"),
+          card(card_header("Methods", class = "bg-secondary", style = "font-size: 25px"),
             markdown("
             The tomatoes were grown in 4 rows of 12 pots each, with each row corresponding to a different inoculation treatment.
             Fluorescence measurements were taken biweekly with a LI-COR LI-600 and two PhotosynQ MultispeQ V2.0s over the course of the trial.
@@ -996,7 +1270,7 @@ ui <- navbarPage(collapsible = TRUE,
             Also shown to increase root and shoot growth ([Glick et al, 1997](https://www.researchgate.net/publication/223543401_Early_development_of_canola_seedlings_in_the_presence_of_the_plant_growth-promoting_rhizobacterium_Pseudomonas_putida_GR12-2); [Hall et al, 1996](https://ui.adsabs.harvard.edu/abs/1996IsJPS..44...37H/abstract)). <br>
             ")
           ), # end methods card
-          card(card_header("Variables", class = "bg-primary"),
+          card(card_header("Variables", class = "bg-primary", style = "font-size: 25px"),
             markdown("
             ##### **Explanatory Variables**
             - **Treatment** is the inoculation timing of the tomato. Options are Control, Germination, Transplantation, and Germ+Trans. <br>
@@ -1049,7 +1323,7 @@ ui <- navbarPage(collapsible = TRUE,
   # this is where information about the app and how to use it goes. as well as info about me perhaps
   # also add references here
   # acknowledgements as well, maybe?
-    card(card_header("About the app", class = "bg-primary"),
+    card(card_header("About the app", class = "bg-primary", style = "font-size: 25px"),
       div(layout_columns(col_widths = c(8,4),
        markdown(
          "This app is built using **R** 4.4.3 and uses a myriad of packages, 
@@ -1072,7 +1346,7 @@ ui <- navbarPage(collapsible = TRUE,
             markdown("Image courtesy of [Posit](https://shiny.posit.co/py/docs/shinylive.html)"))
       )),
     ), # end about the app card
-    card(card_header("About the author", class="bg-primary"),
+    card(card_header("About the author", class="bg-primary", style = "font-size: 25px"),
       div(layout_columns(col_widths = c(3,6,3),
         card(img(src="me_1.png")),
         markdown(
@@ -1087,7 +1361,7 @@ ui <- navbarPage(collapsible = TRUE,
       ) # end column layout
       ) # end div
     ), # end about the author card
-    card(card_header("References", class="bg-primary"),
+    card(card_header("References", class="bg-primary", style = "font-size: 25px"),
       markdown(" ##### **References**
       - Abd El-Fattah, D.A., *et al*. 2013. *Effect of carrier materials, sterilization method, and storage temperature on survival and biological activities of* Azotobacter chroococcum *inoculants*. Ann. Agric. Sci. 58:111-118. <br>
       - Ahmad, F., *et al*. 2008. *Screening of free-living rhizospheric bacteria for their multiple plant growth promoting activities*. Microbiological Research, 163(2):173-181. <br>
@@ -1393,6 +1667,9 @@ server <- function(input, output) {
   output$tit_gsw_aic <- renderText({
     round(AIC(Rtit_gsw_mod()), 0)
   })
+  output$tit_gsw_p <- renderText({
+    p_from_modsum(Rtit_gsw_mod_sum())
+  })
   output$tit_gsw_r2 <- renderText({
     r1 <- round(Rtit_gsw_mod_sum()$adj.r.squared, 4)
     r2 <- r1 *100
@@ -1410,6 +1687,9 @@ server <- function(input, output) {
   })
   output$tit_ps2_aic <- renderText({
     round(AIC(Rtit_ps2_mod()), 0)
+  })
+  output$tit_ps2_p <- renderText({
+    p_from_modsum(Rtit_ps2_mod_sum())
   })
   output$tit_ps2_r2 <- renderText({
     r1 <- round(Rtit_ps2_mod_sum()$adj.r.squared, 4)
@@ -1435,32 +1715,50 @@ server <- function(input, output) {
     summary(tit_pca)
   })
   output$tit_pcr_gsw_summary <- renderPrint({
-    summary(tit_pcr_gsw)
+    tit_pcr_gsw_sum
   })
   output$tit_pcr_gsw_aic <- renderText({
     round(AIC(tit_pcr_gsw), 0)
   })
+  output$tit_pcr_gsw_p <- renderText({
+    p_from_modsum(tit_pcr_gsw_sum)
+  })
   output$tit_pcr_gsw_r2 <- renderText({
-    r1 <- round(summary(tit_pcr_gsw)$adj.r.squared, 4)
+    r1 <- round(tit_pcr_gsw_sum$adj.r.squared, 4)
     r2 <- r1 *100
     return(paste0(r1, "  (", r2, "%)"))
   })
   output$tit_pcr_gsw_letters <- renderPrint({
     cld(glht(tit_pcr_gsw, linfct = mcp(Treatment = "Tukey")))
   })
+  output$tit_pcr_gsw_pred <- renderPlot({
+    predict_plot(tit_pcr_gsw_pmod, tit_pcr_data, gsw, PC1, Treatment, 100, correction = "exponential")+
+      ylim(0,1.5)+
+      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())
+  })
   output$tit_pcr_ps2_summary <- renderPrint({
-    summary(tit_pcr_ps2)
+    tit_pcr_ps2_sum
   })
   output$tit_pcr_ps2_aic <- renderText({
     round(AIC(tit_pcr_ps2), 0)
   })
+  output$tit_pcr_ps2_p <- renderText({
+    p_from_modsum(tit_pcr_ps2_sum)
+  })
   output$tit_pcr_ps2_r2 <- renderText({
-    r1 <- round(summary(tit_pcr_ps2)$adj.r.squared, 4)
+    r1 <- round(tit_pcr_ps2_sum$adj.r.squared, 4)
     r2 <- r1 *100
     return(paste0(r1, "  (", r2, "%)"))
   })
   output$tit_pcr_ps2_letters <- renderPrint({
     cld(glht(tit_pcr_ps2, linfct = mcp(Treatment = "Tukey")))
+  })
+  output$tit_pcr_ps2_pred <- renderPlot({
+    predict_plot(tit_pcr_ps2_pmod, tit_pcr_data, PhiPS2, PC1, Treatment, 100, correction = "logit")+
+      ylim(0.5,0.8)+
+      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())
   })
 #### fruit
 ##### mass
@@ -1471,7 +1769,10 @@ server <- function(input, output) {
     tit_mass_mod$call
   })
   output$tit_mass_aic <- renderText({
-    round(AIC(tit_pcr_ps2), 0)
+    round(AIC(tit_mass_mod), 0)
+  })
+  output$tit_mass_p <- renderText({
+    p_from_modsum(tit_mass_mod_sum)
   })
   output$tit_mass_r2 <- renderText({
     r1 <- round(tit_mass_mod_sum$adj.r.squared, 4)
@@ -1488,7 +1789,7 @@ server <- function(input, output) {
       geom_boxplot(width=0.25, alpha = 0.8)+
       ylab("Mean Mass (g)")+
       xlab("Treatment")+
-      annotate("text", x=1:4, y=120, label = tit_mass_letters$mcletters$Letters, size=10, face="bold")+
+      annotate("text", x=1:4, y=120, label = tit_mass_letters$mcletters$Letters, size=10)+
       scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
       scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
       theme_bw()+
@@ -1500,8 +1801,117 @@ server <- function(input, output) {
       )
   })
 ##### sugar
+  output$tit_sug_mod_summary <- renderPrint({
+    tit_sug_mod_sum
+  })
+  output$tit_sug_mod_call <- renderPrint({
+    tit_sug_mod$call
+  })
+  output$tit_sug_aic <- renderText({
+    round(AIC(tit_sug_mod), 0)
+  })
+  output$tit_sug_p <- renderText({
+    p_from_modsum(tit_sug_mod_sum)
+  })
+  output$tit_sug_r2 <- renderText({
+    r1 <- round(tit_sug_mod_sum$adj.r.squared, 4)
+    r2 <- r1 *100
+    return(paste0(r1, "  (", r2, "%)"))
+  })
+  output$tit_sug_letters <- renderPrint({
+    tit_sug_letters
+  })
+  output$tit_sug_annotated <- renderPlot({
+    ggplot(data=data_tit_fruit_summary, aes(x=Treatment, y=pSugar_mean*100,
+                                            color = Treatment, fill = Treatment))+
+      geom_violin(alpha = 0.5)+
+      geom_boxplot(width=0.25, alpha = 0.8)+
+      ylab("Mean Sugar Content (%)")+
+      xlab("Treatment")+
+      annotate("text", x=1:4, y=10, label = tit_sug_letters$mcletters$Letters, size=10)+
+      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      theme_bw()+
+      theme(
+        text = element_text(size=font_sizes[3]),
+        axis.title = element_text(size=font_sizes[2], face= "bold"),
+        title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
+        legend.title = element_text(size=font_sizes[2], face= "bold")
+      )
+  })
 ##### ber
+  output$tit_ber_mod_summary <- renderPrint({
+    tit_ber_mod_sum
+  })
+  output$tit_ber_mod_call <- renderPrint({
+    tit_ber_mod$call
+  })
+  output$tit_ber_aic <- renderText({
+    round(AIC(tit_ber_mod), 0)
+  })
+  output$tit_ber_p <- renderText({
+    p_from_modsum(tit_ber_mod_sum)
+  })
+  output$tit_ber_r2 <- renderText({
+    r1 <- round(tit_ber_mod_sum$adj.r.squared, 4)
+    r2 <- r1 *100
+    return(paste0(r1, "  (", r2, "%)"))
+  })
+  output$tit_ber_letters <- renderPrint({
+    tit_ber_letters
+  })
+  output$tit_ber_annotated <- renderPlot({
+    ggplot(data=data_tit_fruit_summary, aes(x=Treatment, y=pBER*100,
+                                            color = Treatment, fill = Treatment))+
+      geom_violin(alpha = 0.5)+
+      geom_boxplot(width=0.25, alpha = 0.8)+
+      ylab("Mean Blossom End-Rot Occurrence (%)")+
+      xlab("Treatment")+
+      annotate("text", x=1:4, y=22, label = tit_ber_letters$mcletters$Letters, size=10)+
+      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      theme_bw()+
+      theme(
+        text = element_text(size=font_sizes[3]),
+        axis.title = element_text(size=font_sizes[2], face= "bold"),
+        title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
+        legend.title = element_text(size=font_sizes[2], face= "bold")
+      )
+  })
 ##### count
+  output$tit_fc_mod_summary <- renderPrint({
+    tit_fc_mod_sum
+  })
+  output$tit_fc_mod_call <- renderPrint({
+    tit_fc_mod$call
+  })
+  output$tit_fc_aic <- renderText({
+    round(AIC(tit_fc_mod), 0)
+  })
+  output$tit_fc_r2 <- renderPrint({
+    r.squaredGLMM(tit_fc_mod)
+  })
+  output$tit_fc_letters <- renderPrint({
+    tit_fc_letters
+  })
+  output$tit_fc_annotated <- renderPlot({
+    ggplot(data=data_tit_fruit_summary, aes(x=Treatment, y=Fruit_sum,
+                                            color = Treatment, fill = Treatment))+
+      geom_violin(alpha = 0.5)+
+      geom_boxplot(width=0.25, alpha = 0.8)+
+      ylab("Fruit Count")+
+      xlab("Treatment")+
+      annotate("text", x=1:4, y=100, label = tit_fc_letters$mcletters$Letters, size=10)+
+      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      theme_bw()+
+      theme(
+        text = element_text(size=font_sizes[3]),
+        axis.title = element_text(size=font_sizes[2], face= "bold"),
+        title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
+        legend.title = element_text(size=font_sizes[2], face= "bold")
+      )
+  })
 ### Data
   output$tit_fluoro_DT <- renderDataTable({
     data_tit_fluoro
