@@ -3,9 +3,12 @@
 - [x] finish reformatting
 - [ ] TIL page
 - [ ] TIM page
-- [ ] fix predict_plot function to work with the reactive models
+- [x] fix predict_plot function to work with the reactive models
+  - this probably isn't possible, (it is, assuming i change the entire app architecture) and it's such a niche application i'm not going to bother
 - [ ] flesh out background
-- [ ] add photos to background page
-- [ ] TIT statistics
-- [ ] consider leaflet? it would make for some compelling visuals
-  - [ ] compare speed of rendering a map with leaflet vs including a screenshot from google maps
+- [x] add photos to background page
+  - [ ] fix pest picture sizes (make them smaller)
+- [x] TIT statistics
+- [x] consider leaflet? it would make for some compelling visuals
+  - i'm not going to do this. just grab a screenshot from google earth if i want to show the greenhouses from above. leaflet is SO overkill for this.
+
