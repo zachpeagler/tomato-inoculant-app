@@ -1701,7 +1701,7 @@ server <- function(input, output) {
   })
 ##### PCA
   output$tit_fluoro_pca <- renderPlot({
-    pca_plot(mod_data_tit_fluoro$Treatment, mod_data_tit_fluoro[,c(14:17)])+
+    pca_plot(mod_data_tit_fluoro$Treatment, mod_data_tit_fluoro[,c(14:18)])+
     scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
     scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
       labs(title = "PCA for Fluorescence Environmental Variables")+
