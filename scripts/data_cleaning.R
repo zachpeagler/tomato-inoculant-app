@@ -34,7 +34,7 @@ tim_levels <- c("A1", "A2", "A3", "A4", "A5", "A6",
 
 li_data_file <- "C:/Github/Thesis/data/TIM/TIM24_Fluoro.csv"
 li_data <- read.csv(li_data_file)[,c(2,3,7,8,9,10,17,28,32,34,35,36,39,40)] %>%
-  filter(leak_pct<10 & gsw > 0) %>%
+  filter(leak_pct<10 & gsw > 0 & gsw < 5) %>%
   mutate(Date = parse_date_time(Date, orders = "mdy"),
          DaysFromGermination = as.numeric(round(difftime(Date, tim_germ_date, units = c("days")), 0)),
          Date = as.Date(Date),
@@ -327,7 +327,7 @@ d23_li <- read.csv(d23_li_file, stringsAsFactors = T) %>%
       Row=="C"~TRUE,
       Row=="D"~TRUE
     )) %>%
-  filter(leak_pct<10 & gsw > 0) %>%
+  filter(leak_pct<10 & gsw > 0 & gsw < 5) %>%
   mutate(Date = parse_date_time(Date, orders = "mdy"),
          Date = as.Date(Date),
          Time = parse_date_time(Time, orders = "T"),
@@ -557,7 +557,7 @@ d24_li <- read.csv(d24_li_file, stringsAsFactors = F) %>%
       row_let=="C"~TRUE,
       row_let=="D"~TRUE
     )) %>%
-  filter(leak_pct<10 & gsw > 0) %>%
+  filter(leak_pct<10 & gsw > 0 & gsw < 5) %>%
   rename(Date_ref = Date, row_num = Row) %>%
   mutate(Date = parse_date_time(Date_ref, orders = "mdy"),
          Date = as.Date(Date),

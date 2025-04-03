@@ -496,6 +496,16 @@ p_from_modsum <- function(modsum) {
   return(p)
 }
 # calculate models that don't have user inputs (PCRs and fruit mods)
+## tim
+### tim fluoro
+tim_pca <- rda(scaled_tim_fluoro_vars)
+tim_pcr_data <- pca_data(mod_data_tim_fluoro, scaled_tim_fluoro_vars)
+tim_pcr_gsw <- lm(log(gsw) ~ Treatment + PC1 + PC2, data = tim_pcr_data)
+tim_pcr_gsw_pmod <- lm(log(gsw) ~ Treatment + PC1, data = tim_pcr_data)
+tim_pcr_gsw_sum <- summary(tim_pcr_gsw)
+tim_pcr_ps2 <- lm(LogitPhiPS2 ~ Treatment + PC1 + PC2, data = tim_pcr_data)
+tim_pcr_ps2_pmod <- lm(LogitPhiPS2 ~ Treatment + PC1, data = tim_pcr_data)
+tim_pcr_ps2_sum <- summary(tim_pcr_ps2)
 ## til
 ### til fluoro
 til_pca <- rda(scaled_til_fluoro_vars)
@@ -722,15 +732,507 @@ ui <- navbarPage(collapsible = TRUE,
       # Li-600 only - destructive sampling - no pests
         tabsetPanel(
           tabPanel("Exploratory",
-                   
+            div(style = "padding: 10px",
+            markdown("> Quick tip: this tab uses **accordions**! Click or tap the accordion panel title to expand/shrink the panel
+                   and switch between different exploratory graph types.")
+            ),
+          accordion(
+            accordion_panel(title = "Density and Distribution",
+              markdown("
+                A critical component of an exploratory data analysis is the creation of **probability density function** (PDF) plots
+                and **cumulative distribution function** (CDF) plots. They tell us the shape the data takes and helps inform if we need to 
+                apply a mathematical correction or use a certain type of distribution in our statistical model. I'm only
+                making dedicated PDF and CDF plots for our response variables and not our explanatory variables. However,
+                we can see the shape of our explanatory variables using histograms (a couple accordion panels down).
+                "),
+              card(card_header("Fluorescence", class = "bg-primary", style = "font-size: 25px"),
+                layout_sidebar(sidebar=sidebar(
+                  selectInput("tim_fluoro_dist_var", "Variable", choices = tim_fluoro_vars,
+                               selected = "gsw"),
+                  checkboxGroupInput("tim_fluoro_dists", "Distributions", choices=dists, 
+                                      selected=c("normal", "lognormal", "gamma")),
+                  sliderInput("tim_fluoro_len", "Length to Test Distributions Over", min=1,
+                              max=500, value=100)
+                  ), # end sidebar - but not sidebar LAYOUT
+                  div(
+                    layout_column_wrap(
+                      plotOutput("tim_fluoro_pdf"),
+                      plotOutput("tim_fluoro_cdf")
+                    )
+                  ),
+                  div(
+                    markdown("###### **One-sample Kolmogorov-Smirnov tests for selected fluorescence variable against selected distributions**"),
+                    verbatimTextOutput("tim_fluoro_KS")
+                  ),
+                  div(style="border-left: 5px solid", 
+                    markdown("
+                      > A note on PhiPS2 distributions: PhiPS2 is a **unitless ratio** on a scale of 0-1, so we don't need to create PDF and CDF plots and perform KS tests
+                      (you still have the option to, but this is an instance where we use our *statistical reasoning*).
+                      Instead, we logit transform PhiPS2 and use the logit transformed version in our models. <br>
+                      > For a more comprehensive explanation of PhiPS2, check out 
+                      [Genty *et al*., 1989](https://www.sciencedirect.com/science/article/abs/pii/S0304416589800169) or
+                      for a simpler explanation, the [chlorophyll fluorescence wikipedia page](https://en.wikipedia.org/wiki/Chlorophyll_fluorescence)."
+                  ))
+                ) # end sidebar layout
+              ), # end fluorescence card
+              card(card_header("Height", class = "bg-primary", style = "font-size: 25px"),
+                   layout_sidebar(sidebar=sidebar(
+                     selectInput("tim_height_dist_var", "Variable", choices = tim_height_vars,
+                                 selected = "AG_Length"),
+                     checkboxGroupInput("tim_height_dists", "Distributions", choices=dists, 
+                                        selected=c("normal", "lognormal", "gamma")),
+                     sliderInput("tim_height_len", "Length to Test Distributions Over", min=1,
+                                 max=500, value=100)
+                     ), # end sidebar - but not sidebar LAYOUT
+                     div(
+                       layout_column_wrap(
+                         plotOutput("tim_height_pdf"),
+                         plotOutput("tim_height_cdf")
+                       )
+                     ),
+                     div(
+                       markdown("###### **One-sample Kolmogorov-Smirnov tests for height against selected distributions**"),
+                       verbatimTextOutput("tim_height_KS")
+                     )
+                   ) # end sidebar layout
+              ), # end height card
+              card(card_header("Destructive Sampling", class = "bg-primary", style = "font-size: 25px"),
+                 layout_sidebar(sidebar=sidebar(
+                    selectInput("tim_ds_dist_var", "Variable", choices = tim_ds_vars,
+                                selected = "AG_Length"),
+                    checkboxGroupInput("tim_ds_dists", "Distributions", choices=dists, 
+                                       selected=c("normal", "lognormal", "gamma")),
+                    sliderInput("tim_ds_len", "Length to Test Distributions Over", min=1,
+                                max=500, value=100)
+                  ), # end sidebar - but not sidebar LAYOUT
+                  div(
+                   layout_column_wrap(
+                     plotOutput("tim_ds_pdf"),
+                     plotOutput("tim_ds_cdf")
+                   )
+                  ),
+                  div(
+                   markdown("###### **One-sample Kolmogorov-Smirnov tests for selected destructive sampling variable against selected distributions**"),
+                   verbatimTextOutput("tim_ds_KS")
+                  )
+                ) # end sidebar layout
+              ) # end DS card
+            ), # end dist accordion panel
+            accordion_panel(title="Histograms",
+              card(card_header("Fluorescence Histogram", class = "bg-primary", style = "font-size: 25px"),
+                layout_sidebar(sidebar=sidebar(
+                  selectInput("til_fluoro_hist_var", "Select X Variable",
+                              choices = til_fluoro_vars, selected = "AmbientHumidity"),
+                  selectInput("til_fluoro_hist_color", "Select Color Variable",
+                              choices = til_fluoro_vars_d, selected = "Treatment"),
+                  sliderInput("til_fluoro_hist_bins", "Number of Bins",
+                              value = 30, min = 2, max = 100)
+                  ), # end sidebar
+                  plotOutput("til_fluoro_hist")
+              )), # gsw hist card
+            ), # end hist accordion panel
+              accordion_panel(title = "Scatter Plots",
+                card(card_header("Fluorescence Scatter", class = "bg-primary", style = "font-size: 25px"),
+                    layout_sidebar(sidebar = sidebar(
+                      selectInput("til_fluoro_scatter_x","X Variable",
+                                  choices = all_til_fluoro_vars, selected = "AmbientHumidity"),
+                      selectInput("til_fluoro_scatter_y","Y Variable",
+                                  choices = all_til_fluoro_vars, selected = "gsw"),
+                      selectInput("til_fluoro_scatter_col","Color Variable",
+                                  choices = all_til_fluoro_vars, selected = "Treatment"),
+                      selectInput("til_fluoro_scatter_shape", "Shape Variable",
+                                  choices = til_fluoro_vars_d, selected = "Treatment"),
+                      sliderInput("til_fluoro_scatter_jit", "Jitter Amount",
+                                  min=0, max=10, value =3),
+                      sliderInput("til_fluoro_scatter_size", "Point Size",
+                                  min = 1, max=10, value = 3),
+                      checkboxInput("til_fluoro_scatter_fwrap", "Individual Plot Per Treatment", FALSE)
+                    ), # end sidebar
+                    card_body(plotOutput("til_fluoro_scatter"))
+                    ) # end sidebar layout
+                ), # end gsw scatter plot
+            ), # end scatterplot accordion panel
+            accordion_panel(title="Box Plots",
+              card(card_header("Fluorescence Boxplot", class = "bg-primary", style = "font-size: 25px"),
+                   layout_sidebar(sidebar = sidebar(
+                     selectInput("tim_fluoro_box_x","X Variable",
+                                 choices = tim_fluoro_vars_d, selected = "Treatment"),
+                     selectInput("tim_fluoro_box_y","Y Variable",
+                                 choices = tim_fluoro_vars, selected = "gsw")
+                   ), # end sidebar
+                   plotOutput("tim_fluoro_box")
+                   )),
+              card(card_header("Height Boxplot", class = "bg-primary", style = "font-size: 25px"),
+                   layout_sidebar(sidebar = sidebar(
+                     selectInput("tim_fruit_box_x","X Variable",
+                                 choices = tim_height_vars_d, selected = "Treatment"),
+                     selectInput("tim_fruit_box_y","Y Variable",
+                                 choices = tim_height_vars, selected = "Mass")
+                   ), # end sidebar
+                   plotOutput("tim_fruit_box")
+                   )),
+              card(card_header("Destructuve Sampling Boxplot", class = "bg-primary", style = "font-size: 25px"),
+                   layout_sidebar(sidebar = sidebar(
+                     selectInput("tim_fruit_sum_box_x","X Variable",
+                                 choices = tim_ds_vars_d, selected = "Treatment"),
+                     selectInput("tim_fruit_sum_box_y","Y Variable",
+                                 choices = tim_ds_vars, selected = "Mass_sum")
+                   ), # end sidebar
+                   plotOutput("tim_fruit_sum_box")
+                   ))
+            ) # end boxplot accordion panel
+          ) # end accordion
           ), # end exploratory tab panel
-          tabPanel("Statistics",
-          ),
-          tabPanel("Data",
-          ),
-          tabPanel("Info",
-          # restate much of what's already been said, but make sure to clarify differences between this trial and the other trials
-          )
+        tabPanel("Statistics",
+          accordion(
+            accordion_panel("Fluorescence",
+              card(card_header("Stomatal conductance (gsw)", class = "bg-primary", style = "font-size: 25px"),
+                selectInput("tim_gsw_mod_var", "Predictor Variable",
+                            choices = fluoro_mod_var_names, selected = "AmbientHumidity"),
+                div(layout_columns(col_widths = c(7,5),
+                  div(
+                    card(card_header("Model Summary"),
+                         verbatimTextOutput("tim_gsw_mod_summary")
+                    )
+                  ),# end model summary div
+                  div(# value boxes for AIC and r^2
+                    card(card_header("Model Call", class = "bg-primary"),
+                         verbatimTextOutput("tim_gsw_mod_call")
+                         ),
+                    value_box(
+                      title = "GSW Model AIC",
+                      value = textOutput("tim_gsw_aic"),
+                      theme = "bg-primary",
+                      width = 0.2
+                    ),
+                    value_box(
+                      title = "GSW Model P Value",
+                      value = textOutput("tim_gsw_p"),
+                      width = 0.2
+                    ),
+                    value_box(
+                      title = "GSW Model R^2",
+                      value = textOutput("tim_gsw_r2"),
+                      theme = "bg-secondary",
+                      width = 0.2
+                    ),
+                    card(card_header("Treatment Letters", class="bg-secondary"),
+                         verbatimTextOutput("tim_gsw_letters")
+                    )
+                  ) # end value box div
+                ) # end column wrap
+                ), # end div
+              ), # end gsw stats card
+              card(card_header("Photosystem II Efficiency (PhiPS2", class = "bg-primary", style = "font-size: 25px"),
+                   selectInput("tim_ps2_mod_var", "Predictor Variable",
+                               choices = fluoro_mod_var_names, selected = "AmbientHumidity"),
+                   div(layout_columns(col_widths = c(7,5),
+                        div(
+                          card(card_header("Model Summary"),
+                               verbatimTextOutput("tim_ps2_mod_summary")
+                          )
+                        ),# end model summary div
+                        div(# value boxes for AIC and r^2
+                          card(card_header("Model Call", class = "bg-primary"),
+                               verbatimTextOutput("tim_ps2_mod_call")
+                          ),
+                          value_box(
+                            title = "PhiPS2 Model AIC",
+                            value = textOutput("tim_ps2_aic"),
+                            theme = "bg-primary",
+                            width = 0.2
+                          ),
+                          value_box(
+                            title = "PhiPS2 Model P Value",
+                            value = textOutput("tim_ps2_p"),
+                            width = 0.2
+                          ),
+                          value_box(
+                            title = "PhiPS2 Model R^2",
+                            value = textOutput("tim_ps2_r2"),
+                            theme = "bg-secondary",
+                            width = 0.2
+                          ),
+                          card(card_header("Treatment Letters", class="bg-secondary"),
+                               verbatimTextOutput("tim_ps2_letters")
+                          )
+                        ) # end value box div
+                   ) # end column wrap
+                ) # end div
+              ), # end ps2 stats card
+              card(card_header("Multivariate", class = "bg-secondary", style = "font-size: 25px"),
+                div(layout_columns(col_widths = c(6,6),
+                  div(
+                    markdown("
+                      Maybe instead of looking at a single environmental variable, we want to look at all of them (or at least the ones
+                      that actually make an impact on our target response variables). To accomplish this, we can use **principal component analysis** (PCA).
+                      First, we scale our environmental variables so they all have an equal influence on the output, then use the **rda** function from the **vegan** package
+                      to reduce the dimensionality."
+                    ),
+                    card(card_header("PCA Summary"), 
+                       verbatimTextOutput("tim_fluoro_pca_summary")
+                    )
+                  ),
+                  plotOutput("tim_fluoro_pca")
+                )),
+                div(layout_column_wrap(
+                  card(card_header("Multivariate Stomatal Conductance (GSW)", class = "bg-primary", style = "font-size: 20px"),
+                       div(# value boxes for AIC and r^2
+                         card(card_header("Model Summary", class = "bg-primary"),
+                              verbatimTextOutput("tim_pcr_gsw_summary"),
+                              max_height = 500
+                         ),
+                         value_box(
+                           title = "Multivariate GSW AIC",
+                           value = textOutput("tim_pcr_gsw_aic"),
+                           theme = "bg-primary",
+                           width = 0.2
+                         ),
+                         value_box(
+                           title = "Multivariate GSW P Value",
+                           value = textOutput("tim_pcr_gsw_p"),
+                           width = 0.2
+                         ),
+                         value_box(
+                           title = "Multivariate GSW R^2",
+                           value = textOutput("tim_pcr_gsw_r2"),
+                           theme = "bg-secondary",
+                           width = 0.2
+                         ),
+                         card(card_header("Treatment Letters", class="bg-secondary"),
+                              verbatimTextOutput("tim_pcr_gsw_letters")
+                         )
+                       ), # end value box div
+                       plotOutput("tim_pcr_gsw_pred")
+                       ),
+                  card(card_header("Multivariate Photosystem II Efficiency", class = "bg-primary", style = "font-size: 20px"),
+                       div(# value boxes for AIC and r^2
+                         card(card_header("Model Summary", class = "bg-primary"),
+                              verbatimTextOutput("tim_pcr_ps2_summary"),
+                              max_height = 500
+                         ),
+                         value_box(
+                           title = "Multivariate PhiPS2 AIC",
+                           value = textOutput("tim_pcr_ps2_aic"),
+                           theme = "bg-primary",
+                           width = 0.2
+                         ),
+                         value_box(
+                           title = "Multivariate PhiPS2 P Value",
+                           value = textOutput("tim_pcr_ps2_p"),
+                           width = 0.2
+                         ),
+                         value_box(
+                           title = "Multivariate PhiPS2 R^2",
+                           value = textOutput("tim_pcr_ps2_r2"),
+                           theme = "bg-secondary",
+                           width = 0.2
+                         ),
+                         card(card_header("Treatment Letters", class="bg-secondary"),
+                              verbatimTextOutput("tim_pcr_ps2_letters")
+                         )
+                       ), # end value box div
+                       plotOutput("tim_pcr_ps2_pred")
+                  ), # end phips2 card
+                )) # end column wrap and div
+              ) # end multivariate card
+            ),
+            accordion_panel("Height",
+              card(card_header("Height", class = "bg-primary", style = "font-size: 25px"),
+                div(layout_columns(col_widths = c(7,5),
+                  div(
+                    card(card_header("Model Summary"),
+                         verbatimTextOutput("tim_height_mod_summary")
+                    ),
+                    plotOutput("tim_height_annotated")
+                  ),# end model summary div
+                  div(# value boxes for AIC and r^2
+                    card(card_header("Model Call", class = "bg-primary"),
+                         verbatimTextOutput("tim_height_mod_call")
+                         ),
+                    value_box(
+                      title = "Height Model AIC",
+                      value = textOutput("tim_height_aic"),
+                      theme = "bg-primary",
+                      width = 0.2
+                    ),
+                    value_box(
+                      title = "Height Model P Value",
+                      value = textOutput("tim_height_p"),
+                      width = 0.2
+                    ),
+                    value_box(
+                      title = "Height Model R^2",
+                      value = textOutput("tim_height_r2"),
+                      theme = "bg-secondary",
+                      width = 0.2
+                    ),
+                    card(card_header("Treatment Letters", class="bg-secondary"),
+                         verbatimTextOutput("tim_height_letters")
+                    )
+                  ) # end value box div
+                ) # end column wrap
+                ) # end div
+              ) # end height stats card
+            ), # end height accordion panel
+            accordion_panel("Destructive Sampling",
+              card(card_header("Root:Shoot Length", class = "bg-primary", style = "font-size: 25px"),
+                div(layout_columns(col_widths = c(7,5),
+                  div(
+                    card(card_header("Model Summary"),
+                         verbatimTextOutput("tim_rs_length_mod_summary")
+                    ),
+                    plotOutput("tim_rs_length_annotated")
+                  ),# end model summary div
+                  div(# value boxes for AIC and r^2
+                    card(card_header("Model Call", class = "bg-primary"),
+                         verbatimTextOutput("tim_rs_length_mod_call")
+                         ),
+                    value_box(
+                      title = "R:S Length Model AIC",
+                      value = textOutput("tim_rs_length_aic"),
+                      theme = "bg-primary",
+                      width = 0.2
+                    ),
+                    value_box(
+                      title = "R:S Length Model P Value",
+                      value = textOutput("tim_rs_length_p"),
+                      width = 0.2
+                    ),
+                    value_box(
+                      title = "R:S Length Model R^2",
+                      value = textOutput("tim_rs_length_r2"),
+                      theme = "bg-secondary",
+                      width = 0.2
+                    ),
+                    card(card_header("Treatment Letters", class="bg-secondary"),
+                         verbatimTextOutput("tim_rs_length_letters")
+                    )
+                  ) # end value box div
+                ) # end column wrap
+                ) # end div
+              ), # end RS length stats card
+              card(card_header("Root:Shoot Mass", class = "bg-primary", style = "font-size: 25px"),
+                div(layout_columns(col_widths = c(7,5),
+                  div(
+                    card(card_header("Model Summary"),
+                         verbatimTextOutput("tim_rs_mass_mod_summary")
+                    ),
+                    plotOutput("tim_rs_mass_annotated")
+                  ),# end model summary div
+                  div(# value boxes for AIC and r^2
+                    card(card_header("Model Call", class = "bg-primary"),
+                         verbatimTextOutput("tim_rs_mass_mod_call")
+                         ),
+                    value_box(
+                      title = "R:S Mass Model AIC",
+                      value = textOutput("tim_rs_mass_aic"),
+                      theme = "bg-primary",
+                      width = 0.2
+                    ),
+                    value_box(
+                      title = "R:S Mass Model P Value",
+                      value = textOutput("tim_rs_mass_p"),
+                      width = 0.2
+                    ),
+                    value_box(
+                      title = "R:S Mass Model R^2",
+                      value = textOutput("tim_rs_mass_r2"),
+                      theme = "bg-secondary",
+                      width = 0.2
+                    ),
+                    card(card_header("Treatment Letters", class="bg-secondary"),
+                         verbatimTextOutput("tim_rs_mass_letters")
+                    )
+                  ) # end value box div
+                ) # end column wrap
+                ) # end div
+              ) # end RS length stats card
+            ), # end ds accordion panel
+          ) # end stats accordion
+        ), # end stats tab panel
+        tabPanel("Data",
+         card(card_header("Fluorescence Data", class = "bg-primary", style = "font-size: 25px"),
+              div(dataTableOutput("tim_fluoro_DT")),
+              markdown("This dataset is a combination of data from the LI-COR Li-600
+           and PhotosynQ MultispeQ V2.0s. For the sake of this app running
+           efficiently, the data has been pared down to strictly what is needed.
+           The full datasets can be found [on my github](https://www.github.com/zachpeagler/Thesis/data/TIP24).")
+         ),
+         card(card_header("Height Data", class = "bg-primary", style = "font-size: 25px"),
+              dataTableOutput("tim_height_DT")
+         ),
+         card(card_header("Destructive Sampling Data", class = "bg-primary", style = "font-size: 25px"),
+              dataTableOutput("tim_ds_DT")
+         )
+        ), # end data tab panel
+        tabPanel("Info",
+          div(style = "padding: 10px", align = "center",
+              markdown("#### **Tomato Inoculant Location Trial**")
+              ),
+          card(card_header("Hypothesis and Objectives", class = "bg-primary", style = "font-size: 25px"),
+            markdown("
+            This trial accompanies the following hypothesis and objectives laid out in my thesis: <br>
+            XXXXX <br>
+            > It should be noted that these hypotheses are technically *predictive hypotheses*, as not only do they hypothesize a 
+            change, they also specify a prediction for that change. I.E. Fluorescence parameters will not only *change*, they will *increase*.
+            This is a very minor distinction, but important to those in the science realm (nerds). <br>
+            ")
+               ), # end hypothesis and objective card
+          card(card_header("Methods", class = "bg-secondary", style = "font-size: 25px"),
+            markdown("
+            The tomatoes were grown in 4 rows of 8 pots each, with each row corresponding to a different inoculation treatment. Salt stress was applied
+            via the nutrient solution which was composed of XXX.
+            Fluorescence measurements were taken biweekly with a LI-COR LI-600 and two PhotosynQ MultispeQ V2.0s over the course of the trial.
+            Fruit were harvested upon ripening, as determined by color and firmness. Upon harvesting, fruit were taken back to the lab for analysis, 
+            where the mass (grams), penetrometer (kg), and sugar (%) were measured. Fruit were also assessed for blossom end-rot.
+            The data table is formatted in a tidy format with each row corresponding to one fruit and each column representing a variable.<br>
+            
+            ##### **Microbe** <br>
+            - *Methylobacterium oryzae CBMB20* - PGPB that has been shown to improve fruit quality and yield in tomato
+            in both foliar and chitosan encapsulated inoculations ([Chanratana et al., 2019](https://www.researchgate.net/profile/Aritra-Choudhury/publication/323564168_Evaluation_of_chitosan_and_alginate_immobilized_Methylobacterium_oryzae_CBMB20_on_tomato_plant_growth/links/5a9e6fcfa6fdcc214af2b315/Evaluation-of-chitosan-and-alginate-immobilized-Methylobacterium-oryzae-CBMB20-on-tomato-plant-growth.pdf)). 
+            Operates through phytohormone (auxin and cytokinin) production, stress reduction via ACC deaminase production, 
+            increased nutrient availability through nitrogen fixation, and as a biopesticide ([Chauhan et al., 2015](https://www.sciencedirect.com/science/article/abs/pii/S0929139315300159)). <br>
+            ")
+          ), # end methods card
+          card(card_header("Variables", class = "bg-primary", style = "font-size: 25px"),
+            markdown("
+            ##### **Explanatory Variables**
+            - **Treatment** is the inoculation timing of the tomato. Options are Control, Uninoculated BG, Liquid Inoculant, and Inoculated BG. <br>
+            - **Time** is the time at which the measurement was taken (fluorescence only). <br>
+            - **Date** is the date at which the measurement was taken (fluorescence only). <br>
+            - **DaysFromGermination** is the number of days from germination (2025-05-01) to the date of measurement. <br>
+            - **Row** is the row of the tomato. (A:H) <br>
+            - **Pot** is the pot number of the tomato. (1:13) <br>
+            - **Plant** is a combination of *Row* and *Pot*, and acts as an ID for every individual plant. (A1: D12) <br>
+            - **AmbientHumidity** is the relative humidity (%) at the time of measurement. <br>
+            - **AmbientLight** is the ambient light level (lumens) at the time of measurement. <br>
+            - **AmbientPressure** is the ambient pressure (kPa) at the time of measurement. <br>
+            - **LeafTemperature** is the temperature (Celcius) of the leaf. <br>
+            ---
+            ##### **Response Variables**
+            - **gsw** is the stomatal conductance (mol m-2 s-1) of the leaf. Stomatal conductance refers to the
+            rate at which molecules are moving through the leaf's stomates, and is indicitave of photosynthesis.<br>
+            - **PhiPS2** is the efficiency of Photosystem II. It is unitless. (0:1) <br>
+            - **Height**
+            - **Aboveground Length**
+            - **Aboveground Mass**
+            - **Belowground Length**
+            - **Belowground Mass**
+            > It's important to note that **only** the Li-600 can measure gsw, while both
+            the Li-600 and the MultispeQ can measure PhiPS2. Also, even though both devices can 
+            measure PhiPS2, they do so **in different ways**. For our purposes, this is fine
+            so long as the measurements from each device correlate. <br>
+            "),
+            div(style="border-left: 5px solid", 
+              markdown(
+                "> For a more comprehensive explanation of PhiPS2, check out 
+                [Genty *et al*., 1989](https://www.sciencedirect.com/science/article/abs/pii/S0304416589800169) or
+                for a simpler explanation, the [chlorophyll fluorescence wikipedia page](https://en.wikipedia.org/wiki/Chlorophyll_fluorescence)."
+              )
+            )
+          ) # end variable card
+          ) # end info tab Panel
         ) # end ILT tabsetpanel
       ),
       ##### TOMATO INOCULANT LOCATION #####
@@ -741,10 +1243,10 @@ ui <- navbarPage(collapsible = TRUE,
       # spider mites and white lies
         tabsetPanel( # interior ILT tabsetpanel
           tabPanel("Exploratory",
-div(style = "padding: 10px",
+            div(style = "padding: 10px",
             markdown("> Quick tip: this tab uses **accordions**! Click or tap the accordion panel title to expand/shrink the panel
                    and switch between different exploratory graph types.")
-          ),
+            ),
           accordion(
             accordion_panel(title = "Density and Distribution",
               markdown("
@@ -1231,6 +1733,7 @@ div(style = "padding: 10px",
           card(card_header("Hypothesis and Objectives", class = "bg-primary", style = "font-size: 25px"),
             markdown("
             This trial accompanies the following hypothesis and objectives laid out in my thesis: <br>
+            XXXXX <br>
             > It should be noted that these hypotheses are technically *predictive hypotheses*, as not only do they hypothesize a 
             change, they also specify a prediction for that change. I.E. Fluorescence parameters will not only *change*, they will *increase*.
             This is a very minor distinction, but important to those in the science realm (nerds). <br>
@@ -1238,14 +1741,14 @@ div(style = "padding: 10px",
                ), # end hypothesis and objective card
           card(card_header("Methods", class = "bg-secondary", style = "font-size: 25px"),
             markdown("
-            The tomatoes were grown in 4 rows of 8 pots each, with each row corresponding to a different inoculation treatment.
+            The tomatoes were grown in 4 rows of 8 pots each, with each row corresponding to a different inoculation treatment. Salt stress was applied
+            via the nutrient solution which was composed of XXX.
             Fluorescence measurements were taken biweekly with a LI-COR LI-600 and two PhotosynQ MultispeQ V2.0s over the course of the trial.
             Fruit were harvested upon ripening, as determined by color and firmness. Upon harvesting, fruit were taken back to the lab for analysis, 
             where the mass (grams), penetrometer (kg), and sugar (%) were measured. Fruit were also assessed for blossom end-rot.
             The data table is formatted in a tidy format with each row corresponding to one fruit and each column representing a variable.<br>
             
             ##### **Microbe** <br>
-            It has been used as a biocontrol agent against aphids and pathogenic bacteria ([Kokalis-Burelle et al, 2002](https://link.springer.com/article/10.1023/A:1014464716261)). <br>
             - *Methylobacterium oryzae CBMB20* - PGPB that has been shown to improve fruit quality and yield in tomato
             in both foliar and chitosan encapsulated inoculations ([Chanratana et al., 2019](https://www.researchgate.net/profile/Aritra-Choudhury/publication/323564168_Evaluation_of_chitosan_and_alginate_immobilized_Methylobacterium_oryzae_CBMB20_on_tomato_plant_growth/links/5a9e6fcfa6fdcc214af2b315/Evaluation-of-chitosan-and-alginate-immobilized-Methylobacterium-oryzae-CBMB20-on-tomato-plant-growth.pdf)). 
             Operates through phytohormone (auxin and cytokinin) production, stress reduction via ACC deaminase production, 
@@ -2474,7 +2977,7 @@ server <- function(input, output) {
       geom_boxplot(width=0.4, alpha = 0.8)+
       ylab("Mean Blossom End-Rot (%)")+
       xlab("Treatment")+
-      annotate("text", x=1:4, y=22, label = til_ber_letters$mcletters$Letters, size=10)+
+      annotate("text", x=1:4, y=75, label = til_ber_letters$mcletters$Letters, size=10)+
       scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
       scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
       theme_bw()+
