@@ -1,14 +1,22 @@
 - [x] add TIM data (cleaned)
 - [x] add 2023 TIP data (cleaned)
 - [x] finish reformatting
-- [ ] TIL page
-- [ ] TIM page
+- [x] TIL page
+- [x] TIM page
 - [x] fix predict_plot function to work with the reactive models
   - this probably isn't possible, (it is, assuming i change the entire app architecture) and it's such a niche application i'm not going to bother
-- [ ] flesh out background
+- [x] flesh out background
+  - [ ] add blossom end-rot picture to tomato card and explain what causes it
 - [x] add photos to background page
-  - [ ] fix pest picture sizes (make them smaller)
+  - [x] fix pest picture sizes (make them smaller)
 - [x] TIT statistics
 - [x] consider leaflet? it would make for some compelling visuals
-  - i'm not going to do this. just grab a screenshot from google earth if i want to show the greenhouses from above. leaflet is SO overkill for this.
+  - i'm not going to do this. just grab a screenshot from google earth if i want to show the greenhouses from above. leaflet is SO overkill.
 
+- [ ] add acknowledgements to about page
+  - under "About the Author"
+- [ ] update info tab for IMT, ILT, and ITT
+  - [ ] add photosynq and multispeq pics
+  - [ ] add trial specific pics
+  - [ ] ensure methods are correct
+  - [ ] separate variables out by dataset (i.e. fluoro, fruit)

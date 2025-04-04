@@ -92,6 +92,7 @@ h_data <- read.csv(h_data_file) %>%
   mutate(Date = parse_date_time(Date, orders = "mdy"),
          DaysFromGermination = as.numeric(round(difftime(Date, tim_germ_date, units = c("days")), 0)),
          Date = as.Date(Date),
+         Height = round(Height, 2),
          Column = case_when(
            Column==1~"A",
            Column==2~"B",
@@ -122,7 +123,8 @@ h_data <- read.csv(h_data_file) %>%
   ) %>%
   rename(Pot = Column)
 
-data_tim_height <- h_data[,c(3,7,8,4,6,1,2,9,5)]
+data_tim_height <- h_data[,c(3,7,8,4,6,1,2,9,5)] %>%
+  filter(Height > 0)
 
 save(data_tim_height, file = "C:/Github/tomato-inoculant-app/app/data_tim_height.RData")
 

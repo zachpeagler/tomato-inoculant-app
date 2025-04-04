@@ -1,22 +1,24 @@
 ##### SETUP #####
-## this code runs on the client at execution
+## this code runs on the client at execution, and is a lot of setup,
+## variable caching, and preemptive modeling.
+
 # load packages
-library(shiny)
-library(stringr)
-library(ggplot2)
-library(scico)
-library(bslib)
-library(bsicons)
-library(multcomp)
-library(MASS)
-library(car)
-library(MuMIn)
-library(lmerTest)
-library(vegan)
+library(shiny) # reactivity/app framework
+library(stringr) # handling text
+library(ggplot2) # graphing
+library(scico) # colors
+library(bslib) # bootstrap elements
+library(bsicons) # bootstrap icons
+library(multcomp) # easy pairwise comparisons
+library(MASS) # lots of statistical stuff
+library(car) # logit transformations
+library(MuMIn) # uhhh
+library(lmerTest) # mixed effect models
+library(vegan) # multivariate stuff
 
 # graphics
 p_palettes <- scico_palette_names()
-font_sizes <- c(20,16,14)
+font_sizes <- c(18,16,14)
 
 # distributions
 ## currently only continuous distributions are supported
@@ -40,15 +42,13 @@ load("data_tit_fruit_summary.RData")
 ## scaling is important so they have equal "weight" in the model
 ## especially in multidimensional modeling (PCA, tSNE, NMDS)
 ## we only scale our independent (explanatory) variables
-### tim ds
-scaled_tim_ds_vars <- data.frame(apply(data_tim_ds[,c(7:10)], 2, scale))
-mod_data_tim_ds <- cbind(data_tim_ds[,c(1:5)], scaled_tim_ds_vars)
-ds_mod_var_names <- c("AG_Length", "AG_Mass", "BG_Length", "BG_Mass")
 ### tim fluoro
 scaled_tim_fluoro_vars <- data.frame(apply(data_tim_fluoro[,c(10:14)], 2, scale))
 mod_data_tim_fluoro <- cbind(data_tim_fluoro[,c(1:9, 15:17)], scaled_tim_fluoro_vars)
 ### tim height
 #### nothing to scale here. we have no continuous predictor variables in the height dataset.
+### tim ds
+#### nothing to scale here. we have no continuous predictor variables in the ds dataset.
 ### til fruit
 #### nothing to scale here (we could scale mass for use in sugar modeling, but ehhhhhhh i doubt we need to
 #### we're not performing dimension reduction or multiple linear regression, so it shouldn't much matter)
@@ -62,14 +62,14 @@ mod_data_tit_fluoro <- cbind(data_tit_fluoro[,c(1:9, 15:18)], scaled_tit_fluoro_
 
 fluoro_mod_var_names <- c("DaysFromGermination", "AmbientHumidity", "AmbientPressure", "AmbientTemperature", "AmbientLight", "LeafTemperature")
 
-## preload var names in continuous and discrete groups
+# preload var names in continuous and discrete groups
 ### kind of a funky way of doing this, but it makes it REALLY easy to check if a variable
 ### is continuous or discrete later with [if (var %in% vars_d)] etc.
 ### you could also use the type attribute of your variables, but i didn't feel like it
 #### tim (2024 small)
 ##### fluoro
 tim_fluoro_vars <- c("Date", "DaysFromGermination", "AmbientHumidity", "AmbientPressure", "AmbientTemperature", "AmbientLight", "LeafTemperature", "gsw", "PhiPS2", "LogitPhiPS2")
-tim_fluoro_vars_d <- c("Treatment", "Inoculation", "Chitosan", "Row", "Pot", "Plant", "Time", "Device")
+tim_fluoro_vars_d <- c("Treatment", "Inoculation", "Chitosan", "Row", "Pot", "Plant", "Time")
 all_tim_fluoro_vars <- c(tim_fluoro_vars_d, tim_fluoro_vars)
 ##### height
 tim_height_vars <- c("Date", "DaysFromGermination", "Height")
@@ -433,11 +433,11 @@ predict_plot <- function(mod, data, rvar, pvar, group = NULL, length = 50, inter
         ggplot2::geom_ribbon(data=tdx, ggplot2::aes(x=.data[[d_pvar]], ymin=lo, ymax=up,
                                                     fill=.data[[d_group]]), alpha = 0.5)
     }
-  ### make the plot look good (group agnostic)
+  ### make the plot look good
   p <- p +
     ggplot2::labs(
       title = str_wrap(paste("Observed data (points) vs predicted (lines + 95%", interval, "interval)"), 40),
-      subtitle = paste("Model:", deparse(mod$call))
+#      subtitle = paste("Model:", deparse(mod$call))
     )+
     ggplot2::theme_bw()+
     ggplot2::theme(
@@ -495,7 +495,8 @@ p_from_modsum <- function(modsum) {
   }
   return(p)
 }
-# calculate models that don't have user inputs (PCRs and fruit mods)
+
+# pre-calculate models that don't have user inputs (PCRs and fruit mods)
 ## tim
 ### tim fluoro
 tim_pca <- rda(scaled_tim_fluoro_vars)
@@ -506,6 +507,17 @@ tim_pcr_gsw_sum <- summary(tim_pcr_gsw)
 tim_pcr_ps2 <- lm(LogitPhiPS2 ~ Treatment + PC1 + PC2, data = tim_pcr_data)
 tim_pcr_ps2_pmod <- lm(LogitPhiPS2 ~ Treatment + PC1, data = tim_pcr_data)
 tim_pcr_ps2_sum <- summary(tim_pcr_ps2)
+### tim height
+tim_height_mod <- lm(log(Height) ~ Treatment + DaysFromGermination, data = data_tim_height)
+tim_height_mod_sum <- summary(tim_height_mod)
+tim_height_letters <- cld(glht(tim_height_mod, linfct = mcp(Treatment = "Tukey")))
+### tim ds
+tim_rs_length_mod <- lm(logit(RS_Length) ~ Treatment, data = data_tim_ds)
+tim_rs_length_mod_sum <- summary(tim_rs_length_mod)
+tim_rs_length_letters <- cld(glht(tim_rs_length_mod, linfct = mcp(Treatment = "Tukey")))
+tim_rs_mass_mod <- lm(logit(RS_Mass) ~ Treatment, data = data_tim_ds)
+tim_rs_mass_mod_sum <- summary(tim_rs_mass_mod)
+tim_rs_mass_letters <- cld(glht(tim_rs_mass_mod, linfct = mcp(Treatment = "Tukey")))
 ## til
 ### til fluoro
 til_pca <- rda(scaled_til_fluoro_vars)
@@ -557,7 +569,10 @@ tit_ber_letters <- cld(glht(tit_ber_mod, linfct = mcp(Treatment = "Tukey")))
 gear <- popover(bs_icon("gear"),
                 selectInput("palette","Select color palette",
                             choices = p_palettes, selected = "oslo"),
-                title = "Options")
+                title = "Options",
+                class = "bg-primary"
+                )
+
 # github link
 link_github <- tags$a(bs_icon("GitHub"), href = "https://github.com/zachpeagler/tomato-inoculant-app")
 
@@ -567,9 +582,6 @@ ui <- navbarPage(collapsible = TRUE,
   theme = bs_theme(version = 5, bootswatch = "flatly"),
   ##### BACKGROUND NAV PANEL #####
   nav_panel("Background",
-    # treat it like the background section of a paper
-    # start with the WHY. traditional fertilizers bad, etc.
-      ## HARMFUL ALGAE BLOOM PICTURE
     card(card_header("The Green Revolution and Synthetic Fertilizers", class = "bg-primary", style = "font-size: 25px"),
      markdown("
       In the 20th century, new methods were required to feed an expanding human population,
@@ -585,9 +597,6 @@ ui <- navbarPage(collapsible = TRUE,
       recent years, we can do better.
       ")
     ),
-    # introduce bacterial fertilizers as a solution, but one lacking viable application methods.
-    # explain the shift from just M. oryzae to a microbial consortium.
-      ## BACTERIA PICS
     card(card_header("Microbes as sustainable agriculture solutions", class = "bg-secondary", style = "font-size: 25px"),
      layout_columns(col_widths = c(7,5),
        markdown("
@@ -606,8 +615,6 @@ ui <- navbarPage(collapsible = TRUE,
        )
      ) # end column wrap
     ), # end microbe card
-    # introduce alginate and chitosan, and WHY I chose to pursue chitosan over alginate.
-      ## CHITOSAN AND ALGINATE BEAD PICS
     card(card_header("Biopolymer immobilization of microbes", class = "bg-primary", style = "font-size: 25px"),
      layout_columns(col_widths = c(5,7),
      markdown("
@@ -634,8 +641,6 @@ ui <- navbarPage(collapsible = TRUE,
      )
      ) # end column layout
     ),
-    # introduce tomato as the model organism
-      ## TOMATO PICTURE
     card(card_header("Model organism: Tomato", class = "bg-secondary", style = "font-size: 25px"),
       layout_column_wrap(
         card(
@@ -655,8 +660,6 @@ ui <- navbarPage(collapsible = TRUE,
       ")
       )
     ),
-    # introduce stomates and stomatal conductance
-      ## STOMATE PICTURE
     card(card_header("Stomates: Plant Lungs", class = "bg-primary", style = "font-size: 25px"),
       layout_column_wrap(
         markdown("
@@ -670,8 +673,6 @@ ui <- navbarPage(collapsible = TRUE,
         )
       )
     ),
-    # introduce Photosystem II and basic electron transport stuff
-      ## GRAPHIC SHOWING WHERE PSII is
     card(card_header("Photosystem II and you", class = "bg-secondary", style = "font-size: 25px"),
       layout_column_wrap(
         card(img(src="thylakoid_membrane.png", height = 350, width = 600, style="display: block; margin-left: auto; margin-right: auto;"),
@@ -693,8 +694,6 @@ ui <- navbarPage(collapsible = TRUE,
         ")
       )
     ),
-    # introduce blossom end-rot, spidermites, whiteflies, etc.
-      ## BER PICTURE
     card(card_header("Pests and Pathogens", class = "bg-primary", style = "font-size: 25px"),
       markdown("
       These trials were performed in a greenhouse, and the plants accumulated a number of 
@@ -727,9 +726,6 @@ ui <- navbarPage(collapsible = TRUE,
     tabsetPanel(
       ##### TOMATO INOCULANT METHOD #####
       tabPanel("Inoculant Method Trial",
-      # small trial in the greenhouse on KSU campus - chitosan granule, inoculated chitosan granule, liquid inoculant 
-      # - no salt stress - all 5 bacteria - only 40 days
-      # Li-600 only - destructive sampling - no pests
         tabsetPanel(
           tabPanel("Exploratory",
             div(style = "padding: 10px",
@@ -778,7 +774,7 @@ ui <- navbarPage(collapsible = TRUE,
               card(card_header("Height", class = "bg-primary", style = "font-size: 25px"),
                    layout_sidebar(sidebar=sidebar(
                      selectInput("tim_height_dist_var", "Variable", choices = tim_height_vars,
-                                 selected = "AG_Length"),
+                                 selected = "Height"),
                      checkboxGroupInput("tim_height_dists", "Distributions", choices=dists, 
                                         selected=c("normal", "lognormal", "gamma")),
                      sliderInput("tim_height_len", "Length to Test Distributions Over", min=1,
@@ -814,44 +810,109 @@ ui <- navbarPage(collapsible = TRUE,
                   div(
                    markdown("###### **One-sample Kolmogorov-Smirnov tests for selected destructive sampling variable against selected distributions**"),
                    verbatimTextOutput("tim_ds_KS")
-                  )
+                  ),
+                  markdown("
+                    > It's important to note that the root:shoot ratios **RS_Length** and **RS_Mass** are unitless ratios, so we will end up
+                    logit transforming them for use in models. **RS_Length** is calculated as BG_Length/AG_Length and 
+                    **RS_Mass** is calculated as BG_Mass/AG_Mass.
+                  ")
                 ) # end sidebar layout
               ) # end DS card
             ), # end dist accordion panel
             accordion_panel(title="Histograms",
               card(card_header("Fluorescence Histogram", class = "bg-primary", style = "font-size: 25px"),
                 layout_sidebar(sidebar=sidebar(
-                  selectInput("til_fluoro_hist_var", "Select X Variable",
-                              choices = til_fluoro_vars, selected = "AmbientHumidity"),
-                  selectInput("til_fluoro_hist_color", "Select Color Variable",
-                              choices = til_fluoro_vars_d, selected = "Treatment"),
-                  sliderInput("til_fluoro_hist_bins", "Number of Bins",
+                  selectInput("tim_fluoro_hist_var", "Select X Variable",
+                              choices = tim_fluoro_vars, selected = "AmbientHumidity"),
+                  selectInput("tim_fluoro_hist_color", "Select Color Variable",
+                              choices = tim_fluoro_vars_d, selected = "Treatment"),
+                  sliderInput("tim_fluoro_hist_bins", "Number of Bins",
                               value = 30, min = 2, max = 100)
                   ), # end sidebar
-                  plotOutput("til_fluoro_hist")
-              )), # gsw hist card
+                  plotOutput("tim_fluoro_hist")
+              )), # end fluoro hist card
+              card(card_header("Height Histogram", class = "bg-primary", style = "font-size: 25px"),
+                layout_sidebar(sidebar=sidebar(
+                  selectInput("tim_height_hist_var", "Select X Variable",
+                              choices = tim_height_vars, selected = "Height"),
+                  selectInput("tim_height_hist_color", "Select Color Variable",
+                              choices = tim_height_vars_d, selected = "Treatment"),
+                  sliderInput("tim_height_hist_bins", "Number of Bins",
+                              value = 30, min = 2, max = 100)
+                  ), # end sidebar
+                  plotOutput("tim_height_hist")
+              )), # end height hist card
+              card(card_header("Destructive Sampling Histogram", class = "bg-primary", style = "font-size: 25px"),
+                   layout_sidebar(sidebar=sidebar(
+                     selectInput("tim_ds_hist_var", "Select X Variable",
+                                 choices = tim_ds_vars, selected = "AG_Length"),
+                     selectInput("tim_ds_hist_color", "Select Color Variable",
+                                 choices = tim_ds_vars_d, selected = "Treatment"),
+                     sliderInput("tim_ds_hist_bins", "Number of Bins",
+                                 value = 30, min = 2, max = 100)
+                   ), # end sidebar
+                   plotOutput("tim_ds_hist")
+                   )) # end ds hist card
             ), # end hist accordion panel
               accordion_panel(title = "Scatter Plots",
                 card(card_header("Fluorescence Scatter", class = "bg-primary", style = "font-size: 25px"),
                     layout_sidebar(sidebar = sidebar(
-                      selectInput("til_fluoro_scatter_x","X Variable",
-                                  choices = all_til_fluoro_vars, selected = "AmbientHumidity"),
-                      selectInput("til_fluoro_scatter_y","Y Variable",
-                                  choices = all_til_fluoro_vars, selected = "gsw"),
-                      selectInput("til_fluoro_scatter_col","Color Variable",
-                                  choices = all_til_fluoro_vars, selected = "Treatment"),
-                      selectInput("til_fluoro_scatter_shape", "Shape Variable",
-                                  choices = til_fluoro_vars_d, selected = "Treatment"),
-                      sliderInput("til_fluoro_scatter_jit", "Jitter Amount",
+                      selectInput("tim_fluoro_scatter_x","X Variable",
+                                  choices = all_tim_fluoro_vars, selected = "AmbientHumidity"),
+                      selectInput("tim_fluoro_scatter_y","Y Variable",
+                                  choices = all_tim_fluoro_vars, selected = "gsw"),
+                      selectInput("tim_fluoro_scatter_col","Color Variable",
+                                  choices = all_tim_fluoro_vars, selected = "Treatment"),
+                      selectInput("tim_fluoro_scatter_shape", "Shape Variable",
+                                  choices = tim_fluoro_vars_d, selected = "Treatment"),
+                      sliderInput("tim_fluoro_scatter_jit", "Jitter Amount",
                                   min=0, max=10, value =3),
-                      sliderInput("til_fluoro_scatter_size", "Point Size",
+                      sliderInput("tim_fluoro_scatter_size", "Point Size",
                                   min = 1, max=10, value = 3),
-                      checkboxInput("til_fluoro_scatter_fwrap", "Individual Plot Per Treatment", FALSE)
+                      checkboxInput("tim_fluoro_scatter_fwrap", "Individual Plot Per Treatment", FALSE)
                     ), # end sidebar
-                    card_body(plotOutput("til_fluoro_scatter"))
+                    card_body(plotOutput("tim_fluoro_scatter"))
                     ) # end sidebar layout
-                ), # end gsw scatter plot
-            ), # end scatterplot accordion panel
+                ), # end fluoro scatter plot
+                card(card_header("Height Scatter", class = "bg-primary", style = "font-size: 25px"),
+                    layout_sidebar(sidebar = sidebar(
+                      selectInput("tim_height_scatter_x","X Variable",
+                                  choices = all_tim_height_vars, selected = "DaysFromGermination"),
+                      selectInput("tim_height_scatter_y","Y Variable",
+                                  choices = all_tim_height_vars, selected = "Height"),
+                      selectInput("tim_height_scatter_col","Color Variable",
+                                  choices = all_tim_height_vars, selected = "Treatment"),
+                      selectInput("tim_height_scatter_shape", "Shape Variable",
+                                  choices = tim_height_vars_d, selected = "Treatment"),
+                      sliderInput("tim_height_scatter_jit", "Jitter Amount",
+                                  min=0, max=10, value =5),
+                      sliderInput("tim_height_scatter_size", "Point Size",
+                                  min = 1, max=10, value = 3),
+                      checkboxInput("tim_height_scatter_fwrap", "Individual Plot Per Treatment", FALSE)
+                    ), # end sidebar
+                    card_body(plotOutput("tim_height_scatter"))
+                    ) # end sidebar layout
+                ), # end fluoro scatter plot
+                card(card_header("Destructive Sampling Scatter", class = "bg-primary", style = "font-size: 25px"),
+                    layout_sidebar(sidebar = sidebar(
+                      selectInput("tim_ds_scatter_x","X Variable",
+                                  choices = all_tim_ds_vars, selected = "AG_Length"),
+                      selectInput("tim_ds_scatter_y","Y Variable",
+                                  choices = all_tim_ds_vars, selected = "AG_Mass"),
+                      selectInput("tim_ds_scatter_col","Color Variable",
+                                  choices = all_tim_ds_vars, selected = "Treatment"),
+                      selectInput("tim_ds_scatter_shape", "Shape Variable",
+                                  choices = tim_ds_vars_d, selected = "Treatment"),
+                      sliderInput("tim_ds_scatter_jit", "Jitter Amount",
+                                  min=0, max=10, value =3),
+                      sliderInput("tim_ds_scatter_size", "Point Size",
+                                  min = 1, max=10, value = 3),
+                      checkboxInput("tim_ds_scatter_fwrap", "Individual Plot Per Treatment", FALSE)
+                    ), # end sidebar
+                    card_body(plotOutput("tim_ds_scatter"))
+                    ) # end sidebar layout
+                ), # end fluoro scatter plot
+            ), # end scatter plot accordion panel
             accordion_panel(title="Box Plots",
               card(card_header("Fluorescence Boxplot", class = "bg-primary", style = "font-size: 25px"),
                    layout_sidebar(sidebar = sidebar(
@@ -864,21 +925,21 @@ ui <- navbarPage(collapsible = TRUE,
                    )),
               card(card_header("Height Boxplot", class = "bg-primary", style = "font-size: 25px"),
                    layout_sidebar(sidebar = sidebar(
-                     selectInput("tim_fruit_box_x","X Variable",
+                     selectInput("tim_height_box_x","X Variable",
                                  choices = tim_height_vars_d, selected = "Treatment"),
-                     selectInput("tim_fruit_box_y","Y Variable",
-                                 choices = tim_height_vars, selected = "Mass")
+                     selectInput("tim_height_box_y","Y Variable",
+                                 choices = tim_height_vars, selected = "Height")
                    ), # end sidebar
-                   plotOutput("tim_fruit_box")
+                   plotOutput("tim_height_box")
                    )),
-              card(card_header("Destructuve Sampling Boxplot", class = "bg-primary", style = "font-size: 25px"),
+              card(card_header("Destructive Sampling Boxplot", class = "bg-primary", style = "font-size: 25px"),
                    layout_sidebar(sidebar = sidebar(
-                     selectInput("tim_fruit_sum_box_x","X Variable",
+                     selectInput("tim_ds_box_x","X Variable",
                                  choices = tim_ds_vars_d, selected = "Treatment"),
-                     selectInput("tim_fruit_sum_box_y","Y Variable",
-                                 choices = tim_ds_vars, selected = "Mass_sum")
+                     selectInput("tim_ds_box_y","Y Variable",
+                                 choices = tim_ds_vars, selected = "AG_Length")
                    ), # end sidebar
-                   plotOutput("tim_fruit_sum_box")
+                   plotOutput("tim_ds_box")
                    ))
             ) # end boxplot accordion panel
           ) # end accordion
@@ -923,7 +984,7 @@ ui <- navbarPage(collapsible = TRUE,
                 ) # end column wrap
                 ), # end div
               ), # end gsw stats card
-              card(card_header("Photosystem II Efficiency (PhiPS2", class = "bg-primary", style = "font-size: 25px"),
+              card(card_header("Photosystem II Efficiency (PhiPS2)", class = "bg-primary", style = "font-size: 25px"),
                    selectInput("tim_ps2_mod_var", "Predictor Variable",
                                choices = fluoro_mod_var_names, selected = "AmbientHumidity"),
                    div(layout_columns(col_widths = c(7,5),
@@ -1005,7 +1066,7 @@ ui <- navbarPage(collapsible = TRUE,
                        ), # end value box div
                        plotOutput("tim_pcr_gsw_pred")
                        ),
-                  card(card_header("Multivariate Photosystem II Efficiency", class = "bg-primary", style = "font-size: 20px"),
+                  card(card_header("Multivariate Photosystem II Efficiency (PhiPS2)", class = "bg-primary", style = "font-size: 20px"),
                        div(# value boxes for AIC and r^2
                          card(card_header("Model Summary", class = "bg-primary"),
                               verbatimTextOutput("tim_pcr_ps2_summary"),
@@ -1044,7 +1105,7 @@ ui <- navbarPage(collapsible = TRUE,
                     card(card_header("Model Summary"),
                          verbatimTextOutput("tim_height_mod_summary")
                     ),
-                    plotOutput("tim_height_annotated")
+                    plotOutput("tim_height_pred")
                   ),# end model summary div
                   div(# value boxes for AIC and r^2
                     card(card_header("Model Call", class = "bg-primary"),
@@ -1237,10 +1298,6 @@ ui <- navbarPage(collapsible = TRUE,
       ),
       ##### TOMATO INOCULANT LOCATION #####
       tabPanel("Inoculant Location Trial",
-      # big trial in 2023 in Hydro greenhouse at KSU Field Station - looked at soil vs foliar inoculation in salt-stressed tomato
-      # - only M. oryzae - long enough to gather fruit - no salt-control
-      # Li-600 and MultispeQs - no destructive sampling
-      # spider mites and white lies
         tabsetPanel( # interior ILT tabsetpanel
           tabPanel("Exploratory",
             div(style = "padding: 10px",
@@ -1272,7 +1329,7 @@ ui <- navbarPage(collapsible = TRUE,
                     )
                   ),
                   div(
-                    markdown("###### **One-sample Kolmogorov-Smirnov tests for stomatal conductance against selected distributions**"),
+                    markdown("###### **One-sample Kolmogorov-Smirnov tests for selected fluorescence variable against selected distributions**"),
                     verbatimTextOutput("til_fluoro_KS")
                   ),
                   div(style="border-left: 5px solid", 
@@ -1302,7 +1359,7 @@ ui <- navbarPage(collapsible = TRUE,
                    )
                   ),
                   div(
-                   markdown("###### **One-sample Kolmogorov-Smirnov tests for stomatal conductance against selected distributions**"),
+                   markdown("###### **One-sample Kolmogorov-Smirnov tests for selected fruit variable against selected distributions**"),
                    verbatimTextOutput("til_fruit_KS")
                   ),
                   div(style="border-left: 5px solid", 
@@ -1803,9 +1860,6 @@ ui <- navbarPage(collapsible = TRUE,
       ),
       ##### TOMATO INOCULANT TIMING #####
       tabPanel("Inoculant Timing Trial",
-      # big trial in 2024 in the Hydro greenhouse - germination vs transplantation
-      # - no salt stress - all 5 bacteria - long enough to gather fruit
-      # Li-600 and MultispeQs - spider mites and white flies
       tabsetPanel(
         tabPanel("Exploratory",
           div(style = "padding: 10px",
@@ -1837,7 +1891,7 @@ ui <- navbarPage(collapsible = TRUE,
                     )
                   ),
                   div(
-                    markdown("###### **One-sample Kolmogorov-Smirnov tests for stomatal conductance against selected distributions**"),
+                    markdown("###### **One-sample Kolmogorov-Smirnov tests for selected fluorescence variable against selected distributions**"),
                     verbatimTextOutput("tit_fluoro_KS")
                   ),
                   div(style="border-left: 5px solid", 
@@ -1867,7 +1921,7 @@ ui <- navbarPage(collapsible = TRUE,
                    )
                   ),
                   div(
-                   markdown("###### **One-sample Kolmogorov-Smirnov tests for stomatal conductance against selected distributions**"),
+                   markdown("###### **One-sample Kolmogorov-Smirnov tests for selected fruit variable against selected distributions**"),
                    verbatimTextOutput("tit_fruit_KS")
                   ),
                   div(style="border-left: 5px solid", 
@@ -2395,9 +2449,6 @@ ui <- navbarPage(collapsible = TRUE,
   ),
   ##### ABOUT NAV PANEL #####
   nav_panel("About",
-  # this is where information about the app and how to use it goes. as well as info about me perhaps
-  # also add references here
-  # acknowledgements as well, maybe?
     card(card_header("About the app", class = "bg-primary", style = "font-size: 25px"),
       div(layout_columns(col_widths = c(8,4),
        markdown(
@@ -2480,8 +2531,66 @@ server <- function(input, output) {
 ## global reactive expressions
   Rpalette <- reactive({input$palette})
 ## tim reactive expressions
+### fluorescence
+  Rtim_fluoro_dist_var <- reactive({input$tim_fluoro_dist_var})
+  Rtim_fluoro_dists <- reactive({input$tim_fluoro_dists})
+  Rtim_fluoro_len <- reactive({input$tim_fluoro_len})
+  Rtim_fluoro_hist_var <- reactive({input$tim_fluoro_hist_var})
+  Rtim_fluoro_hist_color <- reactive({input$tim_fluoro_hist_color})
+  Rtim_fluoro_hist_bins <- reactive({input$tim_fluoro_hist_bins})
+  Rtim_fluoro_scatter_x <- reactive({input$tim_fluoro_scatter_x})
+  Rtim_fluoro_scatter_y <- reactive({input$tim_fluoro_scatter_y})
+  Rtim_fluoro_scatter_col <- reactive({input$tim_fluoro_scatter_col})
+  Rtim_fluoro_scatter_shape <- reactive({input$tim_fluoro_scatter_shape})
+  Rtim_fluoro_scatter_jit <- reactive({input$tim_fluoro_scatter_jit * 0.1})
+  Rtim_fluoro_scatter_fwrap <- reactive({input$tim_fluoro_scatter_fwrap})
+  Rtim_fluoro_scatter_size <- reactive({input$tim_fluoro_scatter_size})
+  Rtim_fluoro_box_x <- reactive({input$tim_fluoro_box_x})
+  Rtim_fluoro_box_y <- reactive({input$tim_fluoro_box_y})
+  Rtim_gsw_mod_var <- reactive({input$tim_gsw_mod_var})
+  Rtim_gsw_mod <- reactive({
+    lm(log(gsw) ~ Treatment + data_tim_fluoro[[Rtim_gsw_mod_var()]], data = data_tim_fluoro)
+  })
+  Rtim_gsw_mod_sum <- reactive({summary(Rtim_gsw_mod())})
+  Rtim_ps2_mod_var <- reactive({input$tim_ps2_mod_var})
+  Rtim_ps2_mod <- reactive({
+    lm(LogitPhiPS2 ~ Treatment + data_tim_fluoro[[Rtim_ps2_mod_var()]], data = data_tim_fluoro)
+  })
+  Rtim_ps2_mod_sum <- reactive({summary(Rtim_ps2_mod())})
+### height
+  Rtim_height_dist_var <- reactive({input$tim_height_dist_var})
+  Rtim_height_dists <- reactive({input$tim_height_dists})
+  Rtim_height_len <- reactive({input$tim_height_len})
+  Rtim_height_hist_var <- reactive({input$tim_height_hist_var})
+  Rtim_height_hist_color <- reactive({input$tim_height_hist_color})
+  Rtim_height_hist_bins <- reactive({input$tim_height_hist_bins})
+  Rtim_height_scatter_x <- reactive({input$tim_height_scatter_x})
+  Rtim_height_scatter_y <- reactive({input$tim_height_scatter_y})
+  Rtim_height_scatter_col <- reactive({input$tim_height_scatter_col})
+  Rtim_height_scatter_shape <- reactive({input$tim_height_scatter_shape})
+  Rtim_height_scatter_jit <- reactive({input$tim_height_scatter_jit * 0.1})
+  Rtim_height_scatter_fwrap <- reactive({input$tim_height_scatter_fwrap})
+  Rtim_height_scatter_size <- reactive({input$tim_height_scatter_size})
+  Rtim_height_box_x <- reactive({input$tim_height_box_x})
+  Rtim_height_box_y <- reactive({input$tim_height_box_y})
+### ds
+  Rtim_ds_dist_var <- reactive({input$tim_ds_dist_var})
+  Rtim_ds_dists <- reactive({input$tim_ds_dists})
+  Rtim_ds_len <- reactive({input$tim_ds_len})
+  Rtim_ds_hist_var <- reactive({input$tim_ds_hist_var})
+  Rtim_ds_hist_color <- reactive({input$tim_ds_hist_color})
+  Rtim_ds_hist_bins <- reactive({input$tim_ds_hist_bins})
+  Rtim_ds_scatter_x <- reactive({input$tim_ds_scatter_x})
+  Rtim_ds_scatter_y <- reactive({input$tim_ds_scatter_y})
+  Rtim_ds_scatter_col <- reactive({input$tim_ds_scatter_col})
+  Rtim_ds_scatter_shape <- reactive({input$tim_ds_scatter_shape})
+  Rtim_ds_scatter_jit <- reactive({input$tim_ds_scatter_jit * 0.1})
+  Rtim_ds_scatter_fwrap <- reactive({input$tim_ds_scatter_fwrap})
+  Rtim_ds_scatter_size <- reactive({input$tim_ds_scatter_size})
+  Rtim_ds_box_x <- reactive({input$tim_ds_box_x})
+  Rtim_ds_box_y <- reactive({input$tim_ds_box_y})
 ## til reactive expressions
-  ### fluorescence
+### fluorescence
   Rtil_fluoro_dist_var <- reactive({input$til_fluoro_dist_var})
   Rtil_fluoro_dists <- reactive({input$til_fluoro_dists})
   Rtil_fluoro_len <- reactive({input$til_fluoro_len})
@@ -2507,8 +2616,7 @@ server <- function(input, output) {
     lm(LogitPhiPS2 ~ Treatment + data_til_fluoro[[Rtil_ps2_mod_var()]], data = data_til_fluoro)
   })
   Rtil_ps2_mod_sum <- reactive({summary(Rtil_ps2_mod())})
-  
-  ### fruit
+### fruit
   Rtil_fruit_dist_var <- reactive({input$til_fruit_dist_var})
   Rtil_fruit_dists <- reactive({input$til_fruit_dists})
   Rtil_fruit_len <- reactive({input$til_fruit_len})
@@ -2554,7 +2662,6 @@ server <- function(input, output) {
     lm(LogitPhiPS2 ~ Treatment + data_tit_fluoro[[Rtit_ps2_mod_var()]], data = data_tit_fluoro)
   })
   Rtit_ps2_mod_sum <- reactive({summary(Rtit_ps2_mod())})
-  
 ### fruit
   Rtit_fruit_dist_var <- reactive({input$tit_fruit_dist_var})
   Rtit_fruit_dists <- reactive({input$tit_fruit_dists})
@@ -2575,9 +2682,463 @@ server <- function(input, output) {
   Rtit_fruit_sum_box_x <- reactive({input$tit_fruit_sum_box_x})
   Rtit_fruit_sum_box_y <- reactive({input$tit_fruit_sum_box_y})
 # Outputs
+##### TIM OUTPUTS #####
+### Distributions
+#### Fluorescence
+##### ks
+  output$tim_fluoro_KS <- renderPrint({
+    multiKS_cont(data_tim_fluoro[[Rtim_fluoro_dist_var()]], Rtim_fluoro_dists())
+  })
+##### pdf
+  output$tim_fluoro_pdf <- renderPlot({
+    multiPDF_plot(data_tim_fluoro[[Rtim_fluoro_dist_var()]], Rtim_fluoro_len(), Rtim_fluoro_dists(), palette = Rpalette(), var_name = gettext(Rtim_fluoro_dist_var()))
+  })
+##### cdf
+  output$tim_fluoro_cdf <- renderPlot({
+    multiCDF_plot(data_tim_fluoro[[Rtim_fluoro_dist_var()]], Rtim_fluoro_len(), Rtim_fluoro_dists(), palette = Rpalette(), var_name = gettext(Rtim_fluoro_dist_var()))
+  })
+#### Height
+##### ks
+  output$tim_height_KS <- renderPrint({
+    multiKS_cont(data_tim_height[[Rtim_height_dist_var()]], Rtim_height_dists())
+  })
+##### pdf
+  output$tim_height_pdf <- renderPlot({
+    multiPDF_plot(data_tim_height[[Rtim_height_dist_var()]], Rtim_height_len(), Rtim_height_dists(), palette = Rpalette(), var_name = gettext(Rtim_height_dist_var()))
+  })
+##### cdf
+  output$tim_height_cdf <- renderPlot({
+    multiCDF_plot(data_tim_height[[Rtim_height_dist_var()]], Rtim_height_len(), Rtim_height_dists(), palette = Rpalette(), var_name = gettext(Rtim_height_dist_var()))
+  })
+#### DS
+##### ks
+  output$tim_ds_KS <- renderPrint({
+    multiKS_cont(data_tim_ds[[Rtim_ds_dist_var()]], Rtim_ds_dists())
+  })
+##### pdf
+  output$tim_ds_pdf <- renderPlot({
+    multiPDF_plot(data_tim_ds[[Rtim_ds_dist_var()]], Rtim_ds_len(), Rtim_ds_dists(), palette = Rpalette(), var_name = gettext(Rtim_ds_dist_var()))
+  })
+##### cdf
+  output$tim_ds_cdf <- renderPlot({
+    multiCDF_plot(data_tim_ds[[Rtim_ds_dist_var()]], Rtim_ds_len(), Rtim_ds_dists(), palette = Rpalette(), var_name = gettext(Rtim_ds_dist_var()))
+  })
+### Exploratory
+#### hists
+##### fluoro
+  output$tim_fluoro_hist <- renderPlot({
+    ggplot(data_tim_fluoro, aes(x=.data[[Rtim_fluoro_hist_var()]], 
+                                color = .data[[Rtim_fluoro_hist_color()]],
+                                fill = .data[[Rtim_fluoro_hist_color()]]))+
+      geom_histogram(bins = Rtim_fluoro_hist_bins())+
+      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      theme_bw()+
+      theme(
+        text = element_text(size=font_sizes[3]),
+        axis.title = element_text(size=font_sizes[2], face= "bold"),
+        legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold")
+      )
+  })
+##### height
+  output$tim_height_hist <- renderPlot({
+    ggplot(data_tim_height, aes(x=.data[[Rtim_height_hist_var()]], 
+                                color = .data[[Rtim_height_hist_color()]],
+                                fill = .data[[Rtim_height_hist_color()]]))+
+      geom_histogram(bins = Rtim_height_hist_bins())+
+      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      theme_bw()+
+      theme(
+        text = element_text(size=font_sizes[3]),
+        axis.title = element_text(size=font_sizes[2], face= "bold"),
+        legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold")
+      )
+  })
+##### ds
+  output$tim_ds_hist <- renderPlot({
+    ggplot(data_tim_ds, aes(x=.data[[Rtim_ds_hist_var()]], 
+                            color = .data[[Rtim_ds_hist_color()]],
+                            fill = .data[[Rtim_ds_hist_color()]]))+
+      geom_histogram(bins = Rtim_ds_hist_bins())+
+      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      theme_bw()+
+      theme(
+        text = element_text(size=font_sizes[3]),
+        axis.title = element_text(size=font_sizes[2], face= "bold"),
+        legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold")
+      )
+  })
+#### scatters
+##### fluoro
+  output$tim_fluoro_scatter <- renderPlot({
+    gs <- ggplot(data=data_tim_fluoro, aes(x=.data[[Rtim_fluoro_scatter_x()]], y=.data[[Rtim_fluoro_scatter_y()]],
+                                           color = .data[[Rtim_fluoro_scatter_col()]], shape = .data[[Rtim_fluoro_scatter_shape()]]))+
+      geom_jitter(width=Rtim_fluoro_scatter_jit(), height=Rtim_fluoro_scatter_jit()*0.5, size = Rtim_fluoro_scatter_size())+
+      ylab(gettext(Rtim_fluoro_scatter_y()))+
+      xlab(gettext(Rtim_fluoro_scatter_x()))+
+      theme_bw()+
+      theme(
+        text = element_text(size=font_sizes[3]),
+        axis.title = element_text(size=font_sizes[2], face= "bold"),
+        title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
+        legend.title = element_text(size=font_sizes[2], face= "bold"),
+        legend.title.position = "top"
+      )
+    if (Rtim_fluoro_scatter_x() %in% tim_fluoro_vars_d) {
+      gs <- gs + scale_x_discrete(guide=guide_axis(check.overlap=TRUE))
+    } else {
+      gs <- gs + scale_x_continuous(guide=guide_axis(check.overlap=TRUE))
+    }
+    if (Rtim_fluoro_scatter_fwrap() == TRUE){
+      gs <- gs + facet_wrap(~Treatment)
+    }
+    if (Rtim_fluoro_scatter_col() %in% tim_fluoro_vars_d) {
+      gs <- gs + scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())
+    } else {
+      gs <- gs + scale_color_scico(begin=0.9, end=0.1, palette=Rpalette())
+    }
+    return(gs)
+  })
+##### height
+  output$tim_height_scatter <- renderPlot({
+    gs <- ggplot(data=data_tim_height, aes(x=.data[[Rtim_height_scatter_x()]], y=.data[[Rtim_height_scatter_y()]],
+                                           color = .data[[Rtim_height_scatter_col()]], shape = .data[[Rtim_height_scatter_shape()]]))+
+      geom_jitter(width=Rtim_height_scatter_jit(), height=Rtim_height_scatter_jit()*0.5, size = Rtim_height_scatter_size())+
+      ylab(gettext(Rtim_height_scatter_y()))+
+      xlab(gettext(Rtim_height_scatter_x()))+
+      theme_bw()+
+      theme(
+        text = element_text(size=font_sizes[3]),
+        axis.title = element_text(size=font_sizes[2], face= "bold"),
+        title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
+        legend.title = element_text(size=font_sizes[2], face= "bold"),
+        legend.title.position = "top"
+      )
+    if (Rtim_height_scatter_x() %in% tim_height_vars_d) {
+      gs <- gs + scale_x_discrete(guide=guide_axis(check.overlap=TRUE))
+    } else {
+      gs <- gs + scale_x_continuous(guide=guide_axis(check.overlap=TRUE))
+    }
+    if (Rtim_height_scatter_fwrap() == TRUE){
+      gs <- gs + facet_wrap(~Treatment)
+    }
+    if (Rtim_height_scatter_col() %in% tim_height_vars_d) {
+      gs <- gs + scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())
+    } else {
+      gs <- gs + scale_color_scico(begin=0.9, end=0.1, palette=Rpalette())
+    }
+    return(gs)
+  })
+##### ds
+  output$tim_ds_scatter <- renderPlot({
+    gs <- ggplot(data=data_tim_ds, aes(x=.data[[Rtim_ds_scatter_x()]], y=.data[[Rtim_ds_scatter_y()]],
+                                           color = .data[[Rtim_ds_scatter_col()]], shape = .data[[Rtim_ds_scatter_shape()]]))+
+      geom_jitter(width=Rtim_ds_scatter_jit(), height=Rtim_ds_scatter_jit()*0.5, size = Rtim_ds_scatter_size())+
+      ylab(gettext(Rtim_ds_scatter_y()))+
+      xlab(gettext(Rtim_ds_scatter_x()))+
+      theme_bw()+
+      theme(
+        text = element_text(size=font_sizes[3]),
+        axis.title = element_text(size=font_sizes[2], face= "bold"),
+        title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
+        legend.title = element_text(size=font_sizes[2], face= "bold"),
+        legend.title.position = "top"
+      )
+    if (Rtim_ds_scatter_x() %in% tim_ds_vars_d) {
+      gs <- gs + scale_x_discrete(guide=guide_axis(check.overlap=TRUE))
+    } else {
+      gs <- gs + scale_x_continuous(guide=guide_axis(check.overlap=TRUE))
+    }
+    if (Rtim_ds_scatter_fwrap() == TRUE){
+      gs <- gs + facet_wrap(~Treatment)
+    }
+    if (Rtim_ds_scatter_col() %in% tim_ds_vars_d) {
+      gs <- gs + scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())
+    } else {
+      gs <- gs + scale_color_scico(begin=0.9, end=0.1, palette=Rpalette())
+    }
+    return(gs)
+  })
+#### boxplots
+##### fluoro box
+  output$tim_fluoro_box <- renderPlot({
+    ggplot(data=data_tim_fluoro, aes(x=.data[[Rtim_fluoro_box_x()]], y=.data[[Rtim_fluoro_box_y()]],
+                                     color = .data[[Rtim_fluoro_box_x()]], fill = .data[[Rtim_fluoro_box_x()]]))+
+      geom_jitter(width = 0.1, height = 0)+
+      geom_boxplot(width = 0.4,  alpha = 0.8)+
+      ylab(gettext(Rtim_fluoro_box_y()))+
+      xlab(gettext(Rtim_fluoro_box_x()))+
+      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      theme_bw()+
+      theme(
+        text = element_text(size=font_sizes[3]),
+        axis.title = element_text(size=font_sizes[2], face= "bold"),
+        title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
+        legend.title = element_text(size=font_sizes[2], face= "bold"),
+      )
+  })
+##### height box
+  output$tim_height_box <- renderPlot({
+    ggplot(data=data_tim_height, aes(x=.data[[Rtim_height_box_x()]], y=.data[[Rtim_height_box_y()]],
+                                     color = .data[[Rtim_height_box_x()]], fill = .data[[Rtim_height_box_x()]]))+
+      geom_jitter(width = 0.1, height = 0)+
+      geom_boxplot(width = 0.4,  alpha = 0.8)+
+      ylab(gettext(Rtim_height_box_y()))+
+      xlab(gettext(Rtim_height_box_x()))+
+      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      theme_bw()+
+      theme(
+        text = element_text(size=font_sizes[3]),
+        axis.title = element_text(size=font_sizes[2], face= "bold"),
+        title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
+        legend.title = element_text(size=font_sizes[2], face= "bold"),
+      )
+  })
+##### ds box
+  output$tim_ds_box <- renderPlot({
+    ggplot(data=data_tim_ds, aes(x=.data[[Rtim_ds_box_x()]], y=.data[[Rtim_ds_box_y()]],
+                                     color = .data[[Rtim_ds_box_x()]], fill = .data[[Rtim_ds_box_x()]]))+
+      geom_jitter(width = 0.1, height = 0)+
+      geom_boxplot(width = 0.4,  alpha = 0.8)+
+      ylab(gettext(Rtim_ds_box_y()))+
+      xlab(gettext(Rtim_ds_box_x()))+
+      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      theme_bw()+
+      theme(
+        text = element_text(size=font_sizes[3]),
+        axis.title = element_text(size=font_sizes[2], face= "bold"),
+        title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
+        legend.title = element_text(size=font_sizes[2], face= "bold"),
+      )
+  })
+### Statistics
+#### fluoro
+##### gsw
+  output$tim_gsw_mod_summary <- renderPrint({
+    Rtim_gsw_mod_sum()
+  })
+  output$tim_gsw_mod_call <- renderPrint({
+    Rtim_gsw_mod()$call
+  })
+  output$tim_gsw_aic <- renderText({
+    round(AIC(Rtim_gsw_mod()), 0)
+  })
+  output$tim_gsw_p <- renderText({
+    p_from_modsum(Rtim_gsw_mod_sum())
+  })
+  output$tim_gsw_r2 <- renderText({
+    r1 <- round(Rtim_gsw_mod_sum()$adj.r.squared, 4)
+    r2 <- r1 *100
+    return(paste0(r1, "  (", r2, "%)"))
+  })
+  output$tim_gsw_letters <- renderPrint({
+    cld(glht(Rtim_gsw_mod(), linfct = mcp(Treatment = "Tukey")))
+  })
+##### phips2
+  output$tim_ps2_mod_summary <- renderPrint({
+    Rtim_ps2_mod_sum()
+  })
+  output$tim_ps2_mod_call <- renderPrint({
+    Rtim_ps2_mod()$call
+  })
+  output$tim_ps2_aic <- renderText({
+    round(AIC(Rtim_ps2_mod()), 0)
+  })
+  output$tim_ps2_p <- renderText({
+    p_from_modsum(Rtim_ps2_mod_sum())
+  })
+  output$tim_ps2_r2 <- renderText({
+    r1 <- round(Rtim_ps2_mod_sum()$adj.r.squared, 4)
+    r2 <- r1 *100
+    return(paste0(r1, "  (", r2, "%)"))
+  })
+  output$tim_ps2_letters <- renderPrint({
+    cld(glht(Rtim_ps2_mod(), linfct = mcp(Treatment = "Tukey")))
+  })
+##### PCA
+  output$tim_fluoro_pca <- renderPlot({
+    pca_plot(mod_data_tim_fluoro$Treatment, mod_data_tim_fluoro[,c(13:17)])+
+      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      labs(title = "PCA for Fluorescence Environmental Variables")+
+      theme(
+        text = element_text(size=font_sizes[3]),
+        axis.title = element_text(size=font_sizes[2], face= "bold"),
+        title = element_text(size=font_sizes[1], face="bold", lineheight = .8)
+      )
+  })
+  output$tim_fluoro_pca_summary <- renderPrint({
+    summary(tim_pca)
+  })
+  output$tim_pcr_gsw_summary <- renderPrint({
+    tim_pcr_gsw_sum
+  })
+  output$tim_pcr_gsw_aic <- renderText({
+    round(AIC(tim_pcr_gsw), 0)
+  })
+  output$tim_pcr_gsw_p <- renderText({
+    p_from_modsum(tim_pcr_gsw_sum)
+  })
+  output$tim_pcr_gsw_r2 <- renderText({
+    r1 <- round(tim_pcr_gsw_sum$adj.r.squared, 4)
+    r2 <- r1 *100
+    return(paste0(r1, "  (", r2, "%)"))
+  })
+  output$tim_pcr_gsw_letters <- renderPrint({
+    cld(glht(tim_pcr_gsw, linfct = mcp(Treatment = "Tukey")))
+  })
+  output$tim_pcr_gsw_pred <- renderPlot({
+    predict_plot(tim_pcr_gsw_pmod, tim_pcr_data, gsw, PC1, Treatment, 100, correction = "exponential")+
+      ylim(0,1.5)+
+      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())
+  })
+  output$tim_pcr_ps2_summary <- renderPrint({
+    tim_pcr_ps2_sum
+  })
+  output$tim_pcr_ps2_aic <- renderText({
+    round(AIC(tim_pcr_ps2), 0)
+  })
+  output$tim_pcr_ps2_p <- renderText({
+    p_from_modsum(tim_pcr_ps2_sum)
+  })
+  output$tim_pcr_ps2_r2 <- renderText({
+    r1 <- round(tim_pcr_ps2_sum$adj.r.squared, 4)
+    r2 <- r1 *100
+    return(paste0(r1, "  (", r2, "%)"))
+  })
+  output$tim_pcr_ps2_letters <- renderPrint({
+    cld(glht(tim_pcr_ps2, linfct = mcp(Treatment = "Tukey")))
+  })
+  output$tim_pcr_ps2_pred <- renderPlot({
+    predict_plot(tim_pcr_ps2_pmod, tim_pcr_data, PhiPS2, PC1, Treatment, 100, correction = "logit")+
+      ylim(0.5,0.8)+
+      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())
+  })
+#### height stats
+  output$tim_height_mod_summary <- renderPrint({
+    tim_height_mod_sum
+  })
+  output$tim_height_mod_call <- renderPrint({
+    tim_height_mod$call
+  })
+  output$tim_height_aic <- renderText({
+    round(AIC(tim_height_mod), 0)
+  })
+  output$tim_height_p <- renderText({
+    p_from_modsum(tim_height_mod_sum)
+  })
+  output$tim_height_r2 <- renderText({
+    r1 <- round(tim_height_mod_sum$adj.r.squared, 4)
+    r2 <- r1 *100
+    return(paste0(r1, "  (", r2, "%)"))
+  })
+  output$tim_height_letters <- renderPrint({
+    tim_height_letters
+  })
+  output$tim_height_pred <- renderPlot({
+    predict_plot(tim_height_mod, data_tim_height, Height, DaysFromGermination, Treatment, 100, correction = "exponential")+
+      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())
+  })
+#### ds stats
+##### RS_Length
+  output$tim_rs_length_mod_summary <- renderPrint({
+    tim_rs_length_mod_sum
+  })
+  output$tim_rs_length_mod_call <- renderPrint({
+    tim_rs_length_mod$call
+  })
+  output$tim_rs_length_aic <- renderText({
+    round(AIC(tim_rs_length_mod), 0)
+  })
+  output$tim_rs_length_p <- renderText({
+    p_from_modsum(tim_rs_length_mod_sum)
+  })
+  output$tim_rs_length_r2 <- renderText({
+    r1 <- round(tim_rs_length_mod_sum$adj.r.squared, 4)
+    r2 <- r1 *100
+    return(paste0(r1, "  (", r2, "%)"))
+  })
+  output$tim_rs_length_letters <- renderPrint({
+    tim_rs_length_letters
+  })
+  output$tim_rs_length_annotated <- renderPlot({
+    ggplot(data=data_tim_ds, aes(x=Treatment, y=RS_Length,
+                                            color = Treatment, fill = Treatment))+
+      geom_jitter(width = 0.1, height = 0)+
+      geom_boxplot(width=0.4, alpha = 0.8)+
+      ylab("Root:Shoot Length")+
+      xlab("Treatment")+
+      annotate("text", x=1:4, y=1.5, label = tim_rs_length_letters$mcletters$Letters, size=10)+
+      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      theme_bw()+
+      theme(
+        text = element_text(size=font_sizes[3]),
+        axis.title = element_text(size=font_sizes[2], face= "bold"),
+        title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
+        legend.title = element_text(size=font_sizes[2], face= "bold")
+      )
+  })
+##### RS_Mass
+  output$tim_rs_mass_mod_summary <- renderPrint({
+    tim_rs_mass_mod_sum
+  })
+  output$tim_rs_mass_mod_call <- renderPrint({
+    tim_rs_mass_mod$call
+  })
+  output$tim_rs_mass_aic <- renderText({
+    round(AIC(tim_rs_mass_mod), 0)
+  })
+  output$tim_rs_mass_p <- renderText({
+    p_from_modsum(tim_rs_mass_mod_sum)
+  })
+  output$tim_rs_mass_r2 <- renderText({
+    r1 <- round(tim_rs_mass_mod_sum$adj.r.squared, 4)
+    r2 <- r1 *100
+    return(paste0(r1, "  (", r2, "%)"))
+  })
+  output$tim_rs_mass_letters <- renderPrint({
+    tim_rs_mass_letters
+  })
+  output$tim_rs_mass_annotated <- renderPlot({
+    ggplot(data=data_tim_ds, aes(x=Treatment, y=RS_Mass,
+                                 color = Treatment, fill = Treatment))+
+      geom_jitter(width = 0.1, height = 0)+
+      geom_boxplot(width=0.4, alpha = 0.8)+
+      ylab("Root:Shoot Mass")+
+      xlab("Treatment")+
+      annotate("text", x=1:4, y=.8, label = tim_rs_mass_letters$mcletters$Letters, size=10)+
+      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      theme_bw()+
+      theme(
+        text = element_text(size=font_sizes[3]),
+        axis.title = element_text(size=font_sizes[2], face= "bold"),
+        title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
+        legend.title = element_text(size=font_sizes[2], face= "bold")
+      )
+  })
+### Data
+  output$tim_fluoro_DT <- renderDataTable({
+    data_tim_fluoro
+  })
+  output$tim_height_DT <- renderDataTable({
+    data_tim_height
+  })
+  output$tim_ds_DT <- renderDataTable({
+    data_tim_ds
+  })
 ##### TIL OUTPUTS #####
-  ### Distributions
-  #### Fluorescence
+### Distributions
+#### Fluorescence
   # ks
   output$til_fluoro_KS <- renderPrint({
     if (Rtil_fluoro_dist_var() == "gsw") {
@@ -2602,7 +3163,7 @@ server <- function(input, output) {
       multiCDF_plot(data_til_fluoro[[Rtil_fluoro_dist_var()]], Rtil_fluoro_len(), Rtil_fluoro_dists(), palette = Rpalette(), var_name = gettext(Rtil_fluoro_dist_var()))
     }
   })
-  #### Fruit
+#### Fruit
   # ks
   output$til_fruit_KS <- renderPrint({
     if (Rtil_fruit_dist_var() %in% fruit_lab_vars) {
@@ -2627,7 +3188,7 @@ server <- function(input, output) {
       multiCDF_plot(data_til_fruit[[Rtil_fruit_dist_var()]], Rtil_fruit_len(), Rtil_fruit_dists(), palette = Rpalette(), var_name = gettext(Rtil_fruit_dist_var()))
     }
   })
-  ### Exploratory
+### Exploratory
   # hists
   output$til_fluoro_hist <- renderPlot({
     gh <- ggplot(data_til_fluoro, aes(x=.data[[Rtil_fluoro_hist_var()]], color = .data[[Rtil_fluoro_hist_color()]],
