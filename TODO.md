@@ -20,3 +20,4 @@
   - [ ] add trial specific pics
   - [ ] ensure methods are correct
   - [ ] separate variables out by dataset (i.e. fluoro, fruit)
+- [ ] consider adding time to fluorescence models
