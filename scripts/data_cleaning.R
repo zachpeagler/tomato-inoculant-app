@@ -289,7 +289,8 @@ data_til_fruit <- d23_fl[,c(10,11,12,1,2,16,9,17,4,5,13,8,15)] %>%
          ) %>%
   mutate(pSugar = pSugar/100,
          LogitpSugar = logit(pSugar)
-         )
+         ) %>%
+  filter(Ripeness > 0)
 
 data_til_fruit_sug <- na.omit(data_til_fruit) %>%
   group_by(Treatment, Soil, Foliar, Plant) %>%
@@ -508,7 +509,8 @@ data_tit_fruit <- d24_f[,c(13,14,15,1,2,19,11,12,17,18,3,4,7,20,10,21)] %>%
   mutate(Row = as.factor(Row),
          pSugar = pSugar/100,
          LogitpSugar = logit(pSugar)
-         )
+         ) %>%
+  filter(Ripeness > 0)
 
 save(data_tit_fruit, file = "C:/Github/tomato-inoculant-app/app/data_tit_fruit.RData")
 

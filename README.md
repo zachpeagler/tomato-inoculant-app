@@ -11,7 +11,7 @@
 
  | Link | QR Code |
  | ---- | ------- |
- |https://zachpeagler.github.io/tomato-inoculant-app/| ![qrcode](qrcode.png)
+ |https://zachpeagler.github.io/tomato-inoculant-app/| ![qrcode](images/qrcode.png)
 
  > If you get a blank screen on app startup, wait ~15 seconds and see if it loads. Shinylive apps can take a long time to initialize, especially apps as sprawling as this.
 
