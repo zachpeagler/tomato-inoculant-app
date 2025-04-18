@@ -43,8 +43,8 @@ load("data_tit_fruit_summary.RData")
 ## especially in multidimensional modeling (PCA, tSNE, NMDS)
 ## we only scale our independent (explanatory) variables
 ### tim fluoro
-scaled_tim_fluoro_vars <- data.frame(apply(data_tim_fluoro[,c(10:14)], 2, scale))
-mod_data_tim_fluoro <- cbind(data_tim_fluoro[,c(1:9, 15:17)], scaled_tim_fluoro_vars)
+scaled_tim_fluoro_vars <- data.frame(apply(data_tim_fluoro[,c(6,7,11:15)], 2, scale))
+mod_data_tim_fluoro <- cbind(data_tim_fluoro[,c(1:5,8,9,10, 16:18)], scaled_tim_fluoro_vars)
 ### tim height
 #### nothing to scale here. we have no continuous predictor variables in the height dataset.
 ### tim ds
@@ -54,13 +54,13 @@ mod_data_tim_fluoro <- cbind(data_tim_fluoro[,c(1:9, 15:17)], scaled_tim_fluoro_
 #### we're not performing dimension reduction or multiple linear regression, so it shouldn't much matter)
 #### same with tit fruit data
 ### til fluoro
-scaled_til_fluoro_vars <- data.frame(apply(data_til_fluoro[,c(10:14)], 2, scale))
-mod_data_til_fluoro <- cbind(data_til_fluoro[,c(1:9, 15:18)], scaled_til_fluoro_vars)
+scaled_til_fluoro_vars <- data.frame(apply(data_til_fluoro[,c(6,7,11:15)], 2, scale))
+mod_data_til_fluoro <- cbind(data_til_fluoro[,c(1:5,8,9,10, 16:19)], scaled_til_fluoro_vars)
 ### tit fluoro
-scaled_tit_fluoro_vars <- data.frame(apply(data_tit_fluoro[,c(10:14)], 2, scale))
-mod_data_tit_fluoro <- cbind(data_tit_fluoro[,c(1:9, 15:18)], scaled_tit_fluoro_vars)
+scaled_tit_fluoro_vars <- data.frame(apply(data_tit_fluoro[,c(6,7,11:15)], 2, scale))
+mod_data_tit_fluoro <- cbind(data_tit_fluoro[,c(1:5,8,9,10, 16:19)], scaled_tit_fluoro_vars)
 
-fluoro_mod_var_names <- c("DaysFromGermination", "AmbientHumidity", "AmbientPressure", "AmbientTemperature", "AmbientLight", "LeafTemperature")
+fluoro_mod_var_names <- c("DaysFromGermination", "MinutesFromStart", "AmbientHumidity", "AmbientPressure", "AmbientTemperature", "AmbientLight", "LeafTemperature")
 
 # preload var names in continuous and discrete groups
 ### kind of a funky way of doing this, but it makes it REALLY easy to check if a variable
@@ -68,7 +68,7 @@ fluoro_mod_var_names <- c("DaysFromGermination", "AmbientHumidity", "AmbientPres
 ### you could also use the type attribute of your variables, but i didn't feel like it
 #### tim (2024 small)
 ##### fluoro
-tim_fluoro_vars <- c("Date", "DaysFromGermination", "AmbientHumidity", "AmbientPressure", "AmbientTemperature", "AmbientLight", "LeafTemperature", "gsw", "PhiPS2", "LogitPhiPS2")
+tim_fluoro_vars <- c("Date", "DaysFromGermination", "MinutesFromStart", "AmbientHumidity", "AmbientPressure", "AmbientTemperature", "AmbientLight", "LeafTemperature", "gsw", "PhiPS2", "LogitPhiPS2")
 tim_fluoro_vars_d <- c("Treatment", "Inoculation", "Chitosan", "Row", "Pot", "Plant", "Time")
 all_tim_fluoro_vars <- c(tim_fluoro_vars_d, tim_fluoro_vars)
 ##### height
@@ -81,7 +81,7 @@ tim_ds_vars_d <- c("Treatment", "Inoculation", "Chitosan", "Row", "Pot", "Plant"
 all_tim_ds_vars <- c(tim_ds_vars_d, tim_ds_vars)
 ### til (2023 big)
 #### fluoro
-til_fluoro_vars <- c("Date", "DaysFromGermination", "AmbientHumidity", "AmbientPressure", "AmbientTemperature", "AmbientLight", "LeafTemperature", "gsw", "PhiPS2", "LogitPhiPS2")
+til_fluoro_vars <- c("Date", "DaysFromGermination", "MinutesFromStart", "AmbientHumidity", "AmbientPressure", "AmbientTemperature", "AmbientLight", "LeafTemperature", "gsw", "PhiPS2", "LogitPhiPS2")
 til_fluoro_vars_d <- c("Treatment", "Soil", "Foliar", "Row", "Pot", "Plant", "Time", "Device")
 all_til_fluoro_vars <- c(til_fluoro_vars_d, til_fluoro_vars)
 #### fruit
@@ -94,7 +94,7 @@ til_fruit_sum_vars_d <- c("Treatment", "Soil", "Foliar", "Plant")
 all_til_fruit_sum_vars <- c(til_fruit_sum_vars_d, til_fruit_sum_vars)
 #### tit (2024 big)
 ##### fluoro
-tit_fluoro_vars <- c("Date", "DaysFromGermination", "AmbientHumidity", "AmbientPressure", "AmbientTemperature", "AmbientLight", "LeafTemperature", "gsw", "PhiPS2", "LogitPhiPS2")
+tit_fluoro_vars <- c("Date", "DaysFromGermination", "MinutesFromStart", "AmbientHumidity", "AmbientPressure", "AmbientTemperature", "AmbientLight", "LeafTemperature", "gsw", "PhiPS2", "LogitPhiPS2")
 tit_fluoro_vars_d <- c("Treatment", "Transplantation", "Germination", "Row", "Pot", "Plant", "Time", "Device")
 all_tit_fluoro_vars <- c(tit_fluoro_vars_d, tit_fluoro_vars)
 ##### fruit
@@ -282,7 +282,6 @@ multiPDF_plot <- function (var, seq_length = 50, distributions = "all", palette 
     ggplot2::geom_line(aes(x=var_seq, y=dens, color="Real Density"), linetype = 2, linewidth = 3)+
     ggplot2::xlab(var_name)+
     ggplot2::ylab("PDF")+
-    ggplot2::labs(title=paste("PDF for", var_name, "over selected distributions"))+
     ggplot2::guides(color=guide_legend(title="Distribution"))+
     ggplot2::theme_bw()
   # check for each type of distribution in the distributions, and add it if present
@@ -299,10 +298,9 @@ multiPDF_plot <- function (var, seq_length = 50, distributions = "all", palette 
     p <- p + ggplot2::geom_line(aes(x= var_seq, y=pdf_exponential, color='Exponential'), linewidth = 2)
   }
   p <- p +
-    scico::scale_color_scico_d(begin=0.9, end=0.1, palette = palette)+
+    scico::scale_color_scico_d(begin=0.9, end=0.2, palette = palette)+
     ggplot2::theme(
       text = ggplot2::element_text(size=font_sizes[3]),
-      title = ggplot2::element_text(size=font_sizes[1], face = "bold"),
       legend.position="bottom",
       legend.title.position = "top",
       legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold"),
@@ -329,7 +327,6 @@ multiCDF_plot <- function (var, seq_length = 50, distributions = "all", palette 
     ggplot2::geom_line(aes(x=var_seq, y=dens, color="Real Distribution"), linetype = 2, linewidth = 3)+
     ggplot2::xlab(var_name)+
     ggplot2::ylab("CDF")+
-    ggplot2::labs(title=paste("CDF for", var_name, "over selected distributions"))+
     ggplot2::guides(color=guide_legend(title="Distribution"))+
     ggplot2::theme_bw()
   # check for each type of distribution in the distributions, and add it if present
@@ -346,10 +343,9 @@ multiCDF_plot <- function (var, seq_length = 50, distributions = "all", palette 
     p <- p + ggplot2::geom_line(aes(x=var_seq, y=cdf_exponential, color='Exponential'), linewidth = 2)
   }
   p <- p +
-    scico::scale_color_scico_d(begin=0.9, end=0.1, palette = palette)+
+    scico::scale_color_scico_d(begin=0.9, end=0.2, palette = palette)+
     ggplot2::theme(
       text = ggplot2::element_text(size=font_sizes[3]),
-      title = ggplot2::element_text(size=font_sizes[1], face = "bold"),
       legend.position="bottom",
       legend.title.position = "top",
       legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold"),
@@ -435,16 +431,12 @@ predict_plot <- function(mod, data, rvar, pvar, group = NULL, length = 50, inter
     }
   ### make the plot look good
   p <- p +
-    ggplot2::labs(
-      title = str_wrap(paste("Observed data (points) vs predicted (lines + 95%", interval, "interval)"), 40),
-#      subtitle = paste("Model:", deparse(mod$call))
-    )+
     ggplot2::theme_bw()+
     ggplot2::theme(
       text = ggplot2::element_text(size=font_sizes[3]),
-      legend.position="right",
+      legend.position="bottom",
+      legend.title.position = "top",
       axis.title = ggplot2::element_text(size=font_sizes[2], face= "bold"),
-      title = ggplot2::element_text(size=font_sizes[1], face="bold", lineheight = 1),
       plot.subtitle = ggplot2::element_text(size=font_sizes[3], face = "italic")
     )
   return(p)
@@ -459,12 +451,16 @@ pca_plot <- function(group, pcavars) {
   vx <- scores(p1)$species
   ggplot()+
     geom_point(data=px, aes(x=PC1, y=PC2, color=Groups, fill=Groups), size=3)+
-    geom_segment(data = vx, aes(x=0, y=0, xend=PC1*.18, yend=PC2*.18), color = "black")+
-    annotate("text", x=vx[,1]*.2, y=vx[,2]*.2, label = rownames(vx))+
+    geom_segment(data = vx, aes(x=0, y=0, xend=PC1*.25, yend=PC2*.25), color = "black")+
+    annotate("text", x=vx[,1]*.27, y=vx[,2]*.27, label = rownames(vx))+
     xlim(-1, 1)+
     xlab(paste0("PC1 (", PC1val, "%)"))+
     ylab(paste0("PC2 (", PC2val, "%)"))+
-    theme_bw()
+    theme_bw()+
+    theme(
+      legend.position="bottom",
+      legend.title.position = "top"
+    )
 }
 pca_data <- function(data, pcavars){
   p1 <- rda(pcavars)
@@ -504,8 +500,8 @@ tim_pcr_data <- pca_data(mod_data_tim_fluoro, scaled_tim_fluoro_vars)
 tim_pcr_gsw <- lm(log(gsw) ~ Treatment + PC1 + PC2, data = tim_pcr_data)
 tim_pcr_gsw_pmod <- lm(log(gsw) ~ Treatment + PC1, data = tim_pcr_data)
 tim_pcr_gsw_sum <- summary(tim_pcr_gsw)
-tim_pcr_ps2 <- lm(LogitPhiPS2 ~ Treatment + PC1 + PC2, data = tim_pcr_data)
-tim_pcr_ps2_pmod <- lm(LogitPhiPS2 ~ Treatment + PC1, data = tim_pcr_data)
+tim_pcr_ps2 <- lm(logit(PhiPS2) ~ Treatment + PC1 + PC2, data = tim_pcr_data)
+tim_pcr_ps2_pmod <- lm(logit(PhiPS2) ~ Treatment + PC1, data = tim_pcr_data)
 tim_pcr_ps2_sum <- summary(tim_pcr_ps2)
 ### tim height
 tim_height_mod <- lm(log(Height) ~ Treatment + DaysFromGermination, data = data_tim_height)
@@ -585,7 +581,7 @@ ui <- navbarPage(collapsible = TRUE,
     card(card_header("The Green Revolution and Synthetic Fertilizers", class = "bg-primary", style = "font-size: 20px"),
       layout_columns(col_widths = c(5,7),
           card(
-         img(src="hab.png", height = 367, width = 500, style="display: block; margin-left: auto; margin-right: auto;"),
+         img(src="hab.png"),
          markdown("Image from [USGS EROS](https://landsat.gsfc.nasa.gov/article/satellites-on-toxic-algae-patrol/)")
        ),
        markdown("
@@ -606,12 +602,15 @@ ui <- navbarPage(collapsible = TRUE,
     card(card_header("Microbes as sustainable agriculture solutions", class = "bg-secondary", style = "font-size: 20px"),
      layout_columns(col_widths = c(7,5),
        markdown("
-        In recent years, microbes have garnered much attention for their potetial in sustainable agriculture.
-        A recent report has stated that microbial fertilizers have the potential to generate billions in social benefits be reducing the emissions from synthetic fertilizers (UC Innovation Commission, 2023).
+        In recent years, microbes have garnered much attention for their potential in sustainable agriculture.
+        A recent report has stated that microbial fertilizers have the potential to generate billions in social benefits by reducing the emissions from synthetic fertilizers (UC Innovation Commission, 2023).
         Plant growth promoting bacteria (PGPB) and arbuscular mycorrhical fungi (AMF)
-        are two of the most common microbe archetypes for sustainable agriculture purposes. PGPBs can do lots of things,
-        but act in four main ways: increasing photosynthesis, increasing available nutrients to the plant, 
-        increasing stress resistance, and a fourth one. <br>
+        are two of the most common microbial archetypes for sustainable agriculture purposes. PGPBs can do lots of things,
+        but act in four main ways: <br>
+        - **Biofertilizer**: nitrogen fixation and phosphorous solubilization
+        - **Phytostimulator**: production of phytohormones (auxins, gibberellins, cytokinins)
+        - **Stress tolerance enhancer**: ACC deaminase production, proline and amine synthesis, antioxidative enzyme production
+        - **Biopesticide/biocontroller**: Antibiotic production, competitive exclusion, induced systemic resistance <br>
         Applications of microbial biostimulants have been found to reduce fertilizer requirements by 25% and increase crop yield by 17.9% on average (Adesemoye & Kloepper, 2009 ; Li et al., 2022).
         While biostimulants show promise as a potential alternative for or amendment to synthetic fertilizers, microbial biostimulants are currently held back from widespread implementation due to 
         logistical constraints arising from sub-optimal carrier materials and a lack of awareness from farmers. Carrier materials are necessary for inoculant production, as without a carrier most
@@ -625,8 +624,8 @@ ui <- navbarPage(collapsible = TRUE,
         sustainable agriculture solutions, if economically viable.
         "),
        card(
-         img(src="moryzae.jpg", height = 400, width = 400, style="display: block; margin-left: auto; margin-right: auto;"),
-         markdown("A plate containing *Methylobacterium oryzae CBMB20*")
+         img(src="moryzae.jpg"),
+         markdown("A petri dish containing *Methylobacterium oryzae CBMB20* grown on DSMZ Medium 1 + 1% Methanol.")
        )
      ) # end column wrap
     ), # end microbe card
@@ -663,12 +662,12 @@ ui <- navbarPage(collapsible = TRUE,
       "),
      div(
        card(
-       img(src="cbg_comparison.png", height = 250, width = 750, style="display: block; margin-left: auto; margin-right: auto;"),
+       img(src="cbg_comparison.png"),
        markdown("A comparison of chitosan biostimulant granules at different desiccation points: **a** is fresh,
                 **b** is at 24 hours, **c** is at 72 hours.")
        ),
        card(
-       img(src="cbg_morphology.png", height = 500, width = 750, style="display: block; margin-left: auto; margin-right: auto;"),
+       img(src="cbg_morphology.png"),
        markdown("Chitosan bacterial granules at 400x magnification. This photo does a good job
                 showing the morphological variation between beads from the same batch.")
        )
@@ -678,7 +677,7 @@ ui <- navbarPage(collapsible = TRUE,
     card(card_header("Model organism: Tomato", class = "bg-secondary", style = "font-size: 20px"),
       layout_column_wrap(
         card(
-        img(src="tomato.png", height = 400, width = 475, style="display: block; margin-left: auto; margin-right: auto;"),
+        img(src="tomato.png"),
         markdown("Healthy tomato")
         ),
      markdown("
@@ -697,7 +696,7 @@ ui <- navbarPage(collapsible = TRUE,
       As you may be able to guess, this does not do a great job facilitating a rapid turnaround of results.
       "),
         card(
-         img(src="ber-severe.png", height = 400, width = 475, style="display: block; margin-left: auto; margin-right: auto;"),
+         img(src="ber-severe.png"),
          markdown("Tomato with blossom-end rot")
         ),
       )
@@ -710,14 +709,14 @@ ui <- navbarPage(collapsible = TRUE,
         estimate of the plant's photosynthesis and water use.
         "),
         card(
-        img(src="stomates.png", height = 350, width = 600, style="display: block; margin-left: auto; margin-right: auto;"),
+        img(src="stomates.png"),
         markdown("Tomato stomates at 1000x magnification.")
         )
       )
     ),
     card(card_header("Photosystem II and you", class = "bg-secondary", style = "font-size: 20px"),
       layout_column_wrap(
-        card(img(src="thylakoid_membrane.png", height = 350, width = 600, style="display: block; margin-left: auto; margin-right: auto;"),
+        card(img(src="thylakoid_membrane.png"),
           markdown("Diagram of the photosystem complexes on the thylakoid membrane, courtesy of [Wikipedia](https://en.wikipedia.org/wiki/Photosystem).")
         ),
         markdown("
@@ -740,12 +739,10 @@ ui <- navbarPage(collapsible = TRUE,
       markdown("
       These trials were performed in a greenhouse, and the plants accumulated a number of 
       ailments over the course of the trials. The plants were subject to aphid, spidermite, and
-      whitefly infestations, for which we attempted treatment with organic pesticides. They
-      didn't work very well. Tissue infested with spidermites was removed as it was discovered, 
-      with an equal amount of tissue being removed from each other plant.
-      Blossom end-rot, of which there was a great deal, encourages the growth of 
-      secondary infections. These infections were generally fungal in nature and
-      did not spread through the plant, remaining isolated to the affected fruit.
+      whitefly infestations, for which we attempted treatment with organic pesticides.
+      Tissue infested with spidermites was removed as it was discovered, 
+      with an equal amount of tissue being removed from every other plant. These infections
+      were not bad enough to warrant removing any plant's data from the analysis.
       "),
       div(layout_column_wrap(
         card(card_header("Aphids", class = "bg-primary"),
@@ -763,8 +760,23 @@ ui <- navbarPage(collapsible = TRUE,
       ))
     )
   ),
-  ##### TOMATO INOCULANT TRIALS NAV PANEL #####
-  nav_panel("Tomato Inoculant Trials",
+  ##### DEVELOPMENT NAV PANEL #####
+  nav_panel("Development",
+    card(card_header("First Steps: From the Literature to the Lab", class = "bg-primary", style = "font-size: 20px"),
+      markdown("It didn't work, but *why* didn't it work?")
+    ),
+    card(card_header("Understanding Chitosan", class = "bg-secondary", style = "font-size: 20px"),
+         markdown("chitosan sucks")
+    ),
+    card(card_header("Nozzles, Testbenches, and Desiccation Chambers: Oh my", class = "bg-primary", style = "font-size: 20px"),
+         markdown("lots of 3d printing")
+    ),
+    card(card_header("Final Protocol", class = "bg-secondary", style = "font-size: 20px"),
+         markdown("3d printing bad")
+    )
+  ),
+  ##### TRIALS NAV PANEL #####
+  nav_panel("Trials",
     tabsetPanel(
       ##### TOMATO INOCULANT METHOD #####
       tabPanel("Inoculant Method Trial",
@@ -794,12 +806,18 @@ ui <- navbarPage(collapsible = TRUE,
                   ), # end sidebar - but not sidebar LAYOUT
                   div(
                     layout_column_wrap(
-                      plotOutput("tim_fluoro_pdf"),
-                      plotOutput("tim_fluoro_cdf")
+                      div(
+                        htmlOutput("tim_fluoro_pdf_title"),
+                        plotOutput("tim_fluoro_pdf")
+                      ),
+                      div(
+                        htmlOutput("tim_fluoro_cdf_title"),
+                        plotOutput("tim_fluoro_cdf")
+                      )
                     )
                   ),
                   div(
-                    markdown("###### **One-sample Kolmogorov-Smirnov tests for selected fluorescence variable against selected distributions**"),
+                    htmlOutput("tim_fluoro_KS_title"),
                     verbatimTextOutput("tim_fluoro_KS")
                   ),
                   div(style="border-left: 5px solid", 
@@ -824,12 +842,18 @@ ui <- navbarPage(collapsible = TRUE,
                      ), # end sidebar - but not sidebar LAYOUT
                      div(
                        layout_column_wrap(
-                         plotOutput("tim_height_pdf"),
-                         plotOutput("tim_height_cdf")
+                         div(
+                           htmlOutput("tim_height_pdf_title"),
+                           plotOutput("tim_height_pdf")
+                         ),
+                         div(
+                           htmlOutput("tim_height_cdf_title"),
+                           plotOutput("tim_height_cdf")
+                         )
                        )
                      ),
                      div(
-                       markdown("###### **One-sample Kolmogorov-Smirnov tests for height against selected distributions**"),
+                       htmlOutput("tim_height_KS_title"),
                        verbatimTextOutput("tim_height_KS")
                      )
                    ) # end sidebar layout
@@ -845,13 +869,19 @@ ui <- navbarPage(collapsible = TRUE,
                   ), # end sidebar - but not sidebar LAYOUT
                   div(
                    layout_column_wrap(
-                     plotOutput("tim_ds_pdf"),
-                     plotOutput("tim_ds_cdf")
+                     div(
+                       htmlOutput("tim_ds_pdf_title"),
+                       plotOutput("tim_ds_pdf")
+                     ),
+                     div(
+                       htmlOutput("tim_ds_cdf_title"),
+                       plotOutput("tim_ds_cdf")
+                     )
                    )
                   ),
                   div(
-                   markdown("###### **One-sample Kolmogorov-Smirnov tests for selected destructive sampling variable against selected distributions**"),
-                   verbatimTextOutput("tim_ds_KS")
+                    htmlOutput("tim_ds_KS_title"),
+                    verbatimTextOutput("tim_ds_KS")
                   ),
                   markdown("
                     > It's important to note that the root:shoot ratios **RS_Length** and **RS_Mass** are unitless ratios, so we will end up
@@ -1302,6 +1332,16 @@ ui <- navbarPage(collapsible = TRUE,
             <br>
             ")
                ), # end hypothesis and objective card
+          div(
+            layout_column_wrap(
+              card(img(src = "tim_1.jpg"),
+                   markdown("Tomato plants at six days after germination.")
+                   ),
+              card(img(src = "tim_2.jpg"),
+                   markdown("Tomato plants at thirty-five days after germination.")
+                  )
+            )
+          ),
           card(card_header("Methods", class = "bg-secondary", style = "font-size: 20px"),
             markdown("
             This experiment involved cultivating 144 tomato plants (cultivar BHN 589) for 40 days in a greenhouse.
@@ -1920,11 +1960,11 @@ ui <- navbarPage(collapsible = TRUE,
             increased nutrient availability through nitrogen fixation, and as a biopesticide ([Chauhan et al., 2015](https://www.sciencedirect.com/science/article/abs/pii/S0929139315300159)). <br>
             "),
                div(
-                   div(img(src = "TIP24_1.jpg", height = 500, width = 375, style="display: block; margin-left: auto; margin-right: auto;"),
-                       markdown("Tomato plants six days after germination")
+                   card(img(src = "til_1.jpg"),
+                       markdown("Tomato plants three weeks after germination")
                    ),
-                   div(img(src = "TIP24_2.jpg", height = 500, width = 375, style="display: block; margin-left: auto; margin-right: auto;"),
-                       markdown("Tomato plants one month after germination.")
+                   card(img(src = "til_2.jpg"),
+                       markdown("Tomato plants three months after germination.")
                    )
                ), # end tomato growth pictures div
             ) # end layout column wrap
@@ -2482,13 +2522,13 @@ ui <- navbarPage(collapsible = TRUE,
                ), # end hypothesis and objective card
           div(
             layout_column_wrap(
-              div(img(src = "TIP24_1.jpg", height = 500, width = 375, style="display: block; margin-left: auto; margin-right: auto;"),
+              card(img(src = "TIP24_1.jpg"),
                   markdown("Tomato plants six days after germination")
                   ),
-              div(img(src = "TIP24_2.jpg", height = 500, width = 375, style="display: block; margin-left: auto; margin-right: auto;"),
+              card(img(src = "TIP24_2.jpg"),
                   markdown("Tomato plants one month after germination.")
               ),
-              div(img(src = "TIP24_3.jpg", height = 500, width = 375, style="display: block; margin-left: auto; margin-right: auto;"),
+              card(img(src = "TIP24_3.jpg"),
                   markdown("Tomato plants four months after germination.")
               ),
             ) # end column wrap
@@ -2847,10 +2887,16 @@ server <- function(input, output) {
 ### Distributions
 #### Fluorescence
 ##### ks
+  output$tim_fluoro_KS_title <- renderText({
+    markdown(paste("###### **One-sample Kolmogorov-Smirnov tests for ", Rtim_fluoro_dist_var(), " against selected distributions**"))
+  })
   output$tim_fluoro_KS <- renderPrint({
     multiKS_cont(data_tim_fluoro[[Rtim_fluoro_dist_var()]], Rtim_fluoro_dists())
   })
 ##### pdf
+  output$tim_fluoro_pdf_title <- renderText({
+    markdown(paste("##### **PDF for ", Rtim_fluoro_dist_var(), " over selected distributions**"))
+  })
   output$tim_fluoro_pdf <- renderPlot({
     multiPDF_plot(data_tim_fluoro[[Rtim_fluoro_dist_var()]], Rtim_fluoro_len(), Rtim_fluoro_dists(), palette = Rpalette(), var_name = gettext(Rtim_fluoro_dist_var()))
   })
@@ -2858,8 +2904,14 @@ server <- function(input, output) {
   output$tim_fluoro_cdf <- renderPlot({
     multiCDF_plot(data_tim_fluoro[[Rtim_fluoro_dist_var()]], Rtim_fluoro_len(), Rtim_fluoro_dists(), palette = Rpalette(), var_name = gettext(Rtim_fluoro_dist_var()))
   })
+  output$tim_fluoro_cdf_title <- renderText({
+    markdown(paste("##### **CDF for ", Rtim_fluoro_dist_var(), " over selected distributions**"))
+  })
 #### Height
 ##### ks
+  output$tim_height_KS_title <- renderText({
+    markdown(paste("###### **One-sample Kolmogorov-Smirnov tests for ", Rtim_height_dist_var(), " against selected distributions**"))
+  })
   output$tim_height_KS <- renderPrint({
     multiKS_cont(data_tim_height[[Rtim_height_dist_var()]], Rtim_height_dists())
   })
@@ -2867,22 +2919,37 @@ server <- function(input, output) {
   output$tim_height_pdf <- renderPlot({
     multiPDF_plot(data_tim_height[[Rtim_height_dist_var()]], Rtim_height_len(), Rtim_height_dists(), palette = Rpalette(), var_name = gettext(Rtim_height_dist_var()))
   })
+  output$tim_height_pdf_title <- renderText({
+    markdown(paste("##### **PDF for ", Rtim_height_dist_var(), " over selected distributions**"))
+  })
 ##### cdf
   output$tim_height_cdf <- renderPlot({
     multiCDF_plot(data_tim_height[[Rtim_height_dist_var()]], Rtim_height_len(), Rtim_height_dists(), palette = Rpalette(), var_name = gettext(Rtim_height_dist_var()))
+  })
+  output$tim_height_cdf_title <- renderText({
+    markdown(paste("##### **CDF for ", Rtim_height_dist_var(), " over selected distributions**"))
   })
 #### DS
 ##### ks
   output$tim_ds_KS <- renderPrint({
     multiKS_cont(data_tim_ds[[Rtim_ds_dist_var()]], Rtim_ds_dists())
   })
+  output$tim_ds_KS_title <- renderText({
+    markdown(paste("###### **One-sample Kolmogorov-Smirnov tests for ", Rtim_ds_dist_var(), " against selected distributions**"))
+  })
 ##### pdf
   output$tim_ds_pdf <- renderPlot({
     multiPDF_plot(data_tim_ds[[Rtim_ds_dist_var()]], Rtim_ds_len(), Rtim_ds_dists(), palette = Rpalette(), var_name = gettext(Rtim_ds_dist_var()))
   })
+  output$tim_ds_pdf_title <- renderText({
+    markdown(paste("##### **PDF for ", Rtim_ds_dist_var(), " over selected distributions**"))
+  })
 ##### cdf
   output$tim_ds_cdf <- renderPlot({
     multiCDF_plot(data_tim_ds[[Rtim_ds_dist_var()]], Rtim_ds_len(), Rtim_ds_dists(), palette = Rpalette(), var_name = gettext(Rtim_ds_dist_var()))
+  })
+  output$tim_ds_cdf_title <- renderText({
+    markdown(paste("##### **CDF for ", Rtim_ds_dist_var(), " over selected distributions**"))
   })
 ### Exploratory
 #### hists
@@ -2892,13 +2959,15 @@ server <- function(input, output) {
                                 color = .data[[Rtim_fluoro_hist_color()]],
                                 fill = .data[[Rtim_fluoro_hist_color()]]))+
       geom_histogram(bins = Rtim_fluoro_hist_bins())+
-      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       theme_bw()+
       theme(
         text = element_text(size=font_sizes[3]),
         axis.title = element_text(size=font_sizes[2], face= "bold"),
-        legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold")
+        legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold"),
+        legend.position="bottom",
+        legend.title.position = "top"
       )
   })
 ##### height
@@ -2907,13 +2976,15 @@ server <- function(input, output) {
                                 color = .data[[Rtim_height_hist_color()]],
                                 fill = .data[[Rtim_height_hist_color()]]))+
       geom_histogram(bins = Rtim_height_hist_bins())+
-      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       theme_bw()+
       theme(
         text = element_text(size=font_sizes[3]),
         axis.title = element_text(size=font_sizes[2], face= "bold"),
-        legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold")
+        legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold"),
+        legend.position="bottom",
+        legend.title.position = "top"
       )
   })
 ##### ds
@@ -2922,12 +2993,14 @@ server <- function(input, output) {
                             color = .data[[Rtim_ds_hist_color()]],
                             fill = .data[[Rtim_ds_hist_color()]]))+
       geom_histogram(bins = Rtim_ds_hist_bins())+
-      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       theme_bw()+
       theme(
         text = element_text(size=font_sizes[3]),
         axis.title = element_text(size=font_sizes[2], face= "bold"),
+        legend.position="bottom",
+        legend.title.position = "top",
         legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold")
       )
   })
@@ -2945,8 +3018,9 @@ server <- function(input, output) {
         axis.title = element_text(size=font_sizes[2], face= "bold"),
         title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
         legend.title = element_text(size=font_sizes[2], face= "bold"),
+        legend.position="bottom",
         legend.title.position = "top"
-      )
+        )
     if (Rtim_fluoro_scatter_x() %in% tim_fluoro_vars_d) {
       gs <- gs + scale_x_discrete(guide=guide_axis(check.overlap=TRUE))
     } else {
@@ -2956,9 +3030,9 @@ server <- function(input, output) {
       gs <- gs + facet_wrap(~Treatment)
     }
     if (Rtim_fluoro_scatter_col() %in% tim_fluoro_vars_d) {
-      gs <- gs + scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())
+      gs <- gs + scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())
     } else {
-      gs <- gs + scale_color_scico(begin=0.9, end=0.1, palette=Rpalette())
+      gs <- gs + scale_color_scico(begin=0.9, end=0.2, palette=Rpalette())
     }
     return(gs)
   })
@@ -2975,6 +3049,7 @@ server <- function(input, output) {
         axis.title = element_text(size=font_sizes[2], face= "bold"),
         title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
         legend.title = element_text(size=font_sizes[2], face= "bold"),
+        legend.position="bottom",
         legend.title.position = "top"
       )
     if (Rtim_height_scatter_x() %in% tim_height_vars_d) {
@@ -2986,9 +3061,9 @@ server <- function(input, output) {
       gs <- gs + facet_wrap(~Treatment)
     }
     if (Rtim_height_scatter_col() %in% tim_height_vars_d) {
-      gs <- gs + scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())
+      gs <- gs + scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())
     } else {
-      gs <- gs + scale_color_scico(begin=0.9, end=0.1, palette=Rpalette())
+      gs <- gs + scale_color_scico(begin=0.9, end=0.2, palette=Rpalette())
     }
     return(gs)
   })
@@ -3005,6 +3080,7 @@ server <- function(input, output) {
         axis.title = element_text(size=font_sizes[2], face= "bold"),
         title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
         legend.title = element_text(size=font_sizes[2], face= "bold"),
+        legend.position="bottom",
         legend.title.position = "top"
       )
     if (Rtim_ds_scatter_x() %in% tim_ds_vars_d) {
@@ -3016,9 +3092,9 @@ server <- function(input, output) {
       gs <- gs + facet_wrap(~Treatment)
     }
     if (Rtim_ds_scatter_col() %in% tim_ds_vars_d) {
-      gs <- gs + scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())
+      gs <- gs + scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())
     } else {
-      gs <- gs + scale_color_scico(begin=0.9, end=0.1, palette=Rpalette())
+      gs <- gs + scale_color_scico(begin=0.9, end=0.2, palette=Rpalette())
     }
     return(gs)
   })
@@ -3031,14 +3107,16 @@ server <- function(input, output) {
       geom_boxplot(width = 0.4,  alpha = 0.8)+
       ylab(gettext(Rtim_fluoro_box_y()))+
       xlab(gettext(Rtim_fluoro_box_x()))+
-      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       theme_bw()+
       theme(
         text = element_text(size=font_sizes[3]),
         axis.title = element_text(size=font_sizes[2], face= "bold"),
         title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
-        legend.title = element_text(size=font_sizes[2], face= "bold"),
+        legend.position="bottom",
+        legend.title.position = "top",
+        legend.title = element_text(size=font_sizes[2], face= "bold")
       )
   })
 ##### height box
@@ -3049,14 +3127,16 @@ server <- function(input, output) {
       geom_boxplot(width = 0.4,  alpha = 0.8)+
       ylab(gettext(Rtim_height_box_y()))+
       xlab(gettext(Rtim_height_box_x()))+
-      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       theme_bw()+
       theme(
         text = element_text(size=font_sizes[3]),
         axis.title = element_text(size=font_sizes[2], face= "bold"),
         title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
-        legend.title = element_text(size=font_sizes[2], face= "bold"),
+        legend.position="bottom",
+        legend.title.position = "top",
+        legend.title = element_text(size=font_sizes[2], face= "bold")
       )
   })
 ##### ds box
@@ -3067,14 +3147,16 @@ server <- function(input, output) {
       geom_boxplot(width = 0.4,  alpha = 0.8)+
       ylab(gettext(Rtim_ds_box_y()))+
       xlab(gettext(Rtim_ds_box_x()))+
-      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       theme_bw()+
       theme(
         text = element_text(size=font_sizes[3]),
         axis.title = element_text(size=font_sizes[2], face= "bold"),
         title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
-        legend.title = element_text(size=font_sizes[2], face= "bold"),
+        legend.position="bottom",
+        legend.title.position = "top",
+        legend.title = element_text(size=font_sizes[2], face= "bold")
       )
   })
 ### Statistics
@@ -3123,10 +3205,10 @@ server <- function(input, output) {
   })
 ##### PCA
   output$tim_fluoro_pca <- renderPlot({
-    pca_plot(mod_data_tim_fluoro$Treatment, mod_data_tim_fluoro[,c(13:17)])+
-      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-      labs(title = "PCA for Fluorescence Environmental Variables")+
+    pca_plot(mod_data_tim_fluoro$Treatment, mod_data_tim_fluoro[,c(12:18)])+
+      scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      labs(title = "PCA for Fluorescence Variables")+
       theme(
         text = element_text(size=font_sizes[3]),
         axis.title = element_text(size=font_sizes[2], face= "bold"),
@@ -3156,8 +3238,8 @@ server <- function(input, output) {
   output$tim_pcr_gsw_pred <- renderPlot({
     predict_plot(tim_pcr_gsw_pmod, tim_pcr_data, gsw, PC1, Treatment, 100, correction = "exponential")+
       ylim(0,1.5)+
-      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())
+      scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())
   })
   output$tim_pcr_ps2_summary <- renderPrint({
     tim_pcr_ps2_sum
@@ -3179,8 +3261,8 @@ server <- function(input, output) {
   output$tim_pcr_ps2_pred <- renderPlot({
     predict_plot(tim_pcr_ps2_pmod, tim_pcr_data, PhiPS2, PC1, Treatment, 100, correction = "logit")+
       ylim(0.5,0.8)+
-      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())
+      scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())
   })
 #### height stats
   output$tim_height_mod_summary <- renderPrint({
@@ -3205,8 +3287,8 @@ server <- function(input, output) {
   })
   output$tim_height_pred <- renderPlot({
     predict_plot(tim_height_mod, data_tim_height, Height, DaysFromGermination, Treatment, 100, correction = "exponential")+
-      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())
+      scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())
   })
 #### ds stats
 ##### RS_Length
@@ -3237,14 +3319,16 @@ server <- function(input, output) {
       geom_boxplot(width=0.4, alpha = 0.8)+
       ylab("Root:Shoot Length")+
       xlab("Treatment")+
-      annotate("text", x=1:4, y=1.5, label = tim_rs_length_letters$mcletters$Letters, size=10)+
-      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      annotate("text", x=1:4, y=1.5, label = tim_rs_length_letters$mcletters$Letters, size=6)+
+      scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       theme_bw()+
       theme(
         text = element_text(size=font_sizes[3]),
         axis.title = element_text(size=font_sizes[2], face= "bold"),
         title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
+        legend.position="bottom",
+        legend.title.position = "top",
         legend.title = element_text(size=font_sizes[2], face= "bold")
       )
   })
@@ -3276,14 +3360,16 @@ server <- function(input, output) {
       geom_boxplot(width=0.4, alpha = 0.8)+
       ylab("Root:Shoot Mass")+
       xlab("Treatment")+
-      annotate("text", x=1:4, y=.8, label = tim_rs_mass_letters$mcletters$Letters, size=10)+
-      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      annotate("text", x=1:4, y=.8, label = tim_rs_mass_letters$mcletters$Letters, size=6)+
+      scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       theme_bw()+
       theme(
         text = element_text(size=font_sizes[3]),
         axis.title = element_text(size=font_sizes[2], face= "bold"),
         title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
+        legend.position="bottom",
+        legend.title.position = "top",
         legend.title = element_text(size=font_sizes[2], face= "bold")
       )
   })
@@ -3359,10 +3445,12 @@ server <- function(input, output) {
       theme(
         text = element_text(size=font_sizes[3]),
         axis.title = element_text(size=font_sizes[2], face= "bold"),
+        legend.position="bottom",
+        legend.title.position = "top",
         legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold"),
       )
-    gh <- gh + scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())
-    gh <- gh + scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())
+    gh <- gh + scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())
+    gh <- gh + scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())
     return(gh)
   })
   output$til_fruit_hist <- renderPlot({
@@ -3373,10 +3461,12 @@ server <- function(input, output) {
       theme(
         text = element_text(size=font_sizes[3]),
         axis.title = element_text(size=font_sizes[2], face= "bold"),
+        legend.position="bottom",
+        legend.title.position = "top",
         legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold"),
       )
-    ph <- ph + scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())
-    ph <- ph + scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())
+    ph <- ph + scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())
+    ph <- ph + scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())
     return(ph)
   })
   # scatters
@@ -3392,6 +3482,7 @@ server <- function(input, output) {
         axis.title = element_text(size=font_sizes[2], face= "bold"),
         title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
         legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold"),
+        legend.position="bottom",
         legend.title.position = "top"
       )
     if (Rtil_fluoro_scatter_x() %in% til_fluoro_vars_d) {
@@ -3403,9 +3494,9 @@ server <- function(input, output) {
       gs <- gs + facet_wrap(~Treatment)
     }
     if (Rtil_fluoro_scatter_col() %in% til_fluoro_vars_d) {
-      gs <- gs + scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())
+      gs <- gs + scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())
     } else {
-      gs <- gs + scale_color_scico(begin=0.9, end=0.1, palette=Rpalette())
+      gs <- gs + scale_color_scico(begin=0.9, end=0.2, palette=Rpalette())
     }
     return(gs)
   })
@@ -3421,7 +3512,7 @@ server <- function(input, output) {
         axis.title = element_text(size=font_sizes[2], face= "bold"),
         title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
         legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold"),
-        #        legend.position = "bottom",
+        legend.position = "bottom",
         legend.title.position = "top"
       )
     if (Rtil_fruit_scatter_x() %in% til_fruit_vars_d) {
@@ -3433,9 +3524,9 @@ server <- function(input, output) {
       ps <- ps + facet_wrap(~Treatment)
     }
     if (Rtil_fruit_scatter_col() %in% til_fruit_vars_d) {
-      ps <- ps + scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())
+      ps <- ps + scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())
     } else {
-      ps <- ps + scale_color_scico(begin=0.9, end=0.1, palette=Rpalette())
+      ps <- ps + scale_color_scico(begin=0.9, end=0.2, palette=Rpalette())
     }
     return(ps)
   })
@@ -3456,7 +3547,7 @@ server <- function(input, output) {
         axis.title = element_text(size=font_sizes[2], face= "bold"),
         title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
         legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold"),
-        #        legend.position = "bottom",
+        legend.position = "bottom",
         legend.title.position = "top"
       )
   })
@@ -3468,15 +3559,15 @@ server <- function(input, output) {
       geom_boxplot(width=0.4, alpha = 0.8)+
       ylab(gettext(Rtil_fruit_box_y()))+
       xlab(gettext(Rtil_fruit_box_x()))+
-      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       theme_bw()+
       theme(
         text = element_text(size=font_sizes[3]),
         axis.title = element_text(size=font_sizes[2], face= "bold"),
         title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
         legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold"),
-        #        legend.position = "bottom",
+        legend.position = "bottom",
         legend.title.position = "top"
       )
   })
@@ -3488,15 +3579,15 @@ server <- function(input, output) {
       geom_boxplot(width=0.4, alpha = 0.8)+
       ylab(gettext(Rtil_fruit_sum_box_y()))+
       xlab(gettext(Rtil_fruit_sum_box_x()))+
-      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       theme_bw()+
       theme(
         text = element_text(size=font_sizes[3]),
         axis.title = element_text(size=font_sizes[2], face= "bold"),
         title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
         legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold"),
-        #        legend.position = "bottom",
+        legend.position = "bottom",
         legend.title.position = "top"
       )
   })
@@ -3546,10 +3637,10 @@ server <- function(input, output) {
   })
   ##### PCA
   output$til_fluoro_pca <- renderPlot({
-    pca_plot(mod_data_til_fluoro$Treatment, mod_data_til_fluoro[,c(14:18)])+
-      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-      labs(title = "PCA for Fluorescence Environmental Variables")+
+    pca_plot(mod_data_til_fluoro$Treatment, mod_data_til_fluoro[,c(13:19)])+
+      scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      labs(title = "PCA for Fluorescence Variables")+
       theme(
         text = element_text(size=font_sizes[3]),
         axis.title = element_text(size=font_sizes[2], face= "bold"),
@@ -3579,8 +3670,8 @@ server <- function(input, output) {
   output$til_pcr_gsw_pred <- renderPlot({
     predict_plot(til_pcr_gsw_pmod, til_pcr_data, gsw, PC1, Treatment, 100, correction = "exponential")+
       ylim(0,1.5)+
-      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())
+      scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())
   })
   output$til_pcr_ps2_summary <- renderPrint({
     til_pcr_ps2_sum
@@ -3602,8 +3693,8 @@ server <- function(input, output) {
   output$til_pcr_ps2_pred <- renderPlot({
     predict_plot(til_pcr_ps2_pmod, til_pcr_data, PhiPS2, PC1, Treatment, 100, correction = "logit")+
       ylim(0.5,0.8)+
-      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())
+      scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())
   })
   #### fruit
   ##### mass
@@ -3634,14 +3725,16 @@ server <- function(input, output) {
       geom_boxplot(width=0.4, alpha = 0.8)+
       ylab("Mean Mass (g)")+
       xlab("Treatment")+
-      annotate("text", x=1:4, y=120, label = til_mass_letters$mcletters$Letters, size=10)+
-      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      annotate("text", x=1:4, y=120, label = til_mass_letters$mcletters$Letters, size=6)+
+      scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       theme_bw()+
       theme(
         text = element_text(size=font_sizes[3]),
         axis.title = element_text(size=font_sizes[2], face= "bold"),
         title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
+        legend.position="bottom",
+        legend.title.position = "top",
         legend.title = element_text(size=font_sizes[2], face= "bold")
       )
   })
@@ -3668,8 +3761,8 @@ server <- function(input, output) {
   })
   output$til_sug_annotated <- renderPlot({
     predict_plot(til_sug_mod, data_til_fruit_summary, pSugar_mean, Mass_mean, Treatment, 100, correction = "logit")+
-      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())
+      scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())
   })
   ##### ber
   output$til_ber_mod_summary <- renderPrint({
@@ -3699,14 +3792,16 @@ server <- function(input, output) {
       geom_boxplot(width=0.4, alpha = 0.8)+
       ylab("Mean Blossom End-Rot (%)")+
       xlab("Treatment")+
-      annotate("text", x=1:4, y=75, label = til_ber_letters$mcletters$Letters, size=10)+
-      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      annotate("text", x=1:4, y=75, label = til_ber_letters$mcletters$Letters, size=6)+
+      scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       theme_bw()+
       theme(
         text = element_text(size=font_sizes[3]),
         axis.title = element_text(size=font_sizes[2], face= "bold"),
         title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
+        legend.position="bottom",
+        legend.title.position = "top",
         legend.title = element_text(size=font_sizes[2], face= "bold")
       )
   })
@@ -3733,14 +3828,16 @@ server <- function(input, output) {
       geom_boxplot(width=0.4, alpha = 0.8)+
       ylab("Fruit Count")+
       xlab("Treatment")+
-      annotate("text", x=1:4, y=100, label = til_fc_letters$mcletters$Letters, size=10)+
-      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      annotate("text", x=1:4, y=100, label = til_fc_letters$mcletters$Letters, size=6)+
+      scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())
       theme_bw()+
       theme(
         text = element_text(size=font_sizes[3]),
         axis.title = element_text(size=font_sizes[2], face= "bold"),
         title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
+        legend.position="bottom",
+        legend.title.position = "top",
         legend.title = element_text(size=font_sizes[2], face= "bold")
       )
   })
@@ -3816,10 +3913,12 @@ server <- function(input, output) {
       theme(
         text = element_text(size=font_sizes[3]),
         axis.title = element_text(size=font_sizes[2], face= "bold"),
-        legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold"),
+        legend.position="bottom",
+        legend.title.position = "top",
+        legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold")
       )
-    gh <- gh + scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())
-    gh <- gh + scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())
+    gh <- gh + scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())
+    gh <- gh + scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())
     return(gh)
   })
   output$tit_fruit_hist <- renderPlot({
@@ -3830,10 +3929,12 @@ server <- function(input, output) {
       theme(
         text = element_text(size=font_sizes[3]),
         axis.title = element_text(size=font_sizes[2], face= "bold"),
-        legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold"),
+        legend.position="bottom",
+        legend.title.position = "top",
+        legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold")
       )
-    ph <- ph + scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())
-    ph <- ph + scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())
+    ph <- ph + scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())
+    ph <- ph + scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())
     return(ph)
   })
 # scatters
@@ -3849,6 +3950,7 @@ server <- function(input, output) {
         axis.title = element_text(size=font_sizes[2], face= "bold"),
         title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
         legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold"),
+        legend.position="bottom",
         legend.title.position = "top"
       )
     if (Rtit_fluoro_scatter_x() %in% tit_fluoro_vars_d) {
@@ -3860,9 +3962,9 @@ server <- function(input, output) {
       gs <- gs + facet_wrap(~Treatment)
     }
     if (Rtit_fluoro_scatter_col() %in% tit_fluoro_vars_d) {
-      gs <- gs + scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())
+      gs <- gs + scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())
     } else {
-      gs <- gs + scale_color_scico(begin=0.9, end=0.1, palette=Rpalette())
+      gs <- gs + scale_color_scico(begin=0.9, end=0.2, palette=Rpalette())
     }
     return(gs)
   })
@@ -3878,7 +3980,7 @@ server <- function(input, output) {
         axis.title = element_text(size=font_sizes[2], face= "bold"),
         title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
         legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold"),
-        #        legend.position = "bottom",
+        legend.position = "bottom",
         legend.title.position = "top"
       )
     if (Rtit_fruit_scatter_x() %in% tit_fruit_vars_d) {
@@ -3890,9 +3992,9 @@ server <- function(input, output) {
       ps <- ps + facet_wrap(~Treatment)
     }
     if (Rtit_fruit_scatter_col() %in% tit_fruit_vars_d) {
-      ps <- ps + scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())
+      ps <- ps + scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())
     } else {
-      ps <- ps + scale_color_scico(begin=0.9, end=0.1, palette=Rpalette())
+      ps <- ps + scale_color_scico(begin=0.9, end=0.2, palette=Rpalette())
     }
     return(ps)
   })
@@ -3905,15 +4007,15 @@ server <- function(input, output) {
       geom_boxplot(width = 0.4,  alpha = 0.8)+
       ylab(gettext(Rtit_fluoro_box_y()))+
       xlab(gettext(Rtit_fluoro_box_x()))+
-      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       theme_bw()+
       theme(
         text = element_text(size=font_sizes[3]),
         axis.title = element_text(size=font_sizes[2], face= "bold"),
         title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
         legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold"),
-        #        legend.position = "bottom",
+        legend.position = "bottom",
         legend.title.position = "top"
       )
   })
@@ -3925,15 +4027,15 @@ server <- function(input, output) {
       geom_boxplot(width=0.4, alpha = 0.8)+
       ylab(gettext(Rtit_fruit_box_y()))+
       xlab(gettext(Rtit_fruit_box_x()))+
-      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       theme_bw()+
       theme(
         text = element_text(size=font_sizes[3]),
         axis.title = element_text(size=font_sizes[2], face= "bold"),
         title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
         legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold"),
-        #        legend.position = "bottom",
+        legend.position = "bottom",
         legend.title.position = "top"
       )
   })
@@ -3945,15 +4047,15 @@ server <- function(input, output) {
       geom_boxplot(width=0.4, alpha = 0.8)+
       ylab(gettext(Rtit_fruit_sum_box_y()))+
       xlab(gettext(Rtit_fruit_sum_box_x()))+
-      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       theme_bw()+
       theme(
         text = element_text(size=font_sizes[3]),
         axis.title = element_text(size=font_sizes[2], face= "bold"),
         title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
         legend.title = ggplot2::element_text(size=font_sizes[2], face= "bold"),
-        #        legend.position = "bottom",
+        legend.position = "bottom",
         legend.title.position = "top"
       )
   })
@@ -4003,10 +4105,10 @@ server <- function(input, output) {
   })
 ##### PCA
   output$tit_fluoro_pca <- renderPlot({
-    pca_plot(mod_data_tit_fluoro$Treatment, mod_data_tit_fluoro[,c(14:18)])+
-    scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-    scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-      labs(title = "PCA for Fluorescence Environmental Variables")+
+    pca_plot(mod_data_tit_fluoro$Treatment, mod_data_tit_fluoro[,c(13:19)])+
+      scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      labs(title = "PCA for Fluorescence Variables")+
     theme(
       text = element_text(size=font_sizes[3]),
       axis.title = element_text(size=font_sizes[2], face= "bold"),
@@ -4036,8 +4138,8 @@ server <- function(input, output) {
   output$tit_pcr_gsw_pred <- renderPlot({
     predict_plot(tit_pcr_gsw_pmod, tit_pcr_data, gsw, PC1, Treatment, 100, correction = "exponential")+
       ylim(0,1.5)+
-      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())
+      scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())
   })
   output$tit_pcr_ps2_summary <- renderPrint({
     tit_pcr_ps2_sum
@@ -4059,8 +4161,8 @@ server <- function(input, output) {
   output$tit_pcr_ps2_pred <- renderPlot({
     predict_plot(tit_pcr_ps2_pmod, tit_pcr_data, PhiPS2, PC1, Treatment, 100, correction = "logit")+
       ylim(0.5,0.8)+
-      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())
+      scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())
   })
 #### fruit
 ##### mass
@@ -4091,14 +4193,16 @@ server <- function(input, output) {
       geom_boxplot(width=0.4, alpha = 0.8)+
       ylab("Mean Mass (g)")+
       xlab("Treatment")+
-      annotate("text", x=1:4, y=200, label = tit_mass_letters$mcletters$Letters, size=10)+
-      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      annotate("text", x=1:4, y=200, label = tit_mass_letters$mcletters$Letters, size=6)+
+      scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       theme_bw()+
       theme(
         text = element_text(size=font_sizes[3]),
         axis.title = element_text(size=font_sizes[2], face= "bold"),
         title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
+        legend.position="bottom",
+        legend.title.position = "top",
         legend.title = element_text(size=font_sizes[2], face= "bold")
       )
   })
@@ -4125,8 +4229,8 @@ server <- function(input, output) {
   })
   output$tit_sug_annotated <- renderPlot({
     predict_plot(tit_sug_mod, data_tit_fruit_summary, pSugar_mean, Mass_mean, Treatment, 100, correction = "logit")+
-      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())
+      scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())
   })
 ##### ber
   output$tit_ber_mod_summary <- renderPrint({
@@ -4156,14 +4260,16 @@ server <- function(input, output) {
       geom_boxplot(width=0.4, alpha = 0.8)+
       ylab("Mean Blossom End-Rot (%)")+
       xlab("Treatment")+
-      annotate("text", x=1:4, y=22, label = tit_ber_letters$mcletters$Letters, size=10)+
-      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      annotate("text", x=1:4, y=22, label = tit_ber_letters$mcletters$Letters, size=6)+
+      scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       theme_bw()+
       theme(
         text = element_text(size=font_sizes[3]),
         axis.title = element_text(size=font_sizes[2], face= "bold"),
         title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
+        legend.position="bottom",
+        legend.title.position = "top",
         legend.title = element_text(size=font_sizes[2], face= "bold")
       )
   })
@@ -4190,14 +4296,16 @@ server <- function(input, output) {
       geom_boxplot(width=0.4, alpha = 0.8)+
       ylab("Fruit Count")+
       xlab("Treatment")+
-      annotate("text", x=1:4, y=30, label = tit_fc_letters$mcletters$Letters, size=10)+
-      scale_color_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
-      scale_fill_scico_d(begin=0.9, end=0.1, palette=Rpalette())+
+      annotate("text", x=1:4, y=30, label = tit_fc_letters$mcletters$Letters, size=6)+
+      scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       theme_bw()+
       theme(
         text = element_text(size=font_sizes[3]),
         axis.title = element_text(size=font_sizes[2], face= "bold"),
         title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
+        legend.position="bottom",
+        legend.title.position = "top",
         legend.title = element_text(size=font_sizes[2], face= "bold")
       )
   })

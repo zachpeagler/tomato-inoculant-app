@@ -39,7 +39,6 @@ li_data <- read.csv(li_data_file)[,c(2,3,7,8,9,10,17,28,32,34,35,36,39,40)] %>%
          DaysFromGermination = as.numeric(round(difftime(Date, tim_germ_date, units = c("days")), 0)),
          Date = as.Date(Date),
          Time = parse_date_time(Time, orders = "T"),
-         Time = as.factor(format(Time, "%H:%M:%S")),
          Treatment = factor(Treatment, 
                             levels = tim_treatment_order),
          Inoculation = case_when(
@@ -72,9 +71,15 @@ li_data <- read.csv(li_data_file)[,c(2,3,7,8,9,10,17,28,32,34,35,36,39,40)] %>%
          Plant = factor(Plant, levels = tim_levels),
          P_atm = P_atm
   ) %>%
-  rename(Pot=Column)
+  rename(Pot=Column) %>%
+  group_by(DaysFromGermination) %>%
+  mutate(MinutesFromStart = as.numeric(round(difftime(Time, min(Time), units = "mins"), 2))) %>%
+  ungroup() %>%
+  mutate(
+    Time = as.factor(format(Time, "%H:%M:%S"))
+  )
 
-data_tim_fluoro <- li_data[,c(5,16,17,1,2,15,3,4,18,9,10,12,14,11,6,8,19)] %>%
+data_tim_fluoro <- li_data[,c(5,16,17,1,2,15,20,3,4,18,9,10,12,14,11,6,8,19)] %>%
   rename(AmbientHumidity = rh_s,
          AmbientTemperature = Tref,
          AmbientPressure = P_atm,
@@ -83,6 +88,7 @@ data_tim_fluoro <- li_data[,c(5,16,17,1,2,15,3,4,18,9,10,12,14,11,6,8,19)] %>%
   ) %>% mutate(
     AmbientLight = as.numeric(AmbientLight)
   )
+
 save(data_tim_fluoro, file = "C:/Github/tomato-inoculant-app/app/data_tim_fluoro.RData")
 
 ## HEIGHT
@@ -341,10 +347,10 @@ d23_li <- read.csv(d23_li_file, stringsAsFactors = T) %>%
          LogitPhiPS2 = logit(PhiPS2, FALSE)
   ) %>%
   group_by(DaysFromGermination) %>%
-  mutate(MinutesFromStart = round(difftime(Time, min(Time), units = "mins"), 2)) %>%
+  mutate(MinutesFromStart = as.numeric(round(difftime(Time, min(Time), units = "mins"), 2))) %>%
   ungroup() %>%
   mutate(
-    Time = format(Time, "%H:%M:%S")
+    Time = as.factor(format(Time, "%H:%M:%S"))
   )
 
 ## multispeq
@@ -381,10 +387,17 @@ d23_m <- read.csv(d23_m_file) %>%
     DaysFromGermination = as.numeric(round(difftime(Date, germdate23, units = c("days")), 0)),
     datetime = parse_date_time(time, "%m/%d/%Y %H:%M"),
     Time = format(datetime, "%H:%M:%S"),
+    Time = parse_date_time(Time, orders = "T"),
     LogitPhiPS2 = logit(Phi2, FALSE),
+  ) %>%
+  group_by(DaysFromGermination) %>%
+  mutate(MinutesFromStart = as.numeric(round(difftime(Time, min(Time), units = "mins"), 2))) %>%
+  ungroup() %>%
+  mutate(
+    Time = as.factor(format(Time, "%H:%M:%S"))
   )
 
-data_til_fluoro <- d23_li[,c(61,62,63,2,3,64,8,7,65,31,33,35,39,34,9,27,66)] %>%
+data_til_fluoro <- d23_li[,c(61,62,63,2,3,64,67,8,7,65,31,33,35,39,34,9,27,66)] %>%
   rename(AmbientHumidity = rh_s,
          AmbientTemperature = Tref,
          AmbientPressure = P_atm,
@@ -399,7 +412,7 @@ data_til_fluoro <- d23_li[,c(61,62,63,2,3,64,8,7,65,31,33,35,39,34,9,27,66)] %>%
     Device = "Li-600"
   )
 
-temp_til_fluoro <- d23_m[,c(59,60,61,67,64,65,4,3,63,6,8,7,30,23,45,37,68)] %>%
+temp_til_fluoro <- d23_m[,c(59,60,61,67,64,65,69,4,3,63,6,8,7,30,23,45,37,68)] %>%
   rename(
     AmbientHumidity = Ambient.Humidity,
     AmbientTemperature = Ambient.Temperature,
@@ -574,7 +587,7 @@ d24_li <- read.csv(d24_li_file, stringsAsFactors = F) %>%
          logitPS2 = logit(PhiPS2, FALSE)
   ) %>%
   group_by(DaysFromGermination) %>%
-  mutate(MinutesFromStart = round(difftime(Time, min(Time), units = "mins"), 2)) %>%
+  mutate(MinutesFromStart = as.numeric(round(difftime(Time, min(Time), units = "mins"), 2))) %>%
   ungroup() %>%
   mutate(
     Time = format(Time, "%H:%M:%S")
@@ -613,9 +626,16 @@ d24_m <- read.csv(d24_m_file) %>%
     Device.ID = as.factor(Device.ID),
     Date = as.Date(time, "%m/%d/%Y"),
     DaysFromGermination = as.numeric(round(difftime(Date, germdate24, units = c("days")), 0)),
-    time = parse_date_time(time, "%m/%d/%Y %H:%M"),
-    Time = format(time, "%H:%M:%S"),
+    datetime = parse_date_time(time, "%m/%d/%Y %H:%M"),
+    Time = format(datetime, "%H:%M:%S"),
+    Time = parse_date_time(Time, orders = "T"),
     logitPS2 = logit(Phi2, FALSE),
+  ) %>%
+  group_by(DaysFromGermination) %>%
+  mutate(MinutesFromStart = as.numeric(round(difftime(Time, min(Time), units = "mins"), 2))) %>%
+  ungroup() %>%
+  mutate(
+    Time = format(Time, "%H:%M:%S")
   )
 
 
@@ -638,9 +658,9 @@ data_tit_fluoro <- d24_li %>% mutate(
          Row = as.factor(Row),
          Pot = as.factor(Pot)
          )
-data_tit_fluoro <- data_tit_fluoro[,c(15,16,17,1,18,19,14,4,20,8,9,11,13,10,5,7,21,23)]
+data_tit_fluoro <- data_tit_fluoro[,c(15,16,17,1,18,19,22,14,4,20,8,9,11,13,10,5,7,21,23)]
 
-temp_tit_fluoro <- d24_m[,c(63,64,65,70,68,69,8,7,67,10,12,11,34,27,49,41,71)] %>% mutate(
+temp_tit_fluoro <- d24_m[,c(63,64,65,71,68,69,73,8,7,67,10,12,11,34,27,49,41,72)] %>% mutate(
   Device = "MultispeQ") %>%
   rename(AmbientLight = Light.Intensity..PAR.,
          AmbientPressure = Ambient.Pressure,
