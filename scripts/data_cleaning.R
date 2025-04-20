@@ -327,7 +327,7 @@ data_til_fruit_summary2 <- d23_fl %>%
                list(sum=sum)) %>%
   ungroup()
 
-save(data_til_fruit_summary2, file = "C:/Github/tomato-inoculant-app/app/data_tit_fruit_summary2.RData")
+save(data_til_fruit_summary2, file = "C:/Github/tomato-inoculant-app/app/data_til_fruit_summary2.RData")
 
 
 d23_li <- read.csv(d23_li_file, stringsAsFactors = T) %>%

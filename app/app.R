@@ -32,11 +32,13 @@ load("data_tim_height.RData")
 ## TIL
 load("data_til_fruit.RData")
 load("data_til_fruit_summary.RData")
+load("data_til_fruit_summary2.RData")
 load("data_til_fluoro.RData")
 ## TIT
 load("data_tit_fluoro.RData")
 load("data_tit_fruit.RData")
 load("data_tit_fruit_summary.RData")
+load("data_tit_fruit_summary2.RData")
 
 # scale variables for later use in modeling
 ## scaling is important so they have equal "weight" in the model
@@ -597,43 +599,48 @@ ui <- navbarPage(collapsible = TRUE,
   theme = bs_theme(version = 5, bootswatch = "flatly"),
   ##### BACKGROUND NAV PANEL #####
   nav_panel("Background",
-    card(card_header("The Green Revolution and Synthetic Fertilizers", class = "bg-primary", style = "font-size: 20px"),
+    card(card_header("Synthetic Fertilizers", class = "bg-primary", style = "font-size: 20px"),
       layout_columns(col_widths = c(5,7),
           card(
          img(src="hab.png"),
-         markdown("Image from [USGS EROS](https://landsat.gsfc.nasa.gov/article/satellites-on-toxic-algae-patrol/)")
+         markdown("Image of a harmful algae bloom in Lake Erie in 2017, courtesy of [USGS EROS](https://landsat.gsfc.nasa.gov/article/satellites-on-toxic-algae-patrol/)")
        ),
        markdown("
-        In the 20th century, new methods were required to feed an expanding human population,
-        and the solution was the creation of synthetic fertilizers: inorganic sources of nitrogen (N),
-        phosphorous (P), and sodium (K) that (along with synthetic pesticides) became the foundation
-        for the Green Revolution. However, these solutions quickly became problems in their own right.
-        Synthetic pesticides wreaked havoc on the ecosystem, destroying large bird populations and causing
-        cancer at alarming rates. Synthetic fertilizers followed suit with harmful algal blooms. In recent years,
-        the 4R method has garnered much attention, where synthetic fertilizers, when applied with the four R's in mind: Right time, Right place,
-        Right source, and Right rate. However, this is not enough to stop the historic runoff rates that we're seeing.
-        Up to 60% of applied fertilizers run off into the environment, and with fertilizers being more expensive than ever, 
-        taking up over a third of the average American farmer's budget, with fertilizer prices tripling in 
-        recent years, we can do better.
+        The human population has recently surpassed 8 billion and is expected
+        to exceed 9.8 billion by 2050 ([UN, 2017](https://desapublications.un.org/publications/world-population-prospects-2017-revision)),
+        and this expanding population requires an expanding food supply,
+        with food production projected to increase by 70% from 2005 to 2050 ([Noel et al., 2015](https://www.eld-initiative.org/fileadmin/pdf/ELD-pm-report_05_web_300dpi.pdf)).
+        The predominant approach to maximizing crop yield is the use of synthetic fertilizers,
+        chemically manufactured sources of nitrogen, phosphorous, and potassium, 
+        which have had environmental impacts including groundwater contamination, 
+        water body eutrophication, ecosystem disruption, greenhouse gas emission, 
+        and stratospheric ozone depletion ([Conley et al., 2009](https://www.science.org/doi/10.1126/science.1167755); [Rosa & Gabrielli, 2022](https://iopscience.iop.org/article/10.1088/1748-9326/aca815)). 
+        These synthetic fertilizers are also expensive, accounting for 20% to 36% of a farm’s budget, 
+        with this cost nearly tripling in the past two years ([Schnitkey et al., 2021](https://farmdocdaily.illinois.edu/2021/10/2022-planting-decisions-nitrogen-fertilizer-prices-and-corn-and-soybean-prices.html); [Brownlie et al., 2023](https://www.frontiersin.org/journals/sustainable-food-systems/articles/10.3389/fsufs.2023.1088776/full)).
+        Sustainable alternative solutions to synthetic fertilizers are necessary to alleviate the 
+        environmental and economic toll of synthetic fertilizers while also feeding an expanding human population ([Fitter, 2012](https://nph.onlinelibrary.wiley.com/doi/10.1111/j.1469-8137.2011.03995.x)).
         ")
       )
     ),
-    card(card_header("Microbes as sustainable agriculture solutions", class = "bg-secondary", style = "font-size: 20px"),
+    card(card_header("Microbes as a Sustainable Agriculture Solution", class = "bg-secondary", style = "font-size: 20px"),
      layout_columns(col_widths = c(7,5),
        markdown("
         In recent years, microbes have garnered much attention for their potential in sustainable agriculture.
-        A recent report has stated that microbial fertilizers have the potential to generate billions in social benefits by reducing the emissions from synthetic fertilizers (UC Innovation Commission, 2023).
+        A recent report has stated that microbial fertilizers have the potential to generate billions in 
+        social benefits by reducing the emissions from synthetic fertilizers ([UC Innovation Commission, 2023](https://innovationcommission.uchicago.edu/research_briefs/microbial-fertilizer/)).
         Plant growth promoting bacteria (PGPB) and arbuscular mycorrhical fungi (AMF)
-        are two of the most common microbial archetypes for sustainable agriculture purposes. PGPBs can do lots of things,
+        are two of the most common microbial archetypes for sustainable agriculture purposes. PGPBs have many different modes of action,
         but act in four main ways: <br>
         - **Biofertilizer**: nitrogen fixation and phosphorous solubilization
         - **Phytostimulator**: production of phytohormones (auxins, gibberellins, cytokinins)
         - **Stress tolerance enhancer**: ACC deaminase production, proline and amine synthesis, antioxidative enzyme production
         - **Biopesticide/biocontroller**: Antibiotic production, competitive exclusion, induced systemic resistance <br>
-        Applications of microbial biostimulants have been found to reduce fertilizer requirements by 25% and increase crop yield by 17.9% on average (Adesemoye & Kloepper, 2009 ; Li et al., 2022).
+        
+        Applications of microbial biostimulants have been found to reduce fertilizer requirements by 25% and increase crop yield by 17.9% on average ([Adesemoye & Kloepper, 2009](https://pubmed.ncbi.nlm.nih.gov/19707753/); [Li et al., 2022](https://www.frontiersin.org/journals/plant-science/articles/10.3389/fpls.2022.836702/full)).
         While biostimulants show promise as a potential alternative for or amendment to synthetic fertilizers, microbial biostimulants are currently held back from widespread implementation due to 
         logistical constraints arising from sub-optimal carrier materials and a lack of awareness from farmers. Carrier materials are necessary for inoculant production, as without a carrier most
-        PGPB populations decline rapidly after inoculation (Bashan et al., 2014). Multiple studies have shown that combinations of PGPBs are more effective than lone PGPBs (Madhaiyan et al., 2010; He et al., 2019), 
+        PGPB populations decline rapidly after inoculation ([Bashan et al., 2014](https://link.springer.com/article/10.1007/s11104-013-1956-x)).
+        Multiple studies have shown that combinations of PGPBs are more effective than lone PGPBs ([Madhaiyan et al., 2010](https://www.researchgate.net/publication/225966871_Effect_of_co-inoculation_of_methylotrophic_Methylobacterium_oryzae_with_Azospirillum_brasilense_and_Burkholderia_pyrrocinia_on_the_growth_and_nutrient_uptake_of_tomato_red_pepper_and_rice); [He et al., 2019](https://pubmed.ncbi.nlm.nih.gov/30955229/)), 
         with the exact biostimulant load depending on the target crop and soil conditions,
         warranting further research. The overarching objective of my research was to test 
         chitosan as a carrier material for PGPBs, ranging from a single species (M. oryzae) 
@@ -648,36 +655,32 @@ ui <- navbarPage(collapsible = TRUE,
        )
      ) # end column wrap
     ), # end microbe card
-    card(card_header("Biopolymer immobilization of microbes", class = "bg-primary", style = "font-size: 20px"),
+    card(card_header("Biopolymer Immobilization of Microbes", class = "bg-primary", style = "font-size: 20px"),
      layout_columns(col_widths = c(5,7),
      markdown("
       Then comes the question of how we most effectively deliver the microbes to the plants. This is the
       core question that I was interested in answering with my thesis.
       Current carrier materials can be classified as either wet or dry, with dry inoculants (peat, clay, lignite, etc.) 
       having longer shelf lives, lower contamination risk, and cheaper storage and transportation costs than liquid
-      inoculants (Bashan et al., 2014). Dry carriers can be applied directly to the soil or dissolved in water for 
+      inoculants ([Bashan et al., 2014](https://link.springer.com/article/10.1007/s11104-013-1956-x)). Dry carriers can be applied directly to the soil or dissolved in water for 
       a foliar inoculation, while wet carriers are applied almost exclusively as a foliar inoculation. 
-      In a broad review (Li et al., 2022), soil inoculation has generally been shown to be more effective at increasing 
+      In a broad review ([Li et al., 2022](https://www.frontiersin.org/journals/plant-science/articles/10.3389/fpls.2022.836702/full)), soil inoculation has generally been shown to be more effective at increasing 
       yield than foliar inoculation. Dry inoculants have shown inconsistent results in the field, 
       shown unreliable performance in different environments, are often expensive, and are easily contaminated, 
-      preventing their widespread implementation.(Bashan et al., 2014) 
+      preventing their widespread implementation ([Bashan et al., 2014](https://link.springer.com/article/10.1007/s11104-013-1956-x)). 
       To achieve the next step towards widespread biostimulant use, inoculation methods
       must prove that they can reliably maintain microbial viability and efficacy in the field 
-      after long-term storage and exposure to environmental stressors, all while being cheap, safe, and easy to produce and use (Bashan et al., 2014).
+      after long-term storage and exposure to environmental stressors, all while being cheap, safe, and easy to produce and use ([Bashan et al., 2014](https://link.springer.com/article/10.1007/s11104-013-1956-x)).
       <br>
       A new inoculation method that has shown promise is encapsulation, the process of immobilizing
       biostimulants in droplet-derived granules which can then be dried for storage and transport. 
       Encapsulation requires an encapsulation base and a cross-linker. One encapsulation base that has 
       shown great promise is chitosan, itself a biostimulant that has been shown to increase plant growth 
-      and stress tolerance in tomato plants and can entrap microbial biostimulants in granules (Chanratana et al., 2019). 
-      Another encapsulation base, alginate, is also a biostimulant that can entrap microbes (Joe et al., 2012). 
+      and stress tolerance in tomato plants and can entrap microbial biostimulants in granules ([Chanratana et al., 2018](https://www.researchgate.net/profile/Aritra-Choudhury/publication/323564168_Evaluation_of_chitosan_and_alginate_immobilized_Methylobacterium_oryzae_CBMB20_on_tomato_plant_growth/links/5a9e6fcfa6fdcc214af2b315/Evaluation-of-chitosan-and-alginate-immobilized-Methylobacterium-oryzae-CBMB20-on-tomato-plant-growth.pdf)). 
       Encapsulation has been shown to increase microbial viability in the presence of desiccation stress, 
-      as well as allow for a controlled release of the inoculant (Schoebitz et al., 2013).
-      Studies have shown that both bacteria and fungi can be encapsulated and maintain their viability, 
-      but many of these studies have been done with alginate rather than chitosan, despite chitosan having 
-      been shown to be more effective at maintaining microbial viability than alginate (Declerck, 1996; Bashan & Gonzalez, 1999; Chanratana et al., 2018). 
+      as well as allow for a controlled release of the inoculant ([Schoebitz et al., 2013](https://www.researchgate.net/publication/236119384_Bioencapsulation_of_microbial_inoculants_for_better_soil-plant_fertilization_A_review)).
       Studies also suggest that encapsulation is necessary for PGPBs and AMFs to achieve maximum effectiveness and viability 
-      while also being practical for implementation by farmers (Bashan et al., 2014; Berninger et al., 2018).
+      while also being practical for implementation by farmers ([Bashan et al., 2014](https://link.springer.com/article/10.1007/s11104-013-1956-x); [Berninger et al., 2018](https://pubmed.ncbi.nlm.nih.gov/29205959/)).
       "),
      div(
        card(
@@ -693,8 +696,8 @@ ui <- navbarPage(collapsible = TRUE,
      )
      ) # end column layout
     ),
-    card(card_header("Model organism: Tomato", class = "bg-secondary", style = "font-size: 20px"),
-      layout_column_wrap(
+    card(card_header("Model Organism: Tomato", class = "bg-secondary", style = "font-size: 20px"),
+      layout_columns(col_widths = c(4, 4, 4),
         card(
         img(src="tomato.png"),
         markdown("Healthy tomato")
@@ -716,16 +719,22 @@ ui <- navbarPage(collapsible = TRUE,
       "),
         card(
          img(src="ber-severe.png"),
-         markdown("Tomato with blossom-end rot")
+         markdown("Tomato with blossom-end rot and a secondary infection (the white fungus)")
         ),
       )
     ),
-    card(card_header("Stomates: Plant Lungs", class = "bg-primary", style = "font-size: 20px"),
+    card(card_header("Stomates", class = "bg-primary", style = "font-size: 20px"),
       layout_column_wrap(
         markdown("
-        Stomates are holes that plants breathe through. Carbon dioxide goes in, oxygen and water comes out.
-        By measuring the rate at which molecules move through the stomates, we can get a relative
-        estimate of the plant's photosynthesis and water use.
+        Stomates are holes in plant leaves that facilitate the movement of carbon dioxide and water
+        into and out of the plant. These openings allow plants to take in carbon dioxide,
+        an essential component for photosynthesis. In the process,
+        water vapor present in the plant exits via the opened stomates. This exchange is highly regulated
+        by the plant, with the stomates having guard cells that can open and close the stomates depending
+        on environmental conditions.
+        One of the devices used in this study, the Li-COR Li-600, 
+        can measure the plant's **stomatal conductance** (mol m-2 s-1) that can give us
+        an estimate of the plant's photosynthesis and water use.
         "),
         card(
         img(src="stomates.png"),
@@ -733,7 +742,7 @@ ui <- navbarPage(collapsible = TRUE,
         )
       )
     ),
-    card(card_header("Photosystem II and you", class = "bg-secondary", style = "font-size: 20px"),
+    card(card_header("Photosynthesis - Photosystem II and You", class = "bg-secondary", style = "font-size: 20px"),
       layout_column_wrap(
         card(img(src="thylakoid_membrane.png"),
           markdown("Diagram of the photosystem complexes on the thylakoid membrane, courtesy of [Wikipedia](https://en.wikipedia.org/wiki/Photosystem).")
@@ -741,11 +750,12 @@ ui <- navbarPage(collapsible = TRUE,
         markdown("
         Plants perform photosynthesis inside of a specialized organelle called the chloroplast. <br>
         
-        Specifically, chloroplasts have these things called thylakoids, and photosynthesis happens *across*
-        the thylakoid membrane. It's complicated, but for our purposes we can think of it like a gas station (or charging center).
-        Depleted molecules come in (ADP and NADP) and exit *recharged* (ATP and NADPH). There's a series of reactions that happen
-        in two distinct reaction centers, Photosystem I and Photosystem II. By doing some funky stuff with light, we can use math
-        to figure out the efficiency of Photosystem II (PhiPS2). PhiPS2 is calculated as (maximum fluorescence - steady state fluorescence)/maximum fluorescence,
+        Specifically, chloroplasts contain lots of disk-like pouches called thylakoids, and photosynthesis happens *across*
+        the thylakoid membrane. It's complicated, but for our purposes we can think of it like a gas station.
+        Depleted molecules come in (ADP and NADP), fuel up (receive sunlight), and exit *recharged* (ATP and NADPH). There's a series of reactions that happen
+        in two distinct reaction centers, Photosystem I and Photosystem II. Both of the fluorescence measurement devices
+        used in this study, the Li-COR Li-600 and the PhotosynQ MultispeQ V2.0 can measure the efficiency of Photosystem II (PhiPS2). 
+        PhiPS2 is calculated as (maximum fluorescence - steady state fluorescence)/maximum fluorescence,
         and is useful for estimating changes in the quantum yield of non-cyclic electron transport. <br>
         
         > For a more comprehensive explanation of PhiPS2, check out 
@@ -758,7 +768,7 @@ ui <- navbarPage(collapsible = TRUE,
       markdown("
       These trials were performed in a greenhouse, and the plants accumulated a number of 
       ailments over the course of the trials. The plants were subject to aphid, spidermite, and
-      whitefly infestations, for which we attempted treatment with organic pesticides.
+      whitefly infestations, for which we performed applications of organic pesticides.
       Tissue infested with spidermites was removed as it was discovered, 
       with an equal amount of tissue being removed from every other plant. These infections
       were not bad enough to warrant removing any plant's data from the analysis.
@@ -779,24 +789,1307 @@ ui <- navbarPage(collapsible = TRUE,
       ))
     )
   ),
-  ##### DEVELOPMENT NAV PANEL #####
-  nav_panel("Development",
-    card(card_header("First Steps: From the Literature to the Lab", class = "bg-primary", style = "font-size: 20px"),
-      markdown("It didn't work, but *why* didn't it work?")
-    ),
-    card(card_header("Understanding Chitosan", class = "bg-secondary", style = "font-size: 20px"),
-         markdown("chitosan sucks")
-    ),
-    card(card_header("Nozzles, Testbenches, and Desiccation Chambers: Oh my", class = "bg-primary", style = "font-size: 20px"),
-         markdown("lots of 3d printing")
-    ),
-    card(card_header("Final Protocol", class = "bg-secondary", style = "font-size: 20px"),
-         markdown("3d printing bad")
-    )
-  ),
   ##### TRIALS NAV PANEL #####
   nav_panel("Trials",
     tabsetPanel(
+     ##### TOMATO INOCULANT LOCATION #####
+      tabPanel("Inoculant Location Trial",
+        tabsetPanel( # interior ILT tabsetpanel
+          tabPanel("Exploratory",
+            div(style = "padding: 10px",
+            markdown("> Quick tip: click/tap the **gear** icon in the top right corner to change the color palette of all
+                     the graphs across the entire app. Among some personal favorites of mine are bilbao, lipari, lajolla, and oslo.")
+            ),
+          accordion(
+            accordion_panel(title = "Density and Distribution",
+              markdown("
+                A critical component of an exploratory data analysis is the creation of **probability density function** (PDF) plots
+                and **cumulative distribution function** (CDF) plots. They tell us the shape the data takes and helps inform if we need to 
+                apply a mathematical correction or use a certain type of distribution in our statistical model. I'm only
+                making dedicated PDF and CDF plots for our response variables and not our explanatory variables. However,
+                we can see the shape of our explanatory variables using histograms (a couple accordion panels down).
+                "),
+              card(card_header("Fluorescence", class = "bg-primary", style = "font-size: 20px"),
+                layout_sidebar(sidebar=sidebar(
+                  selectInput("til_fluoro_dist_var", "Variable", choices = til_fluoro_vars,
+                               selected = "gsw"),
+                  checkboxGroupInput("til_fluoro_dists", "Distributions", choices=dists, 
+                                      selected=c("normal", "lognormal", "gamma")),
+                  sliderInput("til_fluoro_len", "Length to Test Distributions Over", min=1,
+                              max=500, value=100)
+                  ), # end sidebar - but not sidebar LAYOUT
+                  div(
+                    layout_column_wrap(
+                      plotOutput("til_fluoro_pdf"),
+                      plotOutput("til_fluoro_cdf")
+                    )
+                  ),
+                  div(
+                    markdown("###### **One-sample Kolmogorov-Smirnov tests for selected fluorescence variable against selected distributions**"),
+                    verbatimTextOutput("til_fluoro_KS")
+                  ),
+                  div(style="border-left: 5px solid", 
+                    markdown("
+                      > A note on PhiPS2 distributions: PhiPS2 is a **unitless ratio** on a scale of 0-1, so we don't need to create PDF and CDF plots and perform KS tests
+                      (you still have the option to, but this is an instance where we use our *statistical reasoning*).
+                      Instead, we logit transform PhiPS2 and use the logit transformed version in our models. <br>
+                      > For a more comprehensive explanation of PhiPS2, check out 
+                      [Genty *et al*., 1989](https://www.sciencedirect.com/science/article/abs/pii/S0304416589800169) or
+                      for a simpler explanation, the [chlorophyll fluorescence wikipedia page](https://en.wikipedia.org/wiki/Chlorophyll_fluorescence)."
+                  ))
+                ) # end sidebar layout
+              ), # end fluorescence card
+              card(card_header("Fruit", class = "bg-primary", style = "font-size: 20px"),
+                 layout_sidebar(sidebar=sidebar(
+                    selectInput("til_fruit_dist_var", "Variable", choices = til_fruit_vars,
+                                selected = "Mass"),
+                    checkboxGroupInput("til_fruit_dists", "Distributions", choices=dists, 
+                                       selected=c("normal", "lognormal", "gamma")),
+                    sliderInput("til_fruit_len", "Length to Test Distributions Over", min=1,
+                                max=500, value=100)
+                  ), # end sidebar - but not sidebar LAYOUT
+                  div(
+                   layout_column_wrap(
+                     plotOutput("til_fruit_pdf"),
+                     plotOutput("til_fruit_cdf")
+                   )
+                  ),
+                  div(
+                   markdown("###### **One-sample Kolmogorov-Smirnov tests for selected fruit variable against selected distributions**"),
+                   verbatimTextOutput("til_fruit_KS")
+                  ),
+                  div(style="border-left: 5px solid", 
+                      markdown("
+                        > Sugar and blossom end-rot are both ratios (similar to PhiPS2), so we'll 
+                        end up logit transforming them for use in our models.
+                      ")
+                  )
+                ) # end sidebar layout
+              ) # end phips2 card
+            ), # end dist accordion panel
+            accordion_panel(title="Histograms",
+              card(card_header("Fluorescence Histogram", class = "bg-primary", style = "font-size: 20px"),
+                layout_sidebar(sidebar=sidebar(
+                  selectInput("til_fluoro_hist_var", "Select X Variable",
+                              choices = til_fluoro_vars, selected = "AmbientHumidity"),
+                  selectInput("til_fluoro_hist_color", "Select Color Variable",
+                              choices = til_fluoro_vars_d, selected = "Treatment"),
+                  sliderInput("til_fluoro_hist_bins", "Number of Bins",
+                              value = 30, min = 2, max = 100)
+                  ), # end sidebar
+                  plotOutput("til_fluoro_hist")
+              )), # gsw hist card
+              card(card_header("Fruit Histogram", class = "bg-primary", style = "font-size: 20px"),
+                layout_sidebar(sidebar=sidebar(
+                  selectInput("til_fruit_hist_var", "Select Variable",
+                              choices = til_fruit_vars, selected = "Ripeness"),
+                  selectInput("til_fruit_hist_color", "Select Color Variable",
+                              choices = til_fruit_vars_d, selected = "Treatment"),
+                  sliderInput("til_fruit_hist_bins", "Number of Bins",
+                              value = 30, min = 2, max = 100)
+                  ), # end sidebar
+                  plotOutput("til_fruit_hist")
+                )) # ps2 hist card
+              ), # end hist accordion panel
+              accordion_panel(title = "Scatter Plots",
+                card(card_header("Fluorescence Scatter", class = "bg-primary", style = "font-size: 20px"),
+                    layout_sidebar(sidebar = sidebar(
+                      selectInput("til_fluoro_scatter_x","X Variable",
+                                  choices = all_til_fluoro_vars, selected = "AmbientHumidity"),
+                      selectInput("til_fluoro_scatter_y","Y Variable",
+                                  choices = all_til_fluoro_vars, selected = "gsw"),
+                      selectInput("til_fluoro_scatter_col","Color Variable",
+                                  choices = all_til_fluoro_vars, selected = "Treatment"),
+                      selectInput("til_fluoro_scatter_shape", "Shape Variable",
+                                  choices = til_fluoro_vars_d, selected = "Treatment"),
+                      sliderInput("til_fluoro_scatter_jit", "Jitter Amount",
+                                  min=0, max=10, value =3),
+                      sliderInput("til_fluoro_scatter_size", "Point Size",
+                                  min = 1, max=10, value = 3),
+                      checkboxInput("til_fluoro_scatter_fwrap", "Individual Plot Per Treatment", FALSE)
+                    ), # end sidebar
+                    card_body(plotOutput("til_fluoro_scatter"))
+                    ) # end sidebar layout
+                ), # end gsw scatter plot
+                card(card_header("Fruit Scatter", class = "bg-primary", style = "font-size: 20px"),
+                    layout_sidebar(sidebar = sidebar(
+                      selectInput("til_fruit_scatter_x","X Variable",
+                                  choices = all_til_fruit_vars, selected = "Mass"),
+                      selectInput("til_fruit_scatter_y","Y Variable",
+                                  choices = all_til_fruit_vars, selected = "Sugar"),
+                      selectInput("til_fruit_scatter_col","Color Variable",
+                                  choices = all_til_fruit_vars, selected = "Treatment"),
+                      selectInput("til_fruit_scatter_shape", "Shape Variable",
+                                  choices = til_fruit_vars_d, selected = "Treatment"),
+                      sliderInput("til_fruit_scatter_jit", "Jitter Amount",
+                                  min=0, max=10, value =0),
+                      sliderInput("til_fruit_scatter_size", "Point Size",
+                                  min = 1, max=10, value = 3),
+                      checkboxInput("til_fruit_scatter_fwrap", "Individual Plot Per Treatment", FALSE)
+                    ), # end sidebar
+                    card_body(plotOutput("til_fruit_scatter"))
+                    ) # end sidebar layout
+                ) # end fruit scatter plot
+            ), # end scatterplot accordion panel
+            accordion_panel(title="Box Plots",
+              card(card_header("Fluorescence Boxplot", class = "bg-primary", style = "font-size: 20px"),
+                   layout_sidebar(sidebar = sidebar(
+                     selectInput("til_fluoro_box_x","X Variable",
+                                 choices = til_fluoro_vars_d, selected = "Treatment"),
+                     selectInput("til_fluoro_box_y","Y Variable",
+                                 choices = til_fluoro_vars, selected = "gsw")
+                   ), # end sidebar
+                   plotOutput("til_fluoro_box")
+                   )),
+              card(card_header("Fruit Boxplot", class = "bg-primary", style = "font-size: 20px"),
+                   layout_sidebar(sidebar = sidebar(
+                     selectInput("til_fruit_box_x","X Variable",
+                                 choices = til_fruit_vars_d, selected = "Treatment"),
+                     selectInput("til_fruit_box_y","Y Variable",
+                                 choices = til_fruit_vars, selected = "Mass")
+                   ), # end sidebar
+                   plotOutput("til_fruit_box")
+                   )),
+              card(card_header("Fruit Summary Boxplot", class = "bg-primary", style = "font-size: 20px"),
+                   layout_sidebar(sidebar = sidebar(
+                     selectInput("til_fruit_sum_box_x","X Variable",
+                                 choices = til_fruit_sum_vars_d, selected = "Treatment"),
+                     selectInput("til_fruit_sum_box_y","Y Variable",
+                                 choices = til_fruit_sum_vars, selected = "Mass_sum")
+                   ), # end sidebar
+                   plotOutput("til_fruit_sum_box")
+                   ))
+            ) # end boxplot accordion panel
+          ) # end accordion
+          ), # end exploratory tab panel
+        tabPanel("Statistics",
+          accordion(
+            accordion_panel("Fluorescence",
+              markdown("These first models are *univariate*, meaning they examine a single
+                       explanatory variable at a time. Select an explanatory variable from the dropdown
+                       to change the model."),
+              card(card_header("Stomatal conductance (gsw)", class = "bg-primary", style = "font-size: 20px"),
+                selectInput("til_gsw_mod_var", "Explanatory Variable",
+                            choices = fluoro_mod_var_names, selected = "AmbientHumidity"),
+                div(layout_columns(col_widths = c(7,5),
+                  div(
+                    card(card_header("Model Summary"),
+                         verbatimTextOutput("til_gsw_mod_summary")
+                    )
+                  ),# end model summary div
+                  div(# value boxes for AIC and r^2
+                    value_box(
+                      title = "GSW Model AIC",
+                      value = textOutput("til_gsw_aic"),
+                      theme = "bg-primary",
+                      width = 0.2
+                    ),
+                    value_box(
+                      title = "GSW Model p-value",
+                      value = textOutput("til_gsw_p"),
+                      width = 0.2
+                    ),
+                    value_box(
+                      title = "GSW Model R^2",
+                      value = textOutput("til_gsw_r2"),
+                      theme = "bg-secondary",
+                      width = 0.2
+                    ),
+                    card(card_header("Treatment Letters", class="bg-secondary"),
+                         verbatimTextOutput("til_gsw_letters")
+                    )
+                  ) # end value box div
+                ) # end column wrap
+                ), # end div
+              ), # end gsw stats card
+              card(card_header("Photosystem II Efficiency (PhiPS2", class = "bg-primary", style = "font-size: 20px"),
+                   selectInput("til_ps2_mod_var", "Explanatory Variable",
+                               choices = fluoro_mod_var_names, selected = "AmbientHumidity"),
+                   div(layout_columns(col_widths = c(7,5),
+                        div(
+                          card(card_header("Model Summary"),
+                               verbatimTextOutput("til_ps2_mod_summary")
+                          )
+                        ),# end model summary div
+                        div(# value boxes for AIC and r^2
+                          value_box(
+                            title = "PhiPS2 Model AIC",
+                            value = textOutput("til_ps2_aic"),
+                            theme = "bg-primary",
+                            width = 0.2
+                          ),
+                          value_box(
+                            title = "PhiPS2 Model p-value",
+                            value = textOutput("til_ps2_p"),
+                            width = 0.2
+                          ),
+                          value_box(
+                            title = "PhiPS2 Model R^2",
+                            value = textOutput("til_ps2_r2"),
+                            theme = "bg-secondary",
+                            width = 0.2
+                          ),
+                          card(card_header("Treatment Letters", class="bg-secondary"),
+                               verbatimTextOutput("til_ps2_letters")
+                          )
+                        ) # end value box div
+                   ) # end column wrap
+                ) # end div
+              ), # end ps2 stats card
+              card(card_header("Multivariate", class = "bg-secondary", style = "font-size: 20px"),
+                div(layout_columns(col_widths = c(6,6),
+                  div(
+                    markdown("
+                      Maybe instead of looking at a single environmental variable, we want to look at all of them (or at least the ones
+                      that actually make an impact on our target response variables). To accomplish this, we can use **principal component analysis** (PCA).
+                      First, we scale our environmental variables so they all have an equal influence on the output, then use the **rda** function from the **vegan** package
+                      to reduce the dimensionality."
+                    ),
+                    card(card_header("PCA Summary"), 
+                       verbatimTextOutput("til_fluoro_pca_summary")
+                    )
+                  ),
+                  div(
+                    markdown("##### **PCA for Fluorescence Variables**"),
+                    plotOutput("til_fluoro_pca", height = "600px")
+                  )
+                )),
+                div(layout_column_wrap(
+                  card(card_header("Multivariate Stomatal Conductance (GSW)", class = "bg-primary", style = "font-size: 20px"),
+                       div(# value boxes for AIC and r^2
+                         card(card_header("Model Summary", class = "bg-primary"),
+                              verbatimTextOutput("til_pcr_gsw_summary"),
+                              max_height = 500
+                         ),
+                         value_box(
+                           title = "Multivariate GSW AIC",
+                           value = textOutput("til_pcr_gsw_aic"),
+                           theme = "bg-primary",
+                           width = 0.2
+                         ),
+                         value_box(
+                           title = "Multivariate GSW p-value",
+                           value = textOutput("til_pcr_gsw_p"),
+                           width = 0.2
+                         ),
+                         value_box(
+                           title = "Multivariate GSW R^2",
+                           value = textOutput("til_pcr_gsw_r2"),
+                           theme = "bg-secondary",
+                           width = 0.2
+                         ),
+                         card(card_header("Treatment Letters", class="bg-secondary"),
+                              verbatimTextOutput("til_pcr_gsw_letters")
+                         )
+                       ), # end value box div
+                       plotOutput("til_pcr_gsw_pred")
+                       ),
+                  card(card_header("Multivariate Photosystem II Efficiency", class = "bg-primary", style = "font-size: 20px"),
+                       div(# value boxes for AIC and r^2
+                         card(card_header("Model Summary", class = "bg-primary"),
+                              verbatimTextOutput("til_pcr_ps2_summary"),
+                              max_height = 500
+                         ),
+                         value_box(
+                           title = "Multivariate PhiPS2 AIC",
+                           value = textOutput("til_pcr_ps2_aic"),
+                           theme = "bg-primary",
+                           width = 0.2
+                         ),
+                         value_box(
+                           title = "Multivariate PhiPS2 p-value",
+                           value = textOutput("til_pcr_ps2_p"),
+                           width = 0.2
+                         ),
+                         value_box(
+                           title = "Multivariate PhiPS2 R^2",
+                           value = textOutput("til_pcr_ps2_r2"),
+                           theme = "bg-secondary",
+                           width = 0.2
+                         ),
+                         card(card_header("Treatment Letters", class="bg-secondary"),
+                              verbatimTextOutput("til_pcr_ps2_letters")
+                         )
+                       ), # end value box div
+                       plotOutput("til_pcr_ps2_pred")
+                  ), # end phips2 card
+                )) # end column wrap and div
+              ) # end multivariate card
+            ),
+            accordion_panel("Fruit",
+              div(
+                markdown("
+                > Because our fruit are **pseudoreplicates** (we applied our treatments to the plants, not the individual fruit)
+                when we go to make fruit models, we have to average out the values between the plants, rather than looking at the individual fruit
+                as a sampling unit. If we didn't do this, our models would have a drastically increased sample size that wouldn't reflect
+                our actual experimental design.
+                ")
+              ),
+              card(card_header("Mass", class = "bg-primary", style = "font-size: 20px"),
+                div(layout_columns(col_widths = c(7,5),
+                  div(
+                    card(card_header("Model Summary"),
+                         verbatimTextOutput("til_mass_mod_summary")
+                    ),
+                    plotOutput("til_mass_annotated")
+                  ),# end model summary div
+                  div(# value boxes for AIC and r^2
+                    value_box(
+                      title = "Mass Model AIC",
+                      value = textOutput("til_mass_aic"),
+                      theme = "bg-primary",
+                      width = 0.2
+                    ),
+                    value_box(
+                      title = "Mass Model p-value",
+                      value = textOutput("til_mass_p"),
+                      width = 0.2
+                    ),
+                    value_box(
+                      title = "Mass Model R^2",
+                      value = textOutput("til_mass_r2"),
+                      theme = "bg-secondary",
+                      width = 0.2
+                    ),
+                    card(card_header("Treatment Letters", class="bg-secondary"),
+                         verbatimTextOutput("til_mass_letters")
+                    )
+                  ) # end value box div
+                ) # end column wrap
+                ) # end div
+              ), # end mass stats card
+              card(card_header("Sugar", class = "bg-primary", style = "font-size: 20px"),
+                div(layout_columns(col_widths = c(7,5),
+                  div(
+                    card(card_header("Model Summary"),
+                         verbatimTextOutput("til_sug_mod_summary")
+                    ),
+                    plotOutput("til_sug_annotated")
+                  ),# end model summary div
+                  div(# value boxes for AIC and r^2
+                    value_box(
+                      title = "Sugar Model AIC",
+                      value = textOutput("til_sug_aic"),
+                      theme = "bg-primary",
+                      width = 0.2
+                    ),
+                    value_box(
+                      title = "Sugar Model p-value",
+                      value = textOutput("til_sug_p"),
+                      width = 0.2
+                    ),
+                    value_box(
+                      title = "Sugar Model R^2",
+                      value = textOutput("til_sug_r2"),
+                      theme = "bg-secondary",
+                      width = 0.2
+                    ),
+                    card(card_header("Treatment Letters", class="bg-secondary"),
+                         verbatimTextOutput("til_sug_letters")
+                    )
+                  ) # end value box div
+                ) # end column wrap
+                ) # end div
+              ), # end sugar stats card
+              card(card_header("Blossom End-Rot", class = "bg-primary", style = "font-size: 20px"),
+                div(layout_columns(col_widths = c(7,5),
+                  div(
+                    card(card_header("Model Summary"),
+                         verbatimTextOutput("til_ber_mod_summary")
+                    ),
+                    plotOutput("til_ber_annotated")
+                  ),# end model summary div
+                  div(# value boxes for AIC and r^2
+                    value_box(
+                      title = "BER Model AIC",
+                      value = textOutput("til_ber_aic"),
+                      theme = "bg-primary",
+                      width = 0.2
+                    ),
+                    value_box(
+                      title = "BER Model p-value",
+                      value = textOutput("til_ber_p"),
+                      width = 0.2
+                    ),
+                    value_box(
+                      title = "BER Model R^2",
+                      value = textOutput("til_ber_r2"),
+                      theme = "bg-secondary",
+                      width = 0.2
+                    ),
+                    card(card_header("Treatment Letters", class="bg-secondary"),
+                         verbatimTextOutput("til_ber_letters")
+                    )
+                  ) # end value box div
+                ) # end column wrap
+                ) # end div
+              ), # end ber stats card
+              card(card_header("Total Fruit Count", class = "bg-primary", style = "font-size: 20px"),
+                div(layout_columns(col_widths = c(7,5),
+                  div(
+                    card(card_header("Model Summary"),
+                         verbatimTextOutput("til_fc_mod_summary")
+                    ),
+                    plotOutput("til_fc_annotated")
+                  ),# end model summary div
+                  div(# value boxes for AIC and r^2
+                    value_box(
+                      title = "Fruit Count Model AIC",
+                      value = textOutput("til_fc_aic"),
+                      theme = "bg-primary",
+                      width = 0.2
+                    ),
+                    card(card_header("Fruit Count Model Confidence Intervals"),
+                         verbatimTextOutput("til_fc_confint")
+                    ),
+                    value_box(
+                      title = "Fruit Count Model R^2",
+                      value = textOutput("til_fc_r2"),
+                      theme = "bg-secondary",
+                      width = 0.2
+                    ),
+                    card(card_header("Treatment Letters", class="bg-secondary"),
+                         verbatimTextOutput("til_fc_letters")
+                    )
+                  ) # end value box div
+                ), # end column wrap
+                markdown("> Because this is a *generalized* linear model rather than a linear model,
+                         we don't get an overall p-value for the model or a regular R^2 value. Instead,
+                         we can use the confidence intervals of each variable to determine if they 
+                         have a significant effect. If the confidence interval contains 0 it is not a significant
+                         effect, but if it doesn't contain 0 it is a significant effect. For example, if our 
+                         confidence intervals were (-0.5 to 0.5) or (-2 to 2) they would not be significant,
+                         whereas (0.5 to 2.5) or (-5 to -3) would be significant effects. Rather than
+                         using an R^2, we can calculate a pseudo-R^2, which is calculated as
+                         (1 - deviance/null deviance).")
+                ) # end div
+              ), # end fruit count stats card
+              card(card_header("Marketable Fruit Count", class = "bg-secondary", style = "font-size: 20px"),
+                div(layout_columns(col_widths = c(7,5),
+                  div(
+                    card(card_header("Model Summary"),
+                         verbatimTextOutput("til_mfc_mod_summary")
+                    ),
+                    plotOutput("til_mfc_annotated")
+                  ),# end model summary div
+                  div(# value boxes for AIC and r^2
+                    value_box(
+                      title = "Marketable Fruit Count Model AIC",
+                      value = textOutput("til_mfc_aic"),
+                      theme = "bg-primary",
+                      width = 0.2
+                    ),
+                    card(card_header("Marketable Fruit Count Model Confidence Intervals"),
+                         verbatimTextOutput("til_mfc_confint")
+                    ),
+                    value_box(
+                      title = "Marketable Fruit Count Model R^2",
+                      value = textOutput("til_mfc_r2"),
+                      theme = "bg-secondary",
+                      width = 0.2
+                    ),
+                    card(card_header("Treatment Letters", class="bg-secondary"),
+                         verbatimTextOutput("til_mfc_letters")
+                    )
+                  ) # end value box div
+                ) # end column wrap
+                ) # end div
+              ), # end fruit count stats card
+            ) # end fruit accordion panel
+          ), # end stats accordion
+          div(markdown("<br>")),
+          card(card_header("A Brief Explanation of Statistical Terminology", class = "bg-primary", style = "font-size: 20px"),
+               markdown("Many of the people using this app may not be familiar with the statistical terminology used within, so
+                      here is a brief overview of the highlighted values above.
+                      <br>
+                      - **AIC**: The *Akaike information criterion* is an estimator of prediction error for a statistical model, and is most useful
+                      for **comparing models**. We generally select the model with the *lowest* AIC value, as it indicates the lowest prediction error.
+                      - **p-value**: This is the probability of the observed result occurring by random chance, if there is no effect. (This is a greatly simplified explanation of a highly contentious way of 
+                      reporting statistical significance. For a more comprehensive explanation, see the [p-value Wikipedia page](https://en.wikipedia.org/wiki/P-value).)
+                      - **R^2**: The coefficient of determination (pronounced 'R squared') is the proportion of variance in the *response* variable
+                      that is explained by the *explanatory* variables in the model.
+                     ")
+          )
+        ), # end stats tab panel
+        tabPanel("Data",
+         card(card_header("Fluorescence Data", class = "bg-primary", style = "font-size: 20px"),
+              div(dataTableOutput("til_fluoro_DT")),
+              markdown("This dataset is a combination of data from the LI-COR Li-600
+           and PhotosynQ MultispeQ V2.0s. For the sake of this app running
+           efficiently, the data has been pared down to strictly what is needed.
+           The full datasets can be found [on my github](https://www.github.com/zachpeagler/Thesis/data/TIP24).")
+         ),
+         card(card_header("Fruit Data", class = "bg-primary", style = "font-size: 20px"),
+              dataTableOutput("til_fruit_DT")
+         ),
+         card(card_header("Fruit Summary Data", class = "bg-primary", style = "font-size: 20px"),
+              dataTableOutput("til_fruit_sum_DT")
+         )
+        ), # end data tab panel
+        tabPanel("Info",
+          div(style = "padding: 10px", align = "center",
+              markdown("#### **Tomato Inoculant Location Trial**")
+              ),
+          card(card_header("Hypothesis and Objectives", class = "bg-primary", style = "font-size: 20px"),
+               markdown("
+            This trial accompanies the following hypothesis and objectives laid out in my thesis: <br>
+            **Objective 1.** Determine the effect of M. oryzae inoculation method on tomato plant growth and crop quality and yield. <br>
+            - **Hypothesis 1.1** – Because of the mass effect, combined soil and foliar M. oryzae application will 
+            increase salt stressed tomato plant fluorescence parameters, fruit yield, and fruit quality more than either soil or foliar inoculations.
+            > It should be noted that these hypotheses are technically *predictive hypotheses*, as not only do they hypothesize a 
+            change, they also specify a prediction for that change. I.E. Fluorescence parameters will not only *change*, they will *increase*.
+            This is a very minor distinction, but important to those in the science realm (nerds).
+            ")
+          ), # end hypothesis and objective card
+          card(card_header("Methods", class = "bg-secondary", style = "font-size: 20px"),
+               layout_column_wrap(
+               markdown("
+            This trial took place in the hydroponic greenhouse at the KSU field station (34.0622° N, 84.6034° W).
+            Tomato seeds were germinated in Oasis cubes and fertilized for three weeks before being transplanted
+            into Dutch buckets containing Mother Earth™ Coco + Perlite Mix, copper-lined root barriers, and
+            Mother Earth™ Hydroton Original clay pellets. The sample size (n) was 32 tomato plants across four rows (A to D)
+            with eight plants per row. Row A was the control, with no treatment applied. Row B was subjected to soil 
+            inoculation with BGs at transplantation by placing a few BGs (~5 g) beneath the roots when transplanting. 
+            Row C was subjected to foliar inoculation with a spray outside the greenhouse prior to transplantation. 
+            Row D was subjected to both soil and foliar treatments as described. The unit of replication for bacterial
+            treatments are the tomato plants. The unit of replication for sugar and weight measurements are individual 
+            tomatoes. However, because the individual tomatoes are pseudoreplicates (we aren’t applying the treatment 
+            to the individual tomatoes, but rather the plant that those fruit comes from) they were summarized by plant prior to analysis.
+            <br>
+            Plants were inoculated at the time of transplantation. A nutrient mix composed of 1.32 g/L Jack’s 0-12-26,
+            0.075 g/L magnesium sulfate, and 0.912 g/L calcium nitrate was mixed in 1000-liter batches and fed into 
+            the Dutch buckets. To salt stress to the plants, sodium chloride was added in 50g batches until the nutrient 
+            solution reached an electrical conductivity of 3.5 mS/cm. 
+            <br>
+            Fluorescence measurements were taken biweekly with a LI-COR LI-600 and two PhotosynQ MultispeQ V2.0s over the course of the trial.
+            Fruit were harvested upon ripening, as determined by color and firmness. Upon harvesting, fruit were taken back to the lab for analysis, 
+            where the mass (grams), penetrometer (kg), and sugar (%) were measured. Fruit were also assessed for blossom end-rot.
+            The data table is formatted in a tidy format with each row corresponding to one fruit and each column representing a variable.<br>
+            
+            ##### **Microbe** <br>
+            - *Methylobacterium oryzae CBMB20* - PGPB that has been shown to improve fruit quality and yield in tomato
+            in both foliar and chitosan encapsulated inoculations ([Chanratana et al., 2018](https://www.researchgate.net/profile/Aritra-Choudhury/publication/323564168_Evaluation_of_chitosan_and_alginate_immobilized_Methylobacterium_oryzae_CBMB20_on_tomato_plant_growth/links/5a9e6fcfa6fdcc214af2b315/Evaluation-of-chitosan-and-alginate-immobilized-Methylobacterium-oryzae-CBMB20-on-tomato-plant-growth.pdf)). 
+            Operates through phytohormone (auxin and cytokinin) production, stress reduction via ACC deaminase production, 
+            increased nutrient availability through nitrogen fixation, and as a biopesticide ([Chauhan et al., 2015](https://www.sciencedirect.com/science/article/abs/pii/S0929139315300159)). <br>
+            "),
+               div(
+                   card(img(src = "til_1.jpg"),
+                       markdown("Tomato plants three weeks after germination")
+                   ),
+                   card(img(src = "til_2.jpg"),
+                       markdown("Tomato plants three months after germination.")
+                   )
+               ), # end tomato growth pictures div
+            ) # end layout column wrap
+          ), # end methods card
+          
+          card(card_header("Variables", class = "bg-primary", style = "font-size: 20px"),
+            markdown("
+            ##### **Explanatory Variables**
+            - **Treatment** is the inoculation timing of the tomato. Options are Control, Germination, Transplantation, and Germ+Trans. <br>
+            - **Row** is the row of the tomato. (A:D) <br>
+            - **Pot** is the pot number of the tomato. (1:12) <br>
+            - **Plant** is a combination of *Row* and *Pot*, and acts as an ID for every individual plant. (A1: D12) <br>
+            - **Date** is the date at which the measurement was taken. <br>
+            ###### **Fluorescence**
+            - **Time** is the time at which the measurement was taken. <br>
+            - **AmbientHumidity** is the relative humidity (%) at the time of measurement. <br>
+            - **AmbientLight** is the ambient light level (lumens) at the time of measurement. <br>
+            - **AmbientPressure** is the ambient pressure (kPa) at the time of measurement. <br>
+            - **LeafTemperature** is the temperature (Celcius) of the leaf. <br>
+            ###### **Fruit**
+            - **Penetrometer** corresponds to the force in kilograms it takes to penetrate the flesh of the tomato (~0.5:~4) <br>
+            - **Ripeness** is the **Penetrometer** value mapped from 0:1 and reversed, so that riper fruit are closer to 1 and unripe fruit are closer to 0. (0:1) <br>
+            ---
+            ##### **Response Variables**
+            ###### **Fluorescence**
+            - **gsw** is the stomatal conductance (mol m-2 s-1) of the leaf. Stomatal conductance refers to the
+            rate at which molecules are moving through the leaf's stomates, and is indicitave of photosynthesis.<br>
+            - **PhiPS2** is the efficiency of Photosystem II. It is unitless. (0:1) <br>
+            ###### **Fruit**
+            - **Mass** is the mass of the tomato (grams), measured on an Ohaus Scout. (~10:~400) <br>
+            - **BER** corresponds to whether or not the tomato has blossom end rot, a disease caused by calcium deficiency that renders the fruit unmarketable. (0,1) <br>
+            - **Sugar** is the average of two measurements of the tomato juice's sugar concentration taken on a Fisher BRIX Refractometer (~2:~12) <br>
+            - **SugarGrams** is the grams of sugar in each tomato, calculated as **Sugar** x **Mass** <br>
+            
+            > It's important to note that **only** the Li-600 can measure gsw, while both
+            the Li-600 and the MultispeQ can measure PhiPS2. Also, even though both devices can 
+            measure PhiPS2, they do so **in different ways**. For our purposes, this is fine
+            so long as the measurements from each device correlate. <br>
+            "),
+            div(style="border-left: 5px solid", 
+              markdown(
+                "> For a more comprehensive explanation of PhiPS2, check out 
+                [Genty *et al*., 1989](https://www.sciencedirect.com/science/article/abs/pii/S0304416589800169) or
+                for a simpler explanation, the [chlorophyll fluorescence wikipedia page](https://en.wikipedia.org/wiki/Chlorophyll_fluorescence)."
+              )
+            )
+          ) # end variable card
+          ) # end info tab Panel
+        ) # end ILT tabsetpanel
+      ),
+      ##### TOMATO INOCULANT TIMING #####
+      tabPanel("Inoculant Timing Trial",
+      tabsetPanel(
+        tabPanel("Exploratory",
+          div(style = "padding: 10px",
+            markdown("> Quick tip: this tab uses **accordions**! Click or tap the accordion panel title to expand/shrink the panel
+                   and switch between different exploratory graph types.")
+          ),
+          accordion(
+            accordion_panel(title = "Density and Distribution",
+              markdown("
+                A critical component of an exploratory data analysis is the creation of **probability density function** (PDF) plots
+                and **cumulative distribution function** (CDF) plots. They tell us the shape the data takes and helps inform if we need to 
+                apply a mathematical correction or use a certain type of distribution in our statistical model. I'm only
+                making dedicated PDF and CDF plots for our response variables and not our explanatory variables. However,
+                we can see the shape of our explanatory variables using histograms (a couple accordion panels down).
+                "),
+              card(card_header("Fluorescence", class = "bg-primary", style = "font-size: 20px"),
+                layout_sidebar(sidebar=sidebar(
+                  selectInput("tit_fluoro_dist_var", "Variable", choices = tit_fluoro_vars,
+                               selected = "gsw"),
+                  checkboxGroupInput("tit_fluoro_dists", "Distributions", choices=dists, 
+                                      selected=c("normal", "lognormal", "gamma")),
+                  sliderInput("tit_fluoro_len", "Length to Test Distributions Over", min=1,
+                              max=500, value=100)
+                  ), # end sidebar - but not sidebar LAYOUT
+                  div(
+                    layout_column_wrap(
+                      plotOutput("tit_fluoro_pdf"),
+                      plotOutput("tit_fluoro_cdf")
+                    )
+                  ),
+                  div(
+                    markdown("###### **One-sample Kolmogorov-Smirnov tests for selected fluorescence variable against selected distributions**"),
+                    verbatimTextOutput("tit_fluoro_KS")
+                  ),
+                  div(style="border-left: 5px solid", 
+                    markdown("
+                      > A note on PhiPS2 distributions: PhiPS2 is a **unitless ratio** on a scale of 0-1, so we don't need to create PDF and CDF plots and perform KS tests
+                      (you still have the option to, but this is an instance where we use our *statistical reasoning*).
+                      Instead, we logit transform PhiPS2 and use the logit transformed version in our models. <br>
+                      > For a more comprehensive explanation of PhiPS2, check out 
+                      [Genty *et al*., 1989](https://www.sciencedirect.com/science/article/abs/pii/S0304416589800169) or
+                      for a simpler explanation, the [chlorophyll fluorescence wikipedia page](https://en.wikipedia.org/wiki/Chlorophyll_fluorescence)."
+                  ))
+                ) # end sidebar layout
+              ), # end fluorescence card
+              card(card_header("Fruit", class = "bg-primary", style = "font-size: 20px"),
+                 layout_sidebar(sidebar=sidebar(
+                    selectInput("tit_fruit_dist_var", "Variable", choices = tit_fruit_vars,
+                                selected = "Mass"),
+                    checkboxGroupInput("tit_fruit_dists", "Distributions", choices=dists, 
+                                       selected=c("normal", "lognormal", "gamma")),
+                    sliderInput("tit_fruit_len", "Length to Test Distributions Over", min=1,
+                                max=500, value=100)
+                  ), # end sidebar - but not sidebar LAYOUT
+                  div(
+                   layout_column_wrap(
+                     plotOutput("tit_fruit_pdf"),
+                     plotOutput("tit_fruit_cdf")
+                   )
+                  ),
+                  div(
+                   markdown("###### **One-sample Kolmogorov-Smirnov tests for selected fruit variable against selected distributions**"),
+                   verbatimTextOutput("tit_fruit_KS")
+                  ),
+                  div(style="border-left: 5px solid", 
+                      markdown("
+                        > Sugar and blossom end-rot are both ratios (similar to PhiPS2), so we'll 
+                        end up logit transforming them for use in our models.
+                      ")
+                  )
+                ) # end sidebar layout
+              ) # end phips2 card
+            ), # end dist accordion panel
+            accordion_panel(title="Histograms",
+              card(card_header("Fluorescence Histogram", class = "bg-primary", style = "font-size: 20px"),
+                layout_sidebar(sidebar=sidebar(
+                  selectInput("tit_fluoro_hist_var", "Select X Variable",
+                              choices = tit_fluoro_vars, selected = "AmbientHumidity"),
+                  selectInput("tit_fluoro_hist_color", "Select Color Variable",
+                              choices = tit_fluoro_vars_d, selected = "Treatment"),
+                  sliderInput("tit_fluoro_hist_bins", "Number of Bins",
+                              value = 30, min = 2, max = 100)
+                  ), # end sidebar
+                  plotOutput("tit_fluoro_hist")
+              )), # gsw hist card
+              card(card_header("Fruit Histogram", class = "bg-primary", style = "font-size: 20px"),
+                layout_sidebar(sidebar=sidebar(
+                  selectInput("tit_fruit_hist_var", "Select Variable",
+                              choices = tit_fruit_vars, selected = "Ripeness"),
+                  selectInput("tit_fruit_hist_color", "Select Color Variable",
+                              choices = tit_fruit_vars_d, selected = "Treatment"),
+                  sliderInput("tit_fruit_hist_bins", "Number of Bins",
+                              value = 30, min = 2, max = 100)
+                  ), # end sidebar
+                  plotOutput("tit_fruit_hist")
+                )) # ps2 hist card
+              ), # end hist accordion panel
+              accordion_panel(title = "Scatter Plots",
+                card(card_header("Fluorescence Scatter", class = "bg-primary", style = "font-size: 20px"),
+                    layout_sidebar(sidebar = sidebar(
+                      selectInput("tit_fluoro_scatter_x","X Variable",
+                                  choices = all_tit_fluoro_vars, selected = "AmbientHumidity"),
+                      selectInput("tit_fluoro_scatter_y","Y Variable",
+                                  choices = all_tit_fluoro_vars, selected = "gsw"),
+                      selectInput("tit_fluoro_scatter_col","Color Variable",
+                                  choices = all_tit_fluoro_vars, selected = "Treatment"),
+                      selectInput("tit_fluoro_scatter_shape", "Shape Variable",
+                                  choices = tit_fluoro_vars_d, selected = "Treatment"),
+                      sliderInput("tit_fluoro_scatter_jit", "Jitter Amount",
+                                  min=0, max=10, value =3),
+                      sliderInput("tit_fluoro_scatter_size", "Point Size",
+                                  min = 1, max=10, value = 3),
+                      checkboxInput("tit_fluoro_scatter_fwrap", "Individual Plot Per Treatment", FALSE)
+                    ), # end sidebar
+                    card_body(plotOutput("tit_fluoro_scatter"))
+                    ) # end sidebar layout
+                ), # end gsw scatter plot
+                card(card_header("Fruit Scatter", class = "bg-primary", style = "font-size: 20px"),
+                    layout_sidebar(sidebar = sidebar(
+                      selectInput("tit_fruit_scatter_x","X Variable",
+                                  choices = all_tit_fruit_vars, selected = "Mass"),
+                      selectInput("tit_fruit_scatter_y","Y Variable",
+                                  choices = all_tit_fruit_vars, selected = "Sugar"),
+                      selectInput("tit_fruit_scatter_col","Color Variable",
+                                  choices = all_tit_fruit_vars, selected = "Treatment"),
+                      selectInput("tit_fruit_scatter_shape", "Shape Variable",
+                                  choices = tit_fruit_vars_d, selected = "Treatment"),
+                      sliderInput("tit_fruit_scatter_jit", "Jitter Amount",
+                                  min=0, max=10, value =0),
+                      sliderInput("tit_fruit_scatter_size", "Point Size",
+                                  min = 1, max=10, value = 3),
+                      checkboxInput("tit_fruit_scatter_fwrap", "Individual Plot Per Treatment", FALSE)
+                    ), # end sidebar
+                    card_body(plotOutput("tit_fruit_scatter"))
+                    ) # end sidebar layout
+                ) # end fruit scatter plot
+            ), # end scatterplot accordion panel
+            accordion_panel(title="Box Plots",
+              card(card_header("Fluorescence Boxplot", class = "bg-primary", style = "font-size: 20px"),
+                   layout_sidebar(sidebar = sidebar(
+                     selectInput("tit_fluoro_box_x","X Variable",
+                                 choices = tit_fluoro_vars_d, selected = "Treatment"),
+                     selectInput("tit_fluoro_box_y","Y Variable",
+                                 choices = tit_fluoro_vars, selected = "gsw")
+                   ), # end sidebar
+                   plotOutput("tit_fluoro_box")
+                   )),
+              card(card_header("Fruit Boxplot", class = "bg-primary", style = "font-size: 20px"),
+                   layout_sidebar(sidebar = sidebar(
+                     selectInput("tit_fruit_box_x","X Variable",
+                                 choices = tit_fruit_vars_d, selected = "Treatment"),
+                     selectInput("tit_fruit_box_y","Y Variable",
+                                 choices = tit_fruit_vars, selected = "Mass")
+                   ), # end sidebar
+                   plotOutput("tit_fruit_box")
+                   )),
+              card(card_header("Fruit Summary Boxplot", class = "bg-primary", style = "font-size: 20px"),
+                   layout_sidebar(sidebar = sidebar(
+                     selectInput("tit_fruit_sum_box_x","X Variable",
+                                 choices = tit_fruit_sum_vars_d, selected = "Treatment"),
+                     selectInput("tit_fruit_sum_box_y","Y Variable",
+                                 choices = tit_fruit_sum_vars, selected = "Mass_sum")
+                   ), # end sidebar
+                   plotOutput("tit_fruit_sum_box")
+                   ))
+            ) # end boxplot accordion panel
+          ) # end accordion
+        ), # end exploratory tab panel
+        tabPanel("Statistics",
+          accordion(
+            accordion_panel("Fluorescence",
+              markdown("These first models are *univariate*, meaning they examine a single
+                       explanatory variable at a time. Select an explanatory variable from the dropdown
+                       to change the model."),
+              card(card_header("Stomatal conductance (gsw)", class = "bg-primary", style = "font-size: 20px"),
+                selectInput("tit_gsw_mod_var", "Explanatory Variable",
+                            choices = fluoro_mod_var_names, selected = "AmbientHumidity"),
+                div(layout_columns(col_widths = c(7,5),
+                  div(
+                    card(card_header("Model Summary"),
+                         verbatimTextOutput("tit_gsw_mod_summary")
+                    )
+                  ),# end model summary div
+                  div(# value boxes for AIC and r^2
+                    value_box(
+                      title = "GSW Model AIC",
+                      value = textOutput("tit_gsw_aic"),
+                      theme = "bg-primary",
+                      width = 0.2
+                    ),
+                    value_box(
+                      title = "GSW Model p-value",
+                      value = textOutput("tit_gsw_p"),
+                      width = 0.2
+                    ),
+                    value_box(
+                      title = "GSW Model R^2",
+                      value = textOutput("tit_gsw_r2"),
+                      theme = "bg-secondary",
+                      width = 0.2
+                    ),
+                    card(card_header("Treatment Letters", class="bg-secondary"),
+                         verbatimTextOutput("tit_gsw_letters")
+                    )
+                  ) # end value box div
+                ) # end column wrap
+                ), # end div
+              ), # end gsw stats card
+              card(card_header("Photosystem II Efficiency (PhiPS2", class = "bg-primary", style = "font-size: 20px"),
+                   selectInput("tit_ps2_mod_var", "Explanatory Variable",
+                               choices = fluoro_mod_var_names, selected = "AmbientHumidity"),
+                   div(layout_columns(col_widths = c(7,5),
+                        div(
+                          card(card_header("Model Summary"),
+                               verbatimTextOutput("tit_ps2_mod_summary")
+                          )
+                        ),# end model summary div
+                        div(# value boxes for AIC and r^2
+                          value_box(
+                            title = "PhiPS2 Model AIC",
+                            value = textOutput("tit_ps2_aic"),
+                            theme = "bg-primary",
+                            width = 0.2
+                          ),
+                          value_box(
+                            title = "PhiPS2 Model p-value",
+                            value = textOutput("tit_ps2_p"),
+                            width = 0.2
+                          ),
+                          value_box(
+                            title = "PhiPS2 Model R^2",
+                            value = textOutput("tit_ps2_r2"),
+                            theme = "bg-secondary",
+                            width = 0.2
+                          ),
+                          card(card_header("Treatment Letters", class="bg-secondary"),
+                               verbatimTextOutput("tit_ps2_letters")
+                          )
+                        ) # end value box div
+                   ) # end column wrap
+                ) # end div
+              ), # end ps2 stats card
+              card(card_header("Multivariate", class = "bg-secondary", style = "font-size: 20px"),
+                div(layout_columns(col_widths = c(6,6),
+                  div(
+                    markdown("
+                      Maybe instead of looking at a single environmental variable, we want to look at all of them (or at least the ones
+                      that actually make an impact on our target response variables). To accomplish this, we can use **principal component analysis** (PCA).
+                      First, we scale our environmental variables so they all have an equal influence on the output, then use the **rda** function from the **vegan** package
+                      to reduce the dimensionality."
+                    ),
+                    card(card_header("PCA Summary"), 
+                       verbatimTextOutput("tit_fluoro_pca_summary")
+                    )
+                  ),
+                  div(
+                    markdown("##### **PCA for Fluorescence Variables**"),
+                    plotOutput("tit_fluoro_pca", height = "600px")
+                  )
+                )),
+                div(layout_column_wrap(
+                  card(card_header("Multivariate Stomatal Conductance (GSW)", class = "bg-primary", style = "font-size: 20px"),
+                       div(# value boxes for AIC and r^2
+                         card(card_header("Model Summary", class = "bg-primary"),
+                              verbatimTextOutput("tit_pcr_gsw_summary"),
+                              max_height = 500
+                         ),
+                         value_box(
+                           title = "Multivariate GSW AIC",
+                           value = textOutput("tit_pcr_gsw_aic"),
+                           theme = "bg-primary",
+                           width = 0.2
+                         ),
+                         value_box(
+                           title = "Multivariate GSW p-value",
+                           value = textOutput("tit_pcr_gsw_p"),
+                           width = 0.2
+                         ),
+                         value_box(
+                           title = "Multivariate GSW R^2",
+                           value = textOutput("tit_pcr_gsw_r2"),
+                           theme = "bg-secondary",
+                           width = 0.2
+                         ),
+                         card(card_header("Treatment Letters", class="bg-secondary"),
+                              verbatimTextOutput("tit_pcr_gsw_letters")
+                         )
+                       ), # end value box div
+                       plotOutput("tit_pcr_gsw_pred")
+                       ),
+                  card(card_header("Multivariate Photosystem II Efficiency", class = "bg-primary", style = "font-size: 20px"),
+                       div(# value boxes for AIC and r^2
+                         card(card_header("Model Summary", class = "bg-primary"),
+                              verbatimTextOutput("tit_pcr_ps2_summary"),
+                              max_height = 500
+                         ),
+                         value_box(
+                           title = "Multivariate PhiPS2 AIC",
+                           value = textOutput("tit_pcr_ps2_aic"),
+                           theme = "bg-primary",
+                           width = 0.2
+                         ),
+                         value_box(
+                           title = "Multivariate PhiPS2 p-value",
+                           value = textOutput("tit_pcr_ps2_p"),
+                           width = 0.2
+                         ),
+                         value_box(
+                           title = "Multivariate PhiPS2 R^2",
+                           value = textOutput("tit_pcr_ps2_r2"),
+                           theme = "bg-secondary",
+                           width = 0.2
+                         ),
+                         card(card_header("Treatment Letters", class="bg-secondary"),
+                              verbatimTextOutput("tit_pcr_ps2_letters")
+                         )
+                       ), # end value box div
+                       plotOutput("tit_pcr_ps2_pred")
+                  ), # end phips2 card
+                )) # end column wrap and div
+              ) # end multivariate card
+            ),
+            accordion_panel("Fruit",
+              div(
+                markdown("
+                > Because our fruit are **pseudoreplicates** (we applied our treatments to the plants, not the individual fruit)
+                when we go to make fruit models, we have to average out the values between the plants, rather than looking at the individual fruit
+                as a sampling unit. If we didn't do this, our models would have a drastically increased sample size that wouldn't reflect
+                our actual experimental design.
+                ")
+              ),
+              card(card_header("Mass", class = "bg-primary", style = "font-size: 20px"),
+                div(layout_columns(col_widths = c(7,5),
+                  div(
+                    card(card_header("Model Summary"),
+                         verbatimTextOutput("tit_mass_mod_summary")
+                    ),
+                    plotOutput("tit_mass_annotated")
+                  ),# end model summary div
+                  div(# value boxes for AIC and r^2
+                    value_box(
+                      title = "Mass Model AIC",
+                      value = textOutput("tit_mass_aic"),
+                      theme = "bg-primary",
+                      width = 0.2
+                    ),
+                    value_box(
+                      title = "Mass Model p-value",
+                      value = textOutput("tit_mass_p"),
+                      width = 0.2
+                    ),
+                    value_box(
+                      title = "Mass Model R^2",
+                      value = textOutput("tit_mass_r2"),
+                      theme = "bg-secondary",
+                      width = 0.2
+                    ),
+                    card(card_header("Treatment Letters", class="bg-secondary"),
+                         verbatimTextOutput("tit_mass_letters")
+                    )
+                  ) # end value box div
+                ) # end column wrap
+                ) # end div
+              ), # end mass stats card
+              card(card_header("Sugar", class = "bg-primary", style = "font-size: 20px"),
+                div(layout_columns(col_widths = c(7,5),
+                  div(
+                    card(card_header("Model Summary"),
+                         verbatimTextOutput("tit_sug_mod_summary")
+                    ),
+                    plotOutput("tit_sug_annotated")
+                  ),# end model summary div
+                  div(# value boxes for AIC and r^2
+                    value_box(
+                      title = "Sugar Model AIC",
+                      value = textOutput("tit_sug_aic"),
+                      theme = "bg-primary",
+                      width = 0.2
+                    ),
+                    value_box(
+                      title = "Sugar Model p-value",
+                      value = textOutput("tit_sug_p"),
+                      width = 0.2
+                    ),
+                    value_box(
+                      title = "Sugar Model R^2",
+                      value = textOutput("tit_sug_r2"),
+                      theme = "bg-secondary",
+                      width = 0.2
+                    ),
+                    card(card_header("Treatment Letters", class="bg-secondary"),
+                         verbatimTextOutput("tit_sug_letters")
+                    )
+                  ) # end value box div
+                ) # end column wrap
+                ) # end div
+              ), # end sugar stats card
+              card(card_header("Blossom End-Rot", class = "bg-primary", style = "font-size: 20px"),
+                div(layout_columns(col_widths = c(7,5),
+                  div(
+                    card(card_header("Model Summary"),
+                         verbatimTextOutput("tit_ber_mod_summary")
+                    ),
+                    plotOutput("tit_ber_annotated")
+                  ),# end model summary div
+                  div(# value boxes for AIC and r^2
+                    value_box(
+                      title = "BER Model AIC",
+                      value = textOutput("tit_ber_aic"),
+                      theme = "bg-primary",
+                      width = 0.2
+                    ),
+                    value_box(
+                      title = "BER Model p-value",
+                      value = textOutput("tit_ber_p"),
+                      width = 0.2
+                    ),
+                    value_box(
+                      title = "BER Model R^2",
+                      value = textOutput("tit_ber_r2"),
+                      theme = "bg-secondary",
+                      width = 0.2
+                    ),
+                    card(card_header("Treatment Letters", class="bg-secondary"),
+                         verbatimTextOutput("tit_ber_letters")
+                    )
+                  ) # end value box div
+                ) # end column wrap
+                ) # end div
+              ), # end ber stats card
+              card(card_header("Total Fruit Count", class = "bg-primary", style = "font-size: 20px"),
+                div(layout_columns(col_widths = c(7,5),
+                  div(
+                    card(card_header("Model Summary"),
+                         verbatimTextOutput("tit_fc_mod_summary")
+                    ),
+                    plotOutput("tit_fc_annotated")
+                  ),# end model summary div
+                  div(# value boxes for AIC and r^2
+                    value_box(
+                      title = "Fruit Count Model AIC",
+                      value = textOutput("tit_fc_aic"),
+                      theme = "bg-primary",
+                      width = 0.2
+                    ),
+                    card(card_header("Fruit Count Model Confidence Intervals"),
+                         verbatimTextOutput("tit_fc_confint")
+                    ),
+                    value_box(
+                      title = "Fruit Count Model R^2",
+                      value = textOutput("tit_fc_r2"),
+                      theme = "bg-secondary",
+                      width = 0.2
+                    ),
+                    card(card_header("Treatment Letters", class="bg-secondary"),
+                         verbatimTextOutput("tit_fc_letters")
+                    )
+                  ) # end value box div
+                ) # end column wrap
+                ) # end div
+              ), # end fruit count stats card
+              card(card_header("Marketable Fruit Count", class = "bg-secondary", style = "font-size: 20px"),
+                div(layout_columns(col_widths = c(7,5),
+                  div(
+                    card(card_header("Model Summary"),
+                         verbatimTextOutput("tit_mfc_mod_summary")
+                    ),
+                    plotOutput("tit_mfc_annotated")
+                  ),# end model summary div
+                  div(# value boxes for AIC and r^2
+                    value_box(
+                      title = "Marketable Fruit Count Model AIC",
+                      value = textOutput("tit_mfc_aic"),
+                      theme = "bg-primary",
+                      width = 0.2
+                    ),
+                    card(card_header("Marketable Fruit Count Model Confidence Intervals"),
+                         verbatimTextOutput("tit_mfc_confint")
+                    ),
+                    value_box(
+                      title = "Marketable Fruit Count Model R^2",
+                      value = textOutput("tit_mfc_r2"),
+                      theme = "bg-secondary",
+                      width = 0.2
+                    ),
+                    card(card_header("Treatment Letters", class="bg-secondary"),
+                         verbatimTextOutput("tit_mfc_letters")
+                    )
+                  ) # end value box div
+                ) # end column wrap
+                ) # end div
+              ), # end fruit count stats card
+            ) # end fruit accordion panel
+          ), # end stats accordion
+          div(markdown("<br>")),
+          card(card_header("A Brief Explanation of Statistical Terminology", class = "bg-primary", style = "font-size: 20px"),
+            markdown("Many of the people using this app may not be familiar with the statistical terminology used within, so
+                      here is a brief overview of the highlighted values above.
+                      <br>
+                      - **AIC**: The *Akaike information criterion* is an estimator of prediction error for a statistical model, and is most useful
+                      for **comparing models**. We generally select the model with the *lowest* AIC value, as it indicates the lowest prediction error.
+                      - **p-value**: This is the probability of the observed result occurring by random chance, if there is no effect. (This is a greatly simplified explanation of a highly contentious way of 
+                      reporting statistical significance. For a more comprehensive explanation, see the [p-value Wikipedia page](https://en.wikipedia.org/wiki/P-value).)
+                      - **R^2**: The coefficient of determination (pronounced 'R squared') is the proportion of variance in the *response* variable
+                      that is explained by the *explanatory* variables in the model.
+                     ")
+          )
+        ), # end stats tab panel
+        tabPanel("Data",
+         card(card_header("Fluorescence Data", class = "bg-primary", style = "font-size: 20px"),
+              div(dataTableOutput("tit_fluoro_DT")),
+              markdown("This dataset is a combination of data from the LI-COR Li-600
+           and PhotosynQ MultispeQ V2.0s. For the sake of this app running
+           efficiently, the data has been pared down to strictly what is needed.
+           The full datasets can be found [on my github](https://www.github.com/zachpeagler/Thesis/data/TIP24).")
+         ),
+         card(card_header("Fruit Data", class = "bg-primary", style = "font-size: 20px"),
+              dataTableOutput("tit_fruit_DT")
+         ),
+         card(card_header("Fruit Summary Data", class = "bg-primary", style = "font-size: 20px"),
+              dataTableOutput("tit_fruit_sum_DT")
+         )
+        ), # end data tab panel
+        tabPanel("Info",
+          div(style = "padding: 10px", align = "center",
+              markdown("#### **Tomato Inoculant Timing Trial**")
+              ),
+          card(card_header("Hypothesis and Objectives", class = "bg-primary", style = "font-size: 20px"),
+            markdown("
+            This trial accompanies the following hypothesis and objectives laid out in my thesis: <br>
+            **Objective 2** – Determine the effect of biostimulant granule (BG) 
+            inoculation timing on tomato plant growth and crop quality and yield.
+            - **Hypothesis 2.1** – Because of the priority effect and the mass effect,
+            BGs with the full microbial consortium applied at both germination and
+            transplantation will increase fluorescence parameters, fruit yield, 
+            and fruit quality more than either germination or transplantation inoculations.
+            > It should be noted that these hypotheses are technically *predictive hypotheses*, as not only do they hypothesize a 
+            change, they also specify a prediction for that change. I.E. Fluorescence parameters will not only *change*, they will *increase*.
+            This is a very minor distinction, but important to those in the science realm (nerds).
+            ")
+               ), # end hypothesis and objective card
+          div(
+            layout_column_wrap(
+              card(img(src = "TIP24_1.jpg"),
+                  markdown("Tomato plants six days after germination")
+                  ),
+              card(img(src = "TIP24_2.jpg"),
+                  markdown("Tomato plants one month after germination.")
+              ),
+              card(img(src = "TIP24_3.jpg"),
+                  markdown("Tomato plants four months after germination.")
+              ),
+            ) # end column wrap
+          ), # end tomato growth pictures div
+          card(card_header("Methods", class = "bg-secondary", style = "font-size: 20px"),
+            markdown("
+            The space available for the tomato inoculant timing trial was greater 
+            than that available for the tomato inoculant location trial, allowing for more replicates per group,
+            thus increasing statistical power to 0.59 for an effect size of 0.4 with 4 groups
+            and 12 replicates per group at a 0.05 significance level. The plants were grown 
+            in the hydroponic greenhouse at the KSU Field Station (34.0622° N, 84.6034° W). 
+            Tomato seeds were germinated in Oasis cubes and fertilized for three weeks before being 
+            transplanted into Dutch buckets containing Mother Earth™ Coco + Perlite Mix, copper-lined root barriers,
+            and Mother Earth™ Hydroton Original clay pellets. A nutrient mix composed of 1.32 g/L Jack’s 0-12-26,
+            0.075 g/L magnesium sulfate, and 0.912 g/L calcium nitrate was mixed in 1000-liter batches
+            and fed into the Dutch buckets. <br>
+            The treatments include inoculation at germination, inoculation at transplantation,
+            inoculation at both germination and transplantation, and a control no inoculation group.
+            All inoculation groups used the entire microbial consortium listed below encapsulated in chitosan.
+            For inoculation at germination, a single BG was placed atop the seed in the Oasis cube.
+            For inoculation at transplantation, approximately 5 grams of BGs were placed in contact with the plant roots.
+            The joint inoculant group effectively received a double dose, as they received inoculation at both germination and transplantation.
+            Each group had 12 replicates, for a total sample size of 48 tomato plants. 
+            Plants were germinated on May 1st, 2024 and transplanted on May 23rd, 2024. 
+            Plants were allowed to grow until October 19th, 2024, at which point they were taken down with samples collected for stomatal density measurements.
+            Biweekly measurements were taken with a Li-COR Li-600 and two PhotosynQ MultispeQ V2.0s.
+            Fruit were harvested when ripe, as assessed by color and firmness, and were taken back to the lab for analysis.
+            Weight measurements were performed with an OHAUS Scout SCA210, and blossom-end rot was assessed by visual observation
+            of the fruit. Sugar concentration was measured with a Fisherbrand Brix refractometer.
+            Firmness was measured with an OA Supplies Fruit Pressure Tester (penetrometer). <br>
+            The fruit data is formatted in a tidy format with each row corresponding to one fruit and each column representing a variable. 
+            The fluorescence data is formatted in a tidy format with each row corresponding to a single plant measurement and each column representing a variable.
+            <br>
+            ##### **Microbial Consortium** <br>
+            - *Azospirillum brasilense Sp7*- PGPB that benefits the plant via nitrogen fixation, siderophore production,
+            and by increasing lateral root growth ([Sahoo et al, 2014](https://pubmed.ncbi.nlm.nih.gov/24414168/); [Li et al, 2005](https://pubmed.ncbi.nlm.nih.gov/16121231/)),
+            and has been shown to increase plant stress tolerance ([Casanovas et al, 2002](https://www.jstor.org/stable/23787082?seq=1)).
+            It has been shown to increase crop yield and plant nitrogen, phosphorous, and potassium content
+            ([Askary et al, 2009](https://www.researchgate.net/publication/347438334_Influence_of_the_Co-inoculation_Azospirillum_brasilense_and_Rhizobium_meliloti_plus_24-D_on_Grain_Yield_and_N_P_K_Content_of_Triticum_aestivum_Cv_Baccros_and_Mahdavi)).
+            It has also been reported to work well with Methylobacterium oryzae ([Madhaiyan et al, 2009](https://www.researchgate.net/publication/225966871_Effect_of_co-inoculation_of_methylotrophic_Methylobacterium_oryzae_with_Azospirillum_brasilense_and_Burkholderia_pyrrocinia_on_the_growth_and_nutrient_uptake_of_tomato_red_pepper_and_rice)). <br>
+            - *Azotobacter chroococcum 43* - PGPB that operates via nitrogen fixation, phosphate solubilization,
+            and vitamin, indole acetic acid (IAA), gibberellin (GA), hydrogen cyanide (HCN), siderophore,
+            and cytokinin (CK) production ([Abd El-Fattah et al, 2013](https://www.researchgate.net/publication/259130343_Effect_of_carrier_materials_sterilization_method_and_storage_temperature_on_survival_and_biological_activities_of_Azotobacter_chroococcum_inoculant); [Revillas et al, 2000](https://pubmed.ncbi.nlm.nih.gov/11021581/); [Wani et al, 2007](https://www.researchgate.net/publication/240762870_Co-inoculation_of_nitrogen-fixing_and_phosphate-solubilizing_bacteria_to_promote_growth_yield_and_nutrient_uptake_in_chickpea)).
+            Shown to increase germination rates and aboveground biomass and crop quality and yield in maize ([Zahir et al, 2005](https://www.researchgate.net/publication/233130106_Precursor_L-tryptophan-Inoculum_Azotobacter_Interaction_for_Improving_Yields_and_Nitrogen_Uptake_of_Maize)). <br>
+            - *Bacillus subtilis* - PGPB that has been shown to improve fruit quality and yield in tomato
+            ([Mena-Violante & Olalde-Portugal, 2007](https://www.researchgate.net/publication/222326135_Alteration_of_tomato_fruit_quality_by_root_inoculation_with_plant_growth-promoting_rhizobacteria_PGPR_Bacillus_subtilis_BEB-13bs); [Kokalis-Burelle et al, 2002](https://link.springer.com/article/10.1023/A:1014464716261))
+            and shown to increase metabolite production ([Sharaf-Eldin et al, 2008](https://pubmed.ncbi.nlm.nih.gov/18622904/)).
+            Shown to solubilize phosphate, fix nitrogen, produce IAA, CK, GA, HCN, and antibiotics,
+            as well as exhibiting phytase activity ([Ahmad et al, 2008](https://pubmed.ncbi.nlm.nih.gov/16735107/); [Arkhipova et al, 2005](https://link.springer.com/article/10.1007/s11104-004-5047-x); [Yao et al, 2006](https://www.researchgate.net/publication/233193377_Effect_of_FZB_24_Bacillus_subtilis_as_biofertilizer_on_cotton_yields_in_field_tests)).
+            It has been used as a biocontrol agent against aphids and pathogenic bacteria ([Kokalis-Burelle et al, 2002](https://link.springer.com/article/10.1023/A:1014464716261)). <br>
+            - *Methylobacterium oryzae CBMB20* - PGPB that has been shown to improve fruit quality and yield in tomato
+            in both foliar and chitosan encapsulated inoculations ([Chanratana et al., 2018](https://www.researchgate.net/profile/Aritra-Choudhury/publication/323564168_Evaluation_of_chitosan_and_alginate_immobilized_Methylobacterium_oryzae_CBMB20_on_tomato_plant_growth/links/5a9e6fcfa6fdcc214af2b315/Evaluation-of-chitosan-and-alginate-immobilized-Methylobacterium-oryzae-CBMB20-on-tomato-plant-growth.pdf)). 
+            Operates through phytohormone (auxin and cytokinin) production, stress reduction via ACC deaminase production, 
+            increased nutrient availability through nitrogen fixation, and as a biopesticide ([Chauhan et al., 2015](https://www.sciencedirect.com/science/article/abs/pii/S0929139315300159)). <br>
+            - *Pseudomonas putida 90* - PGPB that increases plant growth by solubilizing phosphate and producing
+            IAA and siderophores ([Hariprasad & Niranjana, 2009](https://link.springer.com/article/10.1007/s11104-008-9754-6)). Shown to inhibit ethylene production ([Mayak et al, 1999](https://pubmed.ncbi.nlm.nih.gov/10552131/)).
+            Shown to significantly increase tomato fruit macro- and micronutrient content ([He et al, 2019](https://pubmed.ncbi.nlm.nih.gov/30955229/)). 
+            Shown to increase potassium, magnesium, and calcium uptake and decrease sodium uptake ([Yao et al, 2010](https://www.sciencedirect.com/science/article/abs/pii/S1164556309001046)). 
+            Also shown to increase root and shoot growth ([Glick et al, 1997](https://www.researchgate.net/publication/223543401_Early_development_of_canola_seedlings_in_the_presence_of_the_plant_growth-promoting_rhizobacterium_Pseudomonas_putida_GR12-2); [Hall et al, 1996](https://ui.adsabs.harvard.edu/abs/1996IsJPS..44...37H/abstract)). <br>
+            ")
+            ), # end methods card
+          card(card_header("Variables", class = "bg-primary", style = "font-size: 20px"),
+            markdown("
+            ##### **Explanatory Variables**
+            - **Treatment** is the inoculation timing of the tomato. Options are Control, Germination, Transplantation, and Germ+Trans. <br>
+            - **Row** is the row of the tomato. (A:D) <br>
+            - **Pot** is the pot number of the tomato. (1:12) <br>
+            - **Plant** is a combination of *Row* and *Pot*, and acts as an ID for every individual plant. (A1: D12) <br>
+            ###### **Fluorescence**
+            - **Time** is the time at which the measurement was taken <br>
+            - **Date** is the date at which the measurement was taken <br>
+            - **DaysFromGermination** is the number of days from germination (2025-05-01) to the date of measurement. <br>
+            - **AmbientHumidity** is the relative humidity (%) at the time of measurement. <br>
+            - **AmbientLight** is the ambient light level (lumens) at the time of measurement. <br>
+            - **AmbientPressure** is the ambient pressure (kPa) at the time of measurement. <br>
+            - **LeafTemperature** is the temperature (Celcius) of the leaf. <br>
+            ###### **Fruit**
+            - **DateHarvest** (date) is the date the fruit was harvested (August 2024:October 2024) <br>
+            - **DateAnalysis** (date) is the date the fruit was analyzed in the lab (August 2024:October 2024) <br>
+            - **DaysFromHarvestToAnalysis** (int) is the number of days from harvest to analysis (fruit only). <br>
+            - **Penetrometer** corresponds to the force in kilograms it takes to penetrate the flesh of the tomato (~0.5:~4) <br>
+            - **Ripeness** is the **Penetrometer** value mapped from 0:1 and reversed, so that riper fruit are closer to 1 and unripe fruit are closer to 0. (0:1) <br>
+            ---
+            ##### **Response Variables**
+            ###### **Fluorescence**
+            - **gsw** is the stomatal conductance (mol m-2 s-1) of the leaf. Stomatal conductance refers to the
+            rate at which molecules are moving through the leaf's stomates, and is indicitave of photosynthesis.<br>
+            - **PhiPS2** is the efficiency of Photosystem II. It is unitless. (0:1) <br>
+            ###### **Fruit**
+            - **Mass** is the mass of the tomato (grams), measured on an Ohaus Scout. (~10:~400) <br>
+            - **BER** corresponds to whether or not the tomato has blossom end rot, a disease caused by calcium deficiency that renders the fruit unmarketable. (0,1) <br>
+            - **Sugar** is the average of two measurements of the tomato juice's sugar concentration taken on a Fisher BRIX Refractometer (~2:~12) <br>
+            - **SugarGrams** is the grams of sugar in each tomato, calculated as **Sugar** x **Mass** <br>
+            
+            > It's important to note that **only** the Li-600 can measure gsw, while both
+            the Li-600 and the MultispeQ can measure PhiPS2. Also, even though both devices can 
+            measure PhiPS2, they do so **in different ways**. For our purposes, this is fine
+            so long as the measurements from each device correlate. <br>
+            "),
+            div(style="border-left: 5px solid", 
+              markdown(
+                "> For a more comprehensive explanation of PhiPS2, check out 
+                [Genty *et al*., 1989](https://www.sciencedirect.com/science/article/abs/pii/S0304416589800169) or
+                for a simpler explanation, the [chlorophyll fluorescence wikipedia page](https://en.wikipedia.org/wiki/Chlorophyll_fluorescence)."
+              )
+            )
+          ) # end variable card
+          ) # end info tab Panel
+        ) # end tabset Panel
+      ), # end TIT tabpanel
       ##### TOMATO INOCULANT METHOD #####
       tabPanel("Inoculant Method Trial",
         tabsetPanel(
@@ -1038,7 +2331,7 @@ ui <- navbarPage(collapsible = TRUE,
         tabPanel("Statistics",
           accordion(
             accordion_panel("Fluorescence",
-              markdown("These first variables are *univariate*, meaning they examine a single
+              markdown("These first models are *univariate*, meaning they examine a single
                        explanatory variable at a time. Select an explanatory variable from the dropdown
                        to change the model."),
               card(card_header("Stomatal conductance (gsw)", class = "bg-primary", style = "font-size: 20px"),
@@ -1372,7 +2665,7 @@ ui <- navbarPage(collapsible = TRUE,
             and has been shown to increase plant stress tolerance ([Casanovas et al, 2002](https://www.jstor.org/stable/23787082?seq=1)).
             It has been shown to increase crop yield and plant nitrogen, phosphorous, and potassium content
             ([Askary et al, 2009](https://www.researchgate.net/publication/347438334_Influence_of_the_Co-inoculation_Azospirillum_brasilense_and_Rhizobium_meliloti_plus_24-D_on_Grain_Yield_and_N_P_K_Content_of_Triticum_aestivum_Cv_Baccros_and_Mahdavi)).
-            It has also been reported to work well with Methylobacterium oryzae ([Madhaiyan et al, 2009](https://www.researchgate.net/publication/225966871_Effect_of_co-inoculation_of_methylotrophic_Methylobacterium_oryzae_with_Azospirillum_brasilense_and_Burkholderia_pyrrocinia_on_the_growth_and_nutrient_uptake_of_tomato_red_pepper_and_rice)). <br>
+            It has also been reported to work well with Methylobacterium oryzae ([Madhaiyan et al, 2010](https://www.researchgate.net/publication/225966871_Effect_of_co-inoculation_of_methylotrophic_Methylobacterium_oryzae_with_Azospirillum_brasilense_and_Burkholderia_pyrrocinia_on_the_growth_and_nutrient_uptake_of_tomato_red_pepper_and_rice)). <br>
             - *Azotobacter chroococcum 43* - PGPB that operates via nitrogen fixation, phosphate solubilization,
             and vitamin, indole acetic acid (IAA), gibberellin (GA), hydrogen cyanide (HCN), siderophore,
             and cytokinin (CK) production ([Abd El-Fattah et al, 2013](https://www.researchgate.net/publication/259130343_Effect_of_carrier_materials_sterilization_method_and_storage_temperature_on_survival_and_biological_activities_of_Azotobacter_chroococcum_inoculant); [Revillas et al, 2000](https://pubmed.ncbi.nlm.nih.gov/11021581/); [Wani et al, 2007](https://www.researchgate.net/publication/240762870_Co-inoculation_of_nitrogen-fixing_and_phosphate-solubilizing_bacteria_to_promote_growth_yield_and_nutrient_uptake_in_chickpea)).
@@ -1384,7 +2677,7 @@ ui <- navbarPage(collapsible = TRUE,
             as well as exhibiting phytase activity ([Ahmad et al, 2008](https://pubmed.ncbi.nlm.nih.gov/16735107/); [Arkhipova et al, 2005](https://link.springer.com/article/10.1007/s11104-004-5047-x); [Yao et al, 2006](https://www.researchgate.net/publication/233193377_Effect_of_FZB_24_Bacillus_subtilis_as_biofertilizer_on_cotton_yields_in_field_tests)).
             It has been used as a biocontrol agent against aphids and pathogenic bacteria ([Kokalis-Burelle et al, 2002](https://link.springer.com/article/10.1023/A:1014464716261)). <br>
             - *Methylobacterium oryzae CBMB20* - PGPB that has been shown to improve fruit quality and yield in tomato
-            in both foliar and chitosan encapsulated inoculations ([Chanratana et al., 2019](https://www.researchgate.net/profile/Aritra-Choudhury/publication/323564168_Evaluation_of_chitosan_and_alginate_immobilized_Methylobacterium_oryzae_CBMB20_on_tomato_plant_growth/links/5a9e6fcfa6fdcc214af2b315/Evaluation-of-chitosan-and-alginate-immobilized-Methylobacterium-oryzae-CBMB20-on-tomato-plant-growth.pdf)). 
+            in both foliar and chitosan encapsulated inoculations ([Chanratana et al., 2018](https://www.researchgate.net/profile/Aritra-Choudhury/publication/323564168_Evaluation_of_chitosan_and_alginate_immobilized_Methylobacterium_oryzae_CBMB20_on_tomato_plant_growth/links/5a9e6fcfa6fdcc214af2b315/Evaluation-of-chitosan-and-alginate-immobilized-Methylobacterium-oryzae-CBMB20-on-tomato-plant-growth.pdf)). 
             Operates through phytohormone (auxin and cytokinin) production, stress reduction via ACC deaminase production, 
             increased nutrient availability through nitrogen fixation, and as a biopesticide ([Chauhan et al., 2015](https://www.sciencedirect.com/science/article/abs/pii/S0929139315300159)). <br>
             - *Pseudomonas putida 90* - PGPB that increases plant growth by solubilizing phosphate and producing
@@ -1433,1284 +2726,12 @@ ui <- navbarPage(collapsible = TRUE,
           ) # end variable card
           ) # end info tab Panel
         ) # end ILT tabsetpanel
-      ),
-      ##### TOMATO INOCULANT LOCATION #####
-      tabPanel("Inoculant Location Trial",
-        tabsetPanel( # interior ILT tabsetpanel
-          tabPanel("Exploratory",
-            div(style = "padding: 10px",
-            markdown("> Quick tip: click/tap the **gear** icon in the top right corner to change the color palette of all
-                     the graphs across the entire app. Among some personal favorites of mine are bilbao, lipari, lajolla, and oslo.")
-            ),
-          accordion(
-            accordion_panel(title = "Density and Distribution",
-              markdown("
-                A critical component of an exploratory data analysis is the creation of **probability density function** (PDF) plots
-                and **cumulative distribution function** (CDF) plots. They tell us the shape the data takes and helps inform if we need to 
-                apply a mathematical correction or use a certain type of distribution in our statistical model. I'm only
-                making dedicated PDF and CDF plots for our response variables and not our explanatory variables. However,
-                we can see the shape of our explanatory variables using histograms (a couple accordion panels down).
-                "),
-              card(card_header("Fluorescence", class = "bg-primary", style = "font-size: 20px"),
-                layout_sidebar(sidebar=sidebar(
-                  selectInput("til_fluoro_dist_var", "Variable", choices = til_fluoro_vars,
-                               selected = "gsw"),
-                  checkboxGroupInput("til_fluoro_dists", "Distributions", choices=dists, 
-                                      selected=c("normal", "lognormal", "gamma")),
-                  sliderInput("til_fluoro_len", "Length to Test Distributions Over", min=1,
-                              max=500, value=100)
-                  ), # end sidebar - but not sidebar LAYOUT
-                  div(
-                    layout_column_wrap(
-                      plotOutput("til_fluoro_pdf"),
-                      plotOutput("til_fluoro_cdf")
-                    )
-                  ),
-                  div(
-                    markdown("###### **One-sample Kolmogorov-Smirnov tests for selected fluorescence variable against selected distributions**"),
-                    verbatimTextOutput("til_fluoro_KS")
-                  ),
-                  div(style="border-left: 5px solid", 
-                    markdown("
-                      > A note on PhiPS2 distributions: PhiPS2 is a **unitless ratio** on a scale of 0-1, so we don't need to create PDF and CDF plots and perform KS tests
-                      (you still have the option to, but this is an instance where we use our *statistical reasoning*).
-                      Instead, we logit transform PhiPS2 and use the logit transformed version in our models. <br>
-                      > For a more comprehensive explanation of PhiPS2, check out 
-                      [Genty *et al*., 1989](https://www.sciencedirect.com/science/article/abs/pii/S0304416589800169) or
-                      for a simpler explanation, the [chlorophyll fluorescence wikipedia page](https://en.wikipedia.org/wiki/Chlorophyll_fluorescence)."
-                  ))
-                ) # end sidebar layout
-              ), # end fluorescence card
-              card(card_header("Fruit", class = "bg-primary", style = "font-size: 20px"),
-                 layout_sidebar(sidebar=sidebar(
-                    selectInput("til_fruit_dist_var", "Variable", choices = til_fruit_vars,
-                                selected = "Mass"),
-                    checkboxGroupInput("til_fruit_dists", "Distributions", choices=dists, 
-                                       selected=c("normal", "lognormal", "gamma")),
-                    sliderInput("til_fruit_len", "Length to Test Distributions Over", min=1,
-                                max=500, value=100)
-                  ), # end sidebar - but not sidebar LAYOUT
-                  div(
-                   layout_column_wrap(
-                     plotOutput("til_fruit_pdf"),
-                     plotOutput("til_fruit_cdf")
-                   )
-                  ),
-                  div(
-                   markdown("###### **One-sample Kolmogorov-Smirnov tests for selected fruit variable against selected distributions**"),
-                   verbatimTextOutput("til_fruit_KS")
-                  ),
-                  div(style="border-left: 5px solid", 
-                      markdown("
-                        > Sugar and blossom end-rot are both ratios (similar to PhiPS2), so we'll 
-                        end up logit transforming them for use in our models.
-                      ")
-                  )
-                ) # end sidebar layout
-              ) # end phips2 card
-            ), # end dist accordion panel
-            accordion_panel(title="Histograms",
-              card(card_header("Fluorescence Histogram", class = "bg-primary", style = "font-size: 20px"),
-                layout_sidebar(sidebar=sidebar(
-                  selectInput("til_fluoro_hist_var", "Select X Variable",
-                              choices = til_fluoro_vars, selected = "AmbientHumidity"),
-                  selectInput("til_fluoro_hist_color", "Select Color Variable",
-                              choices = til_fluoro_vars_d, selected = "Treatment"),
-                  sliderInput("til_fluoro_hist_bins", "Number of Bins",
-                              value = 30, min = 2, max = 100)
-                  ), # end sidebar
-                  plotOutput("til_fluoro_hist")
-              )), # gsw hist card
-              card(card_header("Fruit Histogram", class = "bg-primary", style = "font-size: 20px"),
-                layout_sidebar(sidebar=sidebar(
-                  selectInput("til_fruit_hist_var", "Select Variable",
-                              choices = til_fruit_vars, selected = "Ripeness"),
-                  selectInput("til_fruit_hist_color", "Select Color Variable",
-                              choices = til_fruit_vars_d, selected = "Treatment"),
-                  sliderInput("til_fruit_hist_bins", "Number of Bins",
-                              value = 30, min = 2, max = 100)
-                  ), # end sidebar
-                  plotOutput("til_fruit_hist")
-                )) # ps2 hist card
-              ), # end hist accordion panel
-              accordion_panel(title = "Scatter Plots",
-                card(card_header("Fluorescence Scatter", class = "bg-primary", style = "font-size: 20px"),
-                    layout_sidebar(sidebar = sidebar(
-                      selectInput("til_fluoro_scatter_x","X Variable",
-                                  choices = all_til_fluoro_vars, selected = "AmbientHumidity"),
-                      selectInput("til_fluoro_scatter_y","Y Variable",
-                                  choices = all_til_fluoro_vars, selected = "gsw"),
-                      selectInput("til_fluoro_scatter_col","Color Variable",
-                                  choices = all_til_fluoro_vars, selected = "Treatment"),
-                      selectInput("til_fluoro_scatter_shape", "Shape Variable",
-                                  choices = til_fluoro_vars_d, selected = "Treatment"),
-                      sliderInput("til_fluoro_scatter_jit", "Jitter Amount",
-                                  min=0, max=10, value =3),
-                      sliderInput("til_fluoro_scatter_size", "Point Size",
-                                  min = 1, max=10, value = 3),
-                      checkboxInput("til_fluoro_scatter_fwrap", "Individual Plot Per Treatment", FALSE)
-                    ), # end sidebar
-                    card_body(plotOutput("til_fluoro_scatter"))
-                    ) # end sidebar layout
-                ), # end gsw scatter plot
-                card(card_header("Fruit Scatter", class = "bg-primary", style = "font-size: 20px"),
-                    layout_sidebar(sidebar = sidebar(
-                      selectInput("til_fruit_scatter_x","X Variable",
-                                  choices = all_til_fruit_vars, selected = "Mass"),
-                      selectInput("til_fruit_scatter_y","Y Variable",
-                                  choices = all_til_fruit_vars, selected = "Sugar"),
-                      selectInput("til_fruit_scatter_col","Color Variable",
-                                  choices = all_til_fruit_vars, selected = "Treatment"),
-                      selectInput("til_fruit_scatter_shape", "Shape Variable",
-                                  choices = til_fruit_vars_d, selected = "Treatment"),
-                      sliderInput("til_fruit_scatter_jit", "Jitter Amount",
-                                  min=0, max=10, value =0),
-                      sliderInput("til_fruit_scatter_size", "Point Size",
-                                  min = 1, max=10, value = 3),
-                      checkboxInput("til_fruit_scatter_fwrap", "Individual Plot Per Treatment", FALSE)
-                    ), # end sidebar
-                    card_body(plotOutput("til_fruit_scatter"))
-                    ) # end sidebar layout
-                ) # end fruit scatter plot
-            ), # end scatterplot accordion panel
-            accordion_panel(title="Box Plots",
-              card(card_header("Fluorescence Boxplot", class = "bg-primary", style = "font-size: 20px"),
-                   layout_sidebar(sidebar = sidebar(
-                     selectInput("til_fluoro_box_x","X Variable",
-                                 choices = til_fluoro_vars_d, selected = "Treatment"),
-                     selectInput("til_fluoro_box_y","Y Variable",
-                                 choices = til_fluoro_vars, selected = "gsw")
-                   ), # end sidebar
-                   plotOutput("til_fluoro_box")
-                   )),
-              card(card_header("Fruit Boxplot", class = "bg-primary", style = "font-size: 20px"),
-                   layout_sidebar(sidebar = sidebar(
-                     selectInput("til_fruit_box_x","X Variable",
-                                 choices = til_fruit_vars_d, selected = "Treatment"),
-                     selectInput("til_fruit_box_y","Y Variable",
-                                 choices = til_fruit_vars, selected = "Mass")
-                   ), # end sidebar
-                   plotOutput("til_fruit_box")
-                   )),
-              card(card_header("Fruit Summary Boxplot", class = "bg-primary", style = "font-size: 20px"),
-                   layout_sidebar(sidebar = sidebar(
-                     selectInput("til_fruit_sum_box_x","X Variable",
-                                 choices = til_fruit_sum_vars_d, selected = "Treatment"),
-                     selectInput("til_fruit_sum_box_y","Y Variable",
-                                 choices = til_fruit_sum_vars, selected = "Mass_sum")
-                   ), # end sidebar
-                   plotOutput("til_fruit_sum_box")
-                   ))
-            ) # end boxplot accordion panel
-          ) # end accordion
-          ), # end exploratory tab panel
-        tabPanel("Statistics",
-          accordion(
-            accordion_panel("Fluorescence",
-              markdown("These first variables are *univariate*, meaning they examine a single
-                       explanatory variable at a time. Select an explanatory variable from the dropdown
-                       to change the model."),
-              card(card_header("Stomatal conductance (gsw)", class = "bg-primary", style = "font-size: 20px"),
-                selectInput("til_gsw_mod_var", "Explanatory Variable",
-                            choices = fluoro_mod_var_names, selected = "AmbientHumidity"),
-                div(layout_columns(col_widths = c(7,5),
-                  div(
-                    card(card_header("Model Summary"),
-                         verbatimTextOutput("til_gsw_mod_summary")
-                    )
-                  ),# end model summary div
-                  div(# value boxes for AIC and r^2
-                    value_box(
-                      title = "GSW Model AIC",
-                      value = textOutput("til_gsw_aic"),
-                      theme = "bg-primary",
-                      width = 0.2
-                    ),
-                    value_box(
-                      title = "GSW Model p-value",
-                      value = textOutput("til_gsw_p"),
-                      width = 0.2
-                    ),
-                    value_box(
-                      title = "GSW Model R^2",
-                      value = textOutput("til_gsw_r2"),
-                      theme = "bg-secondary",
-                      width = 0.2
-                    ),
-                    card(card_header("Treatment Letters", class="bg-secondary"),
-                         verbatimTextOutput("til_gsw_letters")
-                    )
-                  ) # end value box div
-                ) # end column wrap
-                ), # end div
-              ), # end gsw stats card
-              card(card_header("Photosystem II Efficiency (PhiPS2", class = "bg-primary", style = "font-size: 20px"),
-                   selectInput("til_ps2_mod_var", "Explanatory Variable",
-                               choices = fluoro_mod_var_names, selected = "AmbientHumidity"),
-                   div(layout_columns(col_widths = c(7,5),
-                        div(
-                          card(card_header("Model Summary"),
-                               verbatimTextOutput("til_ps2_mod_summary")
-                          )
-                        ),# end model summary div
-                        div(# value boxes for AIC and r^2
-                          value_box(
-                            title = "PhiPS2 Model AIC",
-                            value = textOutput("til_ps2_aic"),
-                            theme = "bg-primary",
-                            width = 0.2
-                          ),
-                          value_box(
-                            title = "PhiPS2 Model p-value",
-                            value = textOutput("til_ps2_p"),
-                            width = 0.2
-                          ),
-                          value_box(
-                            title = "PhiPS2 Model R^2",
-                            value = textOutput("til_ps2_r2"),
-                            theme = "bg-secondary",
-                            width = 0.2
-                          ),
-                          card(card_header("Treatment Letters", class="bg-secondary"),
-                               verbatimTextOutput("til_ps2_letters")
-                          )
-                        ) # end value box div
-                   ) # end column wrap
-                ) # end div
-              ), # end ps2 stats card
-              card(card_header("Multivariate", class = "bg-secondary", style = "font-size: 20px"),
-                div(layout_columns(col_widths = c(6,6),
-                  div(
-                    markdown("
-                      Maybe instead of looking at a single environmental variable, we want to look at all of them (or at least the ones
-                      that actually make an impact on our target response variables). To accomplish this, we can use **principal component analysis** (PCA).
-                      First, we scale our environmental variables so they all have an equal influence on the output, then use the **rda** function from the **vegan** package
-                      to reduce the dimensionality."
-                    ),
-                    card(card_header("PCA Summary"), 
-                       verbatimTextOutput("til_fluoro_pca_summary")
-                    )
-                  ),
-                  div(
-                    markdown("##### **PCA for Fluorescence Variables**"),
-                    plotOutput("til_fluoro_pca", height = "600px")
-                  )
-                )),
-                div(layout_column_wrap(
-                  card(card_header("Multivariate Stomatal Conductance (GSW)", class = "bg-primary", style = "font-size: 20px"),
-                       div(# value boxes for AIC and r^2
-                         card(card_header("Model Summary", class = "bg-primary"),
-                              verbatimTextOutput("til_pcr_gsw_summary"),
-                              max_height = 500
-                         ),
-                         value_box(
-                           title = "Multivariate GSW AIC",
-                           value = textOutput("til_pcr_gsw_aic"),
-                           theme = "bg-primary",
-                           width = 0.2
-                         ),
-                         value_box(
-                           title = "Multivariate GSW p-value",
-                           value = textOutput("til_pcr_gsw_p"),
-                           width = 0.2
-                         ),
-                         value_box(
-                           title = "Multivariate GSW R^2",
-                           value = textOutput("til_pcr_gsw_r2"),
-                           theme = "bg-secondary",
-                           width = 0.2
-                         ),
-                         card(card_header("Treatment Letters", class="bg-secondary"),
-                              verbatimTextOutput("til_pcr_gsw_letters")
-                         )
-                       ), # end value box div
-                       plotOutput("til_pcr_gsw_pred")
-                       ),
-                  card(card_header("Multivariate Photosystem II Efficiency", class = "bg-primary", style = "font-size: 20px"),
-                       div(# value boxes for AIC and r^2
-                         card(card_header("Model Summary", class = "bg-primary"),
-                              verbatimTextOutput("til_pcr_ps2_summary"),
-                              max_height = 500
-                         ),
-                         value_box(
-                           title = "Multivariate PhiPS2 AIC",
-                           value = textOutput("til_pcr_ps2_aic"),
-                           theme = "bg-primary",
-                           width = 0.2
-                         ),
-                         value_box(
-                           title = "Multivariate PhiPS2 p-value",
-                           value = textOutput("til_pcr_ps2_p"),
-                           width = 0.2
-                         ),
-                         value_box(
-                           title = "Multivariate PhiPS2 R^2",
-                           value = textOutput("til_pcr_ps2_r2"),
-                           theme = "bg-secondary",
-                           width = 0.2
-                         ),
-                         card(card_header("Treatment Letters", class="bg-secondary"),
-                              verbatimTextOutput("til_pcr_ps2_letters")
-                         )
-                       ), # end value box div
-                       plotOutput("til_pcr_ps2_pred")
-                  ), # end phips2 card
-                )) # end column wrap and div
-              ) # end multivariate card
-            ),
-            accordion_panel("Fruit",
-              div(
-                markdown("
-                > Because our fruit are **pseudoreplicates** (we applied our treatments to the plants, not the individual fruit)
-                when we go to make fruit models, we have to average out the values between the plants, rather than looking at the individual fruit
-                as a sampling unit. If we didn't do this, our models would have a drastically increased sample size that wouldn't reflect
-                our actual experimental design.
-                ")
-              ),
-              card(card_header("Mass", class = "bg-primary", style = "font-size: 20px"),
-                div(layout_columns(col_widths = c(7,5),
-                  div(
-                    card(card_header("Model Summary"),
-                         verbatimTextOutput("til_mass_mod_summary")
-                    ),
-                    plotOutput("til_mass_annotated")
-                  ),# end model summary div
-                  div(# value boxes for AIC and r^2
-                    value_box(
-                      title = "Mass Model AIC",
-                      value = textOutput("til_mass_aic"),
-                      theme = "bg-primary",
-                      width = 0.2
-                    ),
-                    value_box(
-                      title = "Mass Model p-value",
-                      value = textOutput("til_mass_p"),
-                      width = 0.2
-                    ),
-                    value_box(
-                      title = "Mass Model R^2",
-                      value = textOutput("til_mass_r2"),
-                      theme = "bg-secondary",
-                      width = 0.2
-                    ),
-                    card(card_header("Treatment Letters", class="bg-secondary"),
-                         verbatimTextOutput("til_mass_letters")
-                    )
-                  ) # end value box div
-                ) # end column wrap
-                ) # end div
-              ), # end mass stats card
-              card(card_header("Sugar", class = "bg-primary", style = "font-size: 20px"),
-                div(layout_columns(col_widths = c(7,5),
-                  div(
-                    card(card_header("Model Summary"),
-                         verbatimTextOutput("til_sug_mod_summary")
-                    ),
-                    plotOutput("til_sug_annotated")
-                  ),# end model summary div
-                  div(# value boxes for AIC and r^2
-                    value_box(
-                      title = "Sugar Model AIC",
-                      value = textOutput("til_sug_aic"),
-                      theme = "bg-primary",
-                      width = 0.2
-                    ),
-                    value_box(
-                      title = "Sugar Model p-value",
-                      value = textOutput("til_sug_p"),
-                      width = 0.2
-                    ),
-                    value_box(
-                      title = "Sugar Model R^2",
-                      value = textOutput("til_sug_r2"),
-                      theme = "bg-secondary",
-                      width = 0.2
-                    ),
-                    card(card_header("Treatment Letters", class="bg-secondary"),
-                         verbatimTextOutput("til_sug_letters")
-                    )
-                  ) # end value box div
-                ) # end column wrap
-                ) # end div
-              ), # end sugar stats card
-              card(card_header("Blossom End-Rot", class = "bg-primary", style = "font-size: 20px"),
-                div(layout_columns(col_widths = c(7,5),
-                  div(
-                    card(card_header("Model Summary"),
-                         verbatimTextOutput("til_ber_mod_summary")
-                    ),
-                    plotOutput("til_ber_annotated")
-                  ),# end model summary div
-                  div(# value boxes for AIC and r^2
-                    value_box(
-                      title = "BER Model AIC",
-                      value = textOutput("til_ber_aic"),
-                      theme = "bg-primary",
-                      width = 0.2
-                    ),
-                    value_box(
-                      title = "BER Model p-value",
-                      value = textOutput("til_ber_p"),
-                      width = 0.2
-                    ),
-                    value_box(
-                      title = "BER Model R^2",
-                      value = textOutput("til_ber_r2"),
-                      theme = "bg-secondary",
-                      width = 0.2
-                    ),
-                    card(card_header("Treatment Letters", class="bg-secondary"),
-                         verbatimTextOutput("til_ber_letters")
-                    )
-                  ) # end value box div
-                ) # end column wrap
-                ) # end div
-              ), # end ber stats card
-              card(card_header("Total Fruit Count", class = "bg-primary", style = "font-size: 20px"),
-                div(layout_columns(col_widths = c(7,5),
-                  div(
-                    card(card_header("Model Summary"),
-                         verbatimTextOutput("til_fc_mod_summary")
-                    ),
-                    plotOutput("til_fc_annotated")
-                  ),# end model summary div
-                  div(# value boxes for AIC and r^2
-                    value_box(
-                      title = "Fruit Count Model AIC",
-                      value = textOutput("til_fc_aic"),
-                      theme = "bg-primary",
-                      width = 0.2
-                    ),
-                    card(card_header("Fruit Count Model Confidence Intervals"),
-                         verbatimTextOutput("til_fc_confint")
-                    ),
-                    value_box(
-                      title = "Fruit Count Model R^2",
-                      value = textOutput("til_fc_r2"),
-                      theme = "bg-secondary",
-                      width = 0.2
-                    ),
-                    card(card_header("Treatment Letters", class="bg-secondary"),
-                         verbatimTextOutput("til_fc_letters")
-                    )
-                  ) # end value box div
-                ), # end column wrap
-                markdown("> Because this is a *generalized* linear model rather than a linear model,
-                         we don't get an overall p-value for the model or a regular R^2 value. Instead,
-                         we can use the confidence intervals of each variable to determine if they 
-                         have a significant effect. If the confidence interval contains 0 it is not a significant
-                         effect, but if it doesn't contain 0 it is a significant effect. For example, if our 
-                         confidence intervals were (-0.5 to 0.5) or (-2 to 2) they would not be significant,
-                         whereas (0.5 to 2.5) or (-5 to -3) would be significant effects. Rather than
-                         using an R^2, we can calculate a pseudo-R^2, which is calculated as
-                         (1 - deviance/null deviance).")
-                ) # end div
-              ), # end fruit count stats card
-              card(card_header("Marketable Fruit Count", class = "bg-secondary", style = "font-size: 20px"),
-                div(layout_columns(col_widths = c(7,5),
-                  div(
-                    card(card_header("Model Summary"),
-                         verbatimTextOutput("til_mfc_mod_summary")
-                    ),
-                    plotOutput("til_mfc_annotated")
-                  ),# end model summary div
-                  div(# value boxes for AIC and r^2
-                    value_box(
-                      title = "Marketable Fruit Count Model AIC",
-                      value = textOutput("til_mfc_aic"),
-                      theme = "bg-primary",
-                      width = 0.2
-                    ),
-                    card(card_header("Marketable Fruit Count Model Confidence Intervals"),
-                         verbatimTextOutput("til_mfc_confint")
-                    ),
-                    value_box(
-                      title = "Marketable Fruit Count Model R^2",
-                      value = textOutput("til_mfc_r2"),
-                      theme = "bg-secondary",
-                      width = 0.2
-                    ),
-                    card(card_header("Treatment Letters", class="bg-secondary"),
-                         verbatimTextOutput("til_mfc_letters")
-                    )
-                  ) # end value box div
-                ) # end column wrap
-                ) # end div
-              ), # end fruit count stats card
-            ) # end fruit accordion panel
-          ) # end stats accordion
-        ), # end stats tab panel
-        tabPanel("Data",
-         card(card_header("Fluorescence Data", class = "bg-primary", style = "font-size: 20px"),
-              div(dataTableOutput("til_fluoro_DT")),
-              markdown("This dataset is a combination of data from the LI-COR Li-600
-           and PhotosynQ MultispeQ V2.0s. For the sake of this app running
-           efficiently, the data has been pared down to strictly what is needed.
-           The full datasets can be found [on my github](https://www.github.com/zachpeagler/Thesis/data/TIP24).")
-         ),
-         card(card_header("Fruit Data", class = "bg-primary", style = "font-size: 20px"),
-              dataTableOutput("til_fruit_DT")
-         ),
-         card(card_header("Fruit Summary Data", class = "bg-primary", style = "font-size: 20px"),
-              dataTableOutput("til_fruit_sum_DT")
-         )
-        ), # end data tab panel
-        tabPanel("Info",
-          div(style = "padding: 10px", align = "center",
-              markdown("#### **Tomato Inoculant Location Trial**")
-              ),
-          card(card_header("Hypothesis and Objectives", class = "bg-primary", style = "font-size: 20px"),
-               markdown("
-            This trial accompanies the following hypothesis and objectives laid out in my thesis: <br>
-            **Objective 1.** Determine the effect of M. oryzae inoculation method on tomato plant growth and crop quality and yield. <br>
-            - **Hypothesis 1.1** – Because of the mass effect, combined soil and foliar M. oryzae application will 
-            increase salt stressed tomato plant fluorescence parameters, fruit yield, and fruit quality more than either soil or foliar inoculations.
-            > It should be noted that these hypotheses are technically *predictive hypotheses*, as not only do they hypothesize a 
-            change, they also specify a prediction for that change. I.E. Fluorescence parameters will not only *change*, they will *increase*.
-            This is a very minor distinction, but important to those in the science realm (nerds).
-            ")
-          ), # end hypothesis and objective card
-          card(card_header("Methods", class = "bg-secondary", style = "font-size: 20px"),
-               layout_column_wrap(
-               markdown("
-            This trial took place in the hydroponic greenhouse at the KSU field station (34.0622° N, 84.6034° W).
-            Tomato seeds were germinated in Oasis cubes and fertilized for three weeks before being transplanted
-            into Dutch buckets containing Mother Earth™ Coco + Perlite Mix, copper-lined root barriers, and
-            Mother Earth™ Hydroton Original clay pellets. The sample size (n) was 32 tomato plants across four rows (A to D)
-            with eight plants per row. Row A was the control, with no treatment applied. Row B was subjected to soil 
-            inoculation with BGs at transplantation by placing a few BGs (~5 g) beneath the roots when transplanting. 
-            Row C was subjected to foliar inoculation with a spray outside the greenhouse prior to transplantation. 
-            Row D was subjected to both soil and foliar treatments as described. The unit of replication for bacterial
-            treatments are the tomato plants. The unit of replication for sugar and weight measurements are individual 
-            tomatoes. However, because the individual tomatoes are pseudoreplicates (we aren’t applying the treatment 
-            to the individual tomatoes, but rather the plant that those fruit comes from) they were summarized by plant prior to analysis.
-            <br>
-            Plants were inoculated at the time of transplantation. A nutrient mix composed of 1.32 g/L Jack’s 0-12-26,
-            0.075 g/L magnesium sulfate, and 0.912 g/L calcium nitrate was mixed in 1000-liter batches and fed into 
-            the Dutch buckets. To salt stress to the plants, sodium chloride was added in 50g batches until the nutrient 
-            solution reached an electrical conductivity of 3.5 mS/cm. 
-            <br>
-            Fluorescence measurements were taken biweekly with a LI-COR LI-600 and two PhotosynQ MultispeQ V2.0s over the course of the trial.
-            Fruit were harvested upon ripening, as determined by color and firmness. Upon harvesting, fruit were taken back to the lab for analysis, 
-            where the mass (grams), penetrometer (kg), and sugar (%) were measured. Fruit were also assessed for blossom end-rot.
-            The data table is formatted in a tidy format with each row corresponding to one fruit and each column representing a variable.<br>
-            
-            ##### **Microbe** <br>
-            - *Methylobacterium oryzae CBMB20* - PGPB that has been shown to improve fruit quality and yield in tomato
-            in both foliar and chitosan encapsulated inoculations ([Chanratana et al., 2019](https://www.researchgate.net/profile/Aritra-Choudhury/publication/323564168_Evaluation_of_chitosan_and_alginate_immobilized_Methylobacterium_oryzae_CBMB20_on_tomato_plant_growth/links/5a9e6fcfa6fdcc214af2b315/Evaluation-of-chitosan-and-alginate-immobilized-Methylobacterium-oryzae-CBMB20-on-tomato-plant-growth.pdf)). 
-            Operates through phytohormone (auxin and cytokinin) production, stress reduction via ACC deaminase production, 
-            increased nutrient availability through nitrogen fixation, and as a biopesticide ([Chauhan et al., 2015](https://www.sciencedirect.com/science/article/abs/pii/S0929139315300159)). <br>
-            "),
-               div(
-                   card(img(src = "til_1.jpg"),
-                       markdown("Tomato plants three weeks after germination")
-                   ),
-                   card(img(src = "til_2.jpg"),
-                       markdown("Tomato plants three months after germination.")
-                   )
-               ), # end tomato growth pictures div
-            ) # end layout column wrap
-          ), # end methods card
-          
-          card(card_header("Variables", class = "bg-primary", style = "font-size: 20px"),
-            markdown("
-            ##### **Explanatory Variables**
-            - **Treatment** is the inoculation timing of the tomato. Options are Control, Germination, Transplantation, and Germ+Trans. <br>
-            - **Row** is the row of the tomato. (A:D) <br>
-            - **Pot** is the pot number of the tomato. (1:12) <br>
-            - **Plant** is a combination of *Row* and *Pot*, and acts as an ID for every individual plant. (A1: D12) <br>
-            - **Date** is the date at which the measurement was taken. <br>
-            ###### **Fluorescence**
-            - **Time** is the time at which the measurement was taken. <br>
-            - **AmbientHumidity** is the relative humidity (%) at the time of measurement. <br>
-            - **AmbientLight** is the ambient light level (lumens) at the time of measurement. <br>
-            - **AmbientPressure** is the ambient pressure (kPa) at the time of measurement. <br>
-            - **LeafTemperature** is the temperature (Celcius) of the leaf. <br>
-            ###### **Fruit**
-            - **Penetrometer** corresponds to the force in kilograms it takes to penetrate the flesh of the tomato (~0.5:~4) <br>
-            - **Ripeness** is the **Penetrometer** value mapped from 0:1 and reversed, so that riper fruit are closer to 1 and unripe fruit are closer to 0. (0:1) <br>
-            ---
-            ##### **Response Variables**
-            ###### **Fluorescence**
-            - **gsw** is the stomatal conductance (mol m-2 s-1) of the leaf. Stomatal conductance refers to the
-            rate at which molecules are moving through the leaf's stomates, and is indicitave of photosynthesis.<br>
-            - **PhiPS2** is the efficiency of Photosystem II. It is unitless. (0:1) <br>
-            ###### **Fruit**
-            - **Mass** is the mass of the tomato (grams), measured on an Ohaus Scout. (~10:~400) <br>
-            - **BER** corresponds to whether or not the tomato has blossom end rot, a disease caused by calcium deficiency that renders the fruit unmarketable. (0,1) <br>
-            - **Sugar** is the average of two measurements of the tomato juice's sugar concentration taken on a Fisher BRIX Refractometer (~2:~12) <br>
-            - **SugarGrams** is the grams of sugar in each tomato, calculated as **Sugar** x **Mass** <br>
-            
-            > It's important to note that **only** the Li-600 can measure gsw, while both
-            the Li-600 and the MultispeQ can measure PhiPS2. Also, even though both devices can 
-            measure PhiPS2, they do so **in different ways**. For our purposes, this is fine
-            so long as the measurements from each device correlate. <br>
-            "),
-            div(style="border-left: 5px solid", 
-              markdown(
-                "> For a more comprehensive explanation of PhiPS2, check out 
-                [Genty *et al*., 1989](https://www.sciencedirect.com/science/article/abs/pii/S0304416589800169) or
-                for a simpler explanation, the [chlorophyll fluorescence wikipedia page](https://en.wikipedia.org/wiki/Chlorophyll_fluorescence)."
-              )
-            )
-          ) # end variable card
-          ) # end info tab Panel
-        ) # end ILT tabsetpanel
-      ),
-      ##### TOMATO INOCULANT TIMING #####
-      tabPanel("Inoculant Timing Trial",
-      tabsetPanel(
-        tabPanel("Exploratory",
-          div(style = "padding: 10px",
-            markdown("> Quick tip: this tab uses **accordions**! Click or tap the accordion panel title to expand/shrink the panel
-                   and switch between different exploratory graph types.")
-          ),
-          accordion(
-            accordion_panel(title = "Density and Distribution",
-              markdown("
-                A critical component of an exploratory data analysis is the creation of **probability density function** (PDF) plots
-                and **cumulative distribution function** (CDF) plots. They tell us the shape the data takes and helps inform if we need to 
-                apply a mathematical correction or use a certain type of distribution in our statistical model. I'm only
-                making dedicated PDF and CDF plots for our response variables and not our explanatory variables. However,
-                we can see the shape of our explanatory variables using histograms (a couple accordion panels down).
-                "),
-              card(card_header("Fluorescence", class = "bg-primary", style = "font-size: 20px"),
-                layout_sidebar(sidebar=sidebar(
-                  selectInput("tit_fluoro_dist_var", "Variable", choices = tit_fluoro_vars,
-                               selected = "gsw"),
-                  checkboxGroupInput("tit_fluoro_dists", "Distributions", choices=dists, 
-                                      selected=c("normal", "lognormal", "gamma")),
-                  sliderInput("tit_fluoro_len", "Length to Test Distributions Over", min=1,
-                              max=500, value=100)
-                  ), # end sidebar - but not sidebar LAYOUT
-                  div(
-                    layout_column_wrap(
-                      plotOutput("tit_fluoro_pdf"),
-                      plotOutput("tit_fluoro_cdf")
-                    )
-                  ),
-                  div(
-                    markdown("###### **One-sample Kolmogorov-Smirnov tests for selected fluorescence variable against selected distributions**"),
-                    verbatimTextOutput("tit_fluoro_KS")
-                  ),
-                  div(style="border-left: 5px solid", 
-                    markdown("
-                      > A note on PhiPS2 distributions: PhiPS2 is a **unitless ratio** on a scale of 0-1, so we don't need to create PDF and CDF plots and perform KS tests
-                      (you still have the option to, but this is an instance where we use our *statistical reasoning*).
-                      Instead, we logit transform PhiPS2 and use the logit transformed version in our models. <br>
-                      > For a more comprehensive explanation of PhiPS2, check out 
-                      [Genty *et al*., 1989](https://www.sciencedirect.com/science/article/abs/pii/S0304416589800169) or
-                      for a simpler explanation, the [chlorophyll fluorescence wikipedia page](https://en.wikipedia.org/wiki/Chlorophyll_fluorescence)."
-                  ))
-                ) # end sidebar layout
-              ), # end fluorescence card
-              card(card_header("Fruit", class = "bg-primary", style = "font-size: 20px"),
-                 layout_sidebar(sidebar=sidebar(
-                    selectInput("tit_fruit_dist_var", "Variable", choices = tit_fruit_vars,
-                                selected = "Mass"),
-                    checkboxGroupInput("tit_fruit_dists", "Distributions", choices=dists, 
-                                       selected=c("normal", "lognormal", "gamma")),
-                    sliderInput("tit_fruit_len", "Length to Test Distributions Over", min=1,
-                                max=500, value=100)
-                  ), # end sidebar - but not sidebar LAYOUT
-                  div(
-                   layout_column_wrap(
-                     plotOutput("tit_fruit_pdf"),
-                     plotOutput("tit_fruit_cdf")
-                   )
-                  ),
-                  div(
-                   markdown("###### **One-sample Kolmogorov-Smirnov tests for selected fruit variable against selected distributions**"),
-                   verbatimTextOutput("tit_fruit_KS")
-                  ),
-                  div(style="border-left: 5px solid", 
-                      markdown("
-                        > Sugar and blossom end-rot are both ratios (similar to PhiPS2), so we'll 
-                        end up logit transforming them for use in our models.
-                      ")
-                  )
-                ) # end sidebar layout
-              ) # end phips2 card
-            ), # end dist accordion panel
-            accordion_panel(title="Histograms",
-              card(card_header("Fluorescence Histogram", class = "bg-primary", style = "font-size: 20px"),
-                layout_sidebar(sidebar=sidebar(
-                  selectInput("tit_fluoro_hist_var", "Select X Variable",
-                              choices = tit_fluoro_vars, selected = "AmbientHumidity"),
-                  selectInput("tit_fluoro_hist_color", "Select Color Variable",
-                              choices = tit_fluoro_vars_d, selected = "Treatment"),
-                  sliderInput("tit_fluoro_hist_bins", "Number of Bins",
-                              value = 30, min = 2, max = 100)
-                  ), # end sidebar
-                  plotOutput("tit_fluoro_hist")
-              )), # gsw hist card
-              card(card_header("Fruit Histogram", class = "bg-primary", style = "font-size: 20px"),
-                layout_sidebar(sidebar=sidebar(
-                  selectInput("tit_fruit_hist_var", "Select Variable",
-                              choices = tit_fruit_vars, selected = "Ripeness"),
-                  selectInput("tit_fruit_hist_color", "Select Color Variable",
-                              choices = tit_fruit_vars_d, selected = "Treatment"),
-                  sliderInput("tit_fruit_hist_bins", "Number of Bins",
-                              value = 30, min = 2, max = 100)
-                  ), # end sidebar
-                  plotOutput("tit_fruit_hist")
-                )) # ps2 hist card
-              ), # end hist accordion panel
-              accordion_panel(title = "Scatter Plots",
-                card(card_header("Fluorescence Scatter", class = "bg-primary", style = "font-size: 20px"),
-                    layout_sidebar(sidebar = sidebar(
-                      selectInput("tit_fluoro_scatter_x","X Variable",
-                                  choices = all_tit_fluoro_vars, selected = "AmbientHumidity"),
-                      selectInput("tit_fluoro_scatter_y","Y Variable",
-                                  choices = all_tit_fluoro_vars, selected = "gsw"),
-                      selectInput("tit_fluoro_scatter_col","Color Variable",
-                                  choices = all_tit_fluoro_vars, selected = "Treatment"),
-                      selectInput("tit_fluoro_scatter_shape", "Shape Variable",
-                                  choices = tit_fluoro_vars_d, selected = "Treatment"),
-                      sliderInput("tit_fluoro_scatter_jit", "Jitter Amount",
-                                  min=0, max=10, value =3),
-                      sliderInput("tit_fluoro_scatter_size", "Point Size",
-                                  min = 1, max=10, value = 3),
-                      checkboxInput("tit_fluoro_scatter_fwrap", "Individual Plot Per Treatment", FALSE)
-                    ), # end sidebar
-                    card_body(plotOutput("tit_fluoro_scatter"))
-                    ) # end sidebar layout
-                ), # end gsw scatter plot
-                card(card_header("Fruit Scatter", class = "bg-primary", style = "font-size: 20px"),
-                    layout_sidebar(sidebar = sidebar(
-                      selectInput("tit_fruit_scatter_x","X Variable",
-                                  choices = all_tit_fruit_vars, selected = "Mass"),
-                      selectInput("tit_fruit_scatter_y","Y Variable",
-                                  choices = all_tit_fruit_vars, selected = "Sugar"),
-                      selectInput("tit_fruit_scatter_col","Color Variable",
-                                  choices = all_tit_fruit_vars, selected = "Treatment"),
-                      selectInput("tit_fruit_scatter_shape", "Shape Variable",
-                                  choices = tit_fruit_vars_d, selected = "Treatment"),
-                      sliderInput("tit_fruit_scatter_jit", "Jitter Amount",
-                                  min=0, max=10, value =0),
-                      sliderInput("tit_fruit_scatter_size", "Point Size",
-                                  min = 1, max=10, value = 3),
-                      checkboxInput("tit_fruit_scatter_fwrap", "Individual Plot Per Treatment", FALSE)
-                    ), # end sidebar
-                    card_body(plotOutput("tit_fruit_scatter"))
-                    ) # end sidebar layout
-                ) # end fruit scatter plot
-            ), # end scatterplot accordion panel
-            accordion_panel(title="Box Plots",
-              card(card_header("Fluorescence Boxplot", class = "bg-primary", style = "font-size: 20px"),
-                   layout_sidebar(sidebar = sidebar(
-                     selectInput("tit_fluoro_box_x","X Variable",
-                                 choices = tit_fluoro_vars_d, selected = "Treatment"),
-                     selectInput("tit_fluoro_box_y","Y Variable",
-                                 choices = tit_fluoro_vars, selected = "gsw")
-                   ), # end sidebar
-                   plotOutput("tit_fluoro_box")
-                   )),
-              card(card_header("Fruit Boxplot", class = "bg-primary", style = "font-size: 20px"),
-                   layout_sidebar(sidebar = sidebar(
-                     selectInput("tit_fruit_box_x","X Variable",
-                                 choices = tit_fruit_vars_d, selected = "Treatment"),
-                     selectInput("tit_fruit_box_y","Y Variable",
-                                 choices = tit_fruit_vars, selected = "Mass")
-                   ), # end sidebar
-                   plotOutput("tit_fruit_box")
-                   )),
-              card(card_header("Fruit Summary Boxplot", class = "bg-primary", style = "font-size: 20px"),
-                   layout_sidebar(sidebar = sidebar(
-                     selectInput("tit_fruit_sum_box_x","X Variable",
-                                 choices = tit_fruit_sum_vars_d, selected = "Treatment"),
-                     selectInput("tit_fruit_sum_box_y","Y Variable",
-                                 choices = tit_fruit_sum_vars, selected = "Mass_sum")
-                   ), # end sidebar
-                   plotOutput("tit_fruit_sum_box")
-                   ))
-            ) # end boxplot accordion panel
-          ) # end accordion
-        ), # end exploratory tab panel
-        tabPanel("Statistics",
-          accordion(
-            accordion_panel("Fluorescence",
-              markdown("These first variables are *univariate*, meaning they examine a single
-                       explanatory variable at a time. Select an explanatory variable from the dropdown
-                       to change the model."),
-              card(card_header("Stomatal conductance (gsw)", class = "bg-primary", style = "font-size: 20px"),
-                selectInput("tit_gsw_mod_var", "Explanatory Variable",
-                            choices = fluoro_mod_var_names, selected = "AmbientHumidity"),
-                div(layout_columns(col_widths = c(7,5),
-                  div(
-                    card(card_header("Model Summary"),
-                         verbatimTextOutput("tit_gsw_mod_summary")
-                    )
-                  ),# end model summary div
-                  div(# value boxes for AIC and r^2
-                    value_box(
-                      title = "GSW Model AIC",
-                      value = textOutput("tit_gsw_aic"),
-                      theme = "bg-primary",
-                      width = 0.2
-                    ),
-                    value_box(
-                      title = "GSW Model p-value",
-                      value = textOutput("tit_gsw_p"),
-                      width = 0.2
-                    ),
-                    value_box(
-                      title = "GSW Model R^2",
-                      value = textOutput("tit_gsw_r2"),
-                      theme = "bg-secondary",
-                      width = 0.2
-                    ),
-                    card(card_header("Treatment Letters", class="bg-secondary"),
-                         verbatimTextOutput("tit_gsw_letters")
-                    )
-                  ) # end value box div
-                ) # end column wrap
-                ), # end div
-              ), # end gsw stats card
-              card(card_header("Photosystem II Efficiency (PhiPS2", class = "bg-primary", style = "font-size: 20px"),
-                   selectInput("tit_ps2_mod_var", "Explanatory Variable",
-                               choices = fluoro_mod_var_names, selected = "AmbientHumidity"),
-                   div(layout_columns(col_widths = c(7,5),
-                        div(
-                          card(card_header("Model Summary"),
-                               verbatimTextOutput("tit_ps2_mod_summary")
-                          )
-                        ),# end model summary div
-                        div(# value boxes for AIC and r^2
-                          value_box(
-                            title = "PhiPS2 Model AIC",
-                            value = textOutput("tit_ps2_aic"),
-                            theme = "bg-primary",
-                            width = 0.2
-                          ),
-                          value_box(
-                            title = "PhiPS2 Model p-value",
-                            value = textOutput("tit_ps2_p"),
-                            width = 0.2
-                          ),
-                          value_box(
-                            title = "PhiPS2 Model R^2",
-                            value = textOutput("tit_ps2_r2"),
-                            theme = "bg-secondary",
-                            width = 0.2
-                          ),
-                          card(card_header("Treatment Letters", class="bg-secondary"),
-                               verbatimTextOutput("tit_ps2_letters")
-                          )
-                        ) # end value box div
-                   ) # end column wrap
-                ) # end div
-              ), # end ps2 stats card
-              card(card_header("Multivariate", class = "bg-secondary", style = "font-size: 20px"),
-                div(layout_columns(col_widths = c(6,6),
-                  div(
-                    markdown("
-                      Maybe instead of looking at a single environmental variable, we want to look at all of them (or at least the ones
-                      that actually make an impact on our target response variables). To accomplish this, we can use **principal component analysis** (PCA).
-                      First, we scale our environmental variables so they all have an equal influence on the output, then use the **rda** function from the **vegan** package
-                      to reduce the dimensionality."
-                    ),
-                    card(card_header("PCA Summary"), 
-                       verbatimTextOutput("tit_fluoro_pca_summary")
-                    )
-                  ),
-                  div(
-                    markdown("##### **PCA for Fluorescence Variables**"),
-                    plotOutput("tit_fluoro_pca", height = "600px")
-                  )
-                )),
-                div(layout_column_wrap(
-                  card(card_header("Multivariate Stomatal Conductance (GSW)", class = "bg-primary", style = "font-size: 20px"),
-                       div(# value boxes for AIC and r^2
-                         card(card_header("Model Summary", class = "bg-primary"),
-                              verbatimTextOutput("tit_pcr_gsw_summary"),
-                              max_height = 500
-                         ),
-                         value_box(
-                           title = "Multivariate GSW AIC",
-                           value = textOutput("tit_pcr_gsw_aic"),
-                           theme = "bg-primary",
-                           width = 0.2
-                         ),
-                         value_box(
-                           title = "Multivariate GSW p-value",
-                           value = textOutput("tit_pcr_gsw_p"),
-                           width = 0.2
-                         ),
-                         value_box(
-                           title = "Multivariate GSW R^2",
-                           value = textOutput("tit_pcr_gsw_r2"),
-                           theme = "bg-secondary",
-                           width = 0.2
-                         ),
-                         card(card_header("Treatment Letters", class="bg-secondary"),
-                              verbatimTextOutput("tit_pcr_gsw_letters")
-                         )
-                       ), # end value box div
-                       plotOutput("tit_pcr_gsw_pred")
-                       ),
-                  card(card_header("Multivariate Photosystem II Efficiency", class = "bg-primary", style = "font-size: 20px"),
-                       div(# value boxes for AIC and r^2
-                         card(card_header("Model Summary", class = "bg-primary"),
-                              verbatimTextOutput("tit_pcr_ps2_summary"),
-                              max_height = 500
-                         ),
-                         value_box(
-                           title = "Multivariate PhiPS2 AIC",
-                           value = textOutput("tit_pcr_ps2_aic"),
-                           theme = "bg-primary",
-                           width = 0.2
-                         ),
-                         value_box(
-                           title = "Multivariate PhiPS2 p-value",
-                           value = textOutput("tit_pcr_ps2_p"),
-                           width = 0.2
-                         ),
-                         value_box(
-                           title = "Multivariate PhiPS2 R^2",
-                           value = textOutput("tit_pcr_ps2_r2"),
-                           theme = "bg-secondary",
-                           width = 0.2
-                         ),
-                         card(card_header("Treatment Letters", class="bg-secondary"),
-                              verbatimTextOutput("tit_pcr_ps2_letters")
-                         )
-                       ), # end value box div
-                       plotOutput("tit_pcr_ps2_pred")
-                  ), # end phips2 card
-                )) # end column wrap and div
-              ) # end multivariate card
-            ),
-            accordion_panel("Fruit",
-              div(
-                markdown("
-                > Because our fruit are **pseudoreplicates** (we applied our treatments to the plants, not the individual fruit)
-                when we go to make fruit models, we have to average out the values between the plants, rather than looking at the individual fruit
-                as a sampling unit. If we didn't do this, our models would have a drastically increased sample size that wouldn't reflect
-                our actual experimental design.
-                ")
-              ),
-              card(card_header("Mass", class = "bg-primary", style = "font-size: 20px"),
-                div(layout_columns(col_widths = c(7,5),
-                  div(
-                    card(card_header("Model Summary"),
-                         verbatimTextOutput("tit_mass_mod_summary")
-                    ),
-                    plotOutput("tit_mass_annotated")
-                  ),# end model summary div
-                  div(# value boxes for AIC and r^2
-                    value_box(
-                      title = "Mass Model AIC",
-                      value = textOutput("tit_mass_aic"),
-                      theme = "bg-primary",
-                      width = 0.2
-                    ),
-                    value_box(
-                      title = "Mass Model p-value",
-                      value = textOutput("tit_mass_p"),
-                      width = 0.2
-                    ),
-                    value_box(
-                      title = "Mass Model R^2",
-                      value = textOutput("tit_mass_r2"),
-                      theme = "bg-secondary",
-                      width = 0.2
-                    ),
-                    card(card_header("Treatment Letters", class="bg-secondary"),
-                         verbatimTextOutput("tit_mass_letters")
-                    )
-                  ) # end value box div
-                ) # end column wrap
-                ) # end div
-              ), # end mass stats card
-              card(card_header("Sugar", class = "bg-primary", style = "font-size: 20px"),
-                div(layout_columns(col_widths = c(7,5),
-                  div(
-                    card(card_header("Model Summary"),
-                         verbatimTextOutput("tit_sug_mod_summary")
-                    ),
-                    plotOutput("tit_sug_annotated")
-                  ),# end model summary div
-                  div(# value boxes for AIC and r^2
-                    value_box(
-                      title = "Sugar Model AIC",
-                      value = textOutput("tit_sug_aic"),
-                      theme = "bg-primary",
-                      width = 0.2
-                    ),
-                    value_box(
-                      title = "Sugar Model p-value",
-                      value = textOutput("tit_sug_p"),
-                      width = 0.2
-                    ),
-                    value_box(
-                      title = "Sugar Model R^2",
-                      value = textOutput("tit_sug_r2"),
-                      theme = "bg-secondary",
-                      width = 0.2
-                    ),
-                    card(card_header("Treatment Letters", class="bg-secondary"),
-                         verbatimTextOutput("tit_sug_letters")
-                    )
-                  ) # end value box div
-                ) # end column wrap
-                ) # end div
-              ), # end sugar stats card
-              card(card_header("Blossom End-Rot", class = "bg-primary", style = "font-size: 20px"),
-                div(layout_columns(col_widths = c(7,5),
-                  div(
-                    card(card_header("Model Summary"),
-                         verbatimTextOutput("tit_ber_mod_summary")
-                    ),
-                    plotOutput("tit_ber_annotated")
-                  ),# end model summary div
-                  div(# value boxes for AIC and r^2
-                    value_box(
-                      title = "BER Model AIC",
-                      value = textOutput("tit_ber_aic"),
-                      theme = "bg-primary",
-                      width = 0.2
-                    ),
-                    value_box(
-                      title = "BER Model p-value",
-                      value = textOutput("tit_ber_p"),
-                      width = 0.2
-                    ),
-                    value_box(
-                      title = "BER Model R^2",
-                      value = textOutput("tit_ber_r2"),
-                      theme = "bg-secondary",
-                      width = 0.2
-                    ),
-                    card(card_header("Treatment Letters", class="bg-secondary"),
-                         verbatimTextOutput("tit_ber_letters")
-                    )
-                  ) # end value box div
-                ) # end column wrap
-                ) # end div
-              ), # end ber stats card
-              card(card_header("Total Fruit Count", class = "bg-primary", style = "font-size: 20px"),
-                div(layout_columns(col_widths = c(7,5),
-                  div(
-                    card(card_header("Model Summary"),
-                         verbatimTextOutput("tit_fc_mod_summary")
-                    ),
-                    plotOutput("tit_fc_annotated")
-                  ),# end model summary div
-                  div(# value boxes for AIC and r^2
-                    value_box(
-                      title = "Fruit Count Model AIC",
-                      value = textOutput("tit_fc_aic"),
-                      theme = "bg-primary",
-                      width = 0.2
-                    ),
-                    card(card_header("Fruit Count Model Confidence Intervals"),
-                         verbatimTextOutput("tit_fc_confint")
-                    ),
-                    value_box(
-                      title = "Fruit Count Model R^2",
-                      value = textOutput("tit_fc_r2"),
-                      theme = "bg-secondary",
-                      width = 0.2
-                    ),
-                    card(card_header("Treatment Letters", class="bg-secondary"),
-                         verbatimTextOutput("tit_fc_letters")
-                    )
-                  ) # end value box div
-                ) # end column wrap
-                ) # end div
-              ), # end fruit count stats card
-              card(card_header("Marketable Fruit Count", class = "bg-secondary", style = "font-size: 20px"),
-                div(layout_columns(col_widths = c(7,5),
-                  div(
-                    card(card_header("Model Summary"),
-                         verbatimTextOutput("tit_mfc_mod_summary")
-                    ),
-                    plotOutput("tit_mfc_annotated")
-                  ),# end model summary div
-                  div(# value boxes for AIC and r^2
-                    value_box(
-                      title = "Marketable Fruit Count Model AIC",
-                      value = textOutput("tit_mfc_aic"),
-                      theme = "bg-primary",
-                      width = 0.2
-                    ),
-                    card(card_header("Marketable Fruit Count Model Confidence Intervals"),
-                         verbatimTextOutput("tit_mfc_confint")
-                    ),
-                    value_box(
-                      title = "Marketable Fruit Count Model R^2",
-                      value = textOutput("tit_mfc_r2"),
-                      theme = "bg-secondary",
-                      width = 0.2
-                    ),
-                    card(card_header("Treatment Letters", class="bg-secondary"),
-                         verbatimTextOutput("tit_mfc_letters")
-                    )
-                  ) # end value box div
-                ) # end column wrap
-                ) # end div
-              ), # end fruit count stats card
-            ) # end fruit accordion panel
-          ) # end stats accordion
-        ), # end stats tab panel
-        tabPanel("Data",
-         card(card_header("Fluorescence Data", class = "bg-primary", style = "font-size: 20px"),
-              div(dataTableOutput("tit_fluoro_DT")),
-              markdown("This dataset is a combination of data from the LI-COR Li-600
-           and PhotosynQ MultispeQ V2.0s. For the sake of this app running
-           efficiently, the data has been pared down to strictly what is needed.
-           The full datasets can be found [on my github](https://www.github.com/zachpeagler/Thesis/data/TIP24).")
-         ),
-         card(card_header("Fruit Data", class = "bg-primary", style = "font-size: 20px"),
-              dataTableOutput("tit_fruit_DT")
-         ),
-         card(card_header("Fruit Summary Data", class = "bg-primary", style = "font-size: 20px"),
-              dataTableOutput("tit_fruit_sum_DT")
-         )
-        ), # end data tab panel
-        tabPanel("Info",
-          div(style = "padding: 10px", align = "center",
-              markdown("#### **Tomato Inoculant Timing Trial**")
-              ),
-          card(card_header("Hypothesis and Objectives", class = "bg-primary", style = "font-size: 20px"),
-            markdown("
-            This trial accompanies the following hypothesis and objectives laid out in my thesis: <br>
-            **Objective 2** – Determine the effect of biostimulant granule (BG) 
-            inoculation timing on tomato plant growth and crop quality and yield.
-            - **Hypothesis 2.1** – Because of the priority effect and the mass effect,
-            BGs with the full microbial consortium applied at both germination and
-            transplantation will increase fluorescence parameters, fruit yield, 
-            and fruit quality more than either germination or transplantation inoculations.
-            > It should be noted that these hypotheses are technically *predictive hypotheses*, as not only do they hypothesize a 
-            change, they also specify a prediction for that change. I.E. Fluorescence parameters will not only *change*, they will *increase*.
-            This is a very minor distinction, but important to those in the science realm (nerds).
-            ")
-               ), # end hypothesis and objective card
-          div(
-            layout_column_wrap(
-              card(img(src = "TIP24_1.jpg"),
-                  markdown("Tomato plants six days after germination")
-                  ),
-              card(img(src = "TIP24_2.jpg"),
-                  markdown("Tomato plants one month after germination.")
-              ),
-              card(img(src = "TIP24_3.jpg"),
-                  markdown("Tomato plants four months after germination.")
-              ),
-            ) # end column wrap
-          ), # end tomato growth pictures div
-          card(card_header("Methods", class = "bg-secondary", style = "font-size: 20px"),
-            markdown("
-            The space available for the tomato inoculant timing trial was greater 
-            than that available for the tomato inoculant location trial, allowing for more replicates per group,
-            thus increasing statistical power to 0.59 for an effect size of 0.4 with 4 groups
-            and 12 replicates per group at a 0.05 significance level. The plants were grown 
-            in the hydroponic greenhouse at the KSU Field Station (34.0622° N, 84.6034° W). 
-            Tomato seeds were germinated in Oasis cubes and fertilized for three weeks before being 
-            transplanted into Dutch buckets containing Mother Earth™ Coco + Perlite Mix, copper-lined root barriers,
-            and Mother Earth™ Hydroton Original clay pellets. A nutrient mix composed of 1.32 g/L Jack’s 0-12-26,
-            0.075 g/L magnesium sulfate, and 0.912 g/L calcium nitrate was mixed in 1000-liter batches
-            and fed into the Dutch buckets. <br>
-            The treatments include inoculation at germination, inoculation at transplantation,
-            inoculation at both germination and transplantation, and a control no inoculation group.
-            All inoculation groups used the entire microbial consortium listed below encapsulated in chitosan.
-            For inoculation at germination, a single BG was placed atop the seed in the Oasis cube.
-            For inoculation at transplantation, approximately 5 grams of BGs were placed in contact with the plant roots.
-            The joint inoculant group effectively received a double dose, as they received inoculation at both germination and transplantation.
-            Each group had 12 replicates, for a total sample size of 48 tomato plants. 
-            Plants were germinated on May 1st, 2024 and transplanted on May 23rd, 2024. 
-            Plants were allowed to grow until October 19th, 2024, at which point they were taken down with samples collected for stomatal density measurements.
-            Biweekly measurements were taken with a Li-COR Li-600 and two PhotosynQ MultispeQ V2.0s.
-            Fruit were harvested when ripe, as assessed by color and firmness, and were taken back to the lab for analysis.
-            Weight measurements were performed with an OHAUS Scout SCA210, and blossom-end rot was assessed by visual observation
-            of the fruit. Sugar concentration was measured with a Fisherbrand Brix refractometer.
-            Firmness was measured with an OA Supplies Fruit Pressure Tester (penetrometer). <br>
-            The fruit data is formatted in a tidy format with each row corresponding to one fruit and each column representing a variable. 
-            The fluorescence data is formatted in a tidy format with each row corresponding to a single plant measurement and each column representing a variable.
-            <br>
-            ##### **Microbial Consortium** <br>
-            - *Azospirillum brasilense Sp7*- PGPB that benefits the plant via nitrogen fixation, siderophore production,
-            and by increasing lateral root growth ([Sahoo et al, 2014](https://pubmed.ncbi.nlm.nih.gov/24414168/); [Li et al, 2005](https://pubmed.ncbi.nlm.nih.gov/16121231/)),
-            and has been shown to increase plant stress tolerance ([Casanovas et al, 2002](https://www.jstor.org/stable/23787082?seq=1)).
-            It has been shown to increase crop yield and plant nitrogen, phosphorous, and potassium content
-            ([Askary et al, 2009](https://www.researchgate.net/publication/347438334_Influence_of_the_Co-inoculation_Azospirillum_brasilense_and_Rhizobium_meliloti_plus_24-D_on_Grain_Yield_and_N_P_K_Content_of_Triticum_aestivum_Cv_Baccros_and_Mahdavi)).
-            It has also been reported to work well with Methylobacterium oryzae ([Madhaiyan et al, 2009](https://www.researchgate.net/publication/225966871_Effect_of_co-inoculation_of_methylotrophic_Methylobacterium_oryzae_with_Azospirillum_brasilense_and_Burkholderia_pyrrocinia_on_the_growth_and_nutrient_uptake_of_tomato_red_pepper_and_rice)). <br>
-            - *Azotobacter chroococcum 43* - PGPB that operates via nitrogen fixation, phosphate solubilization,
-            and vitamin, indole acetic acid (IAA), gibberellin (GA), hydrogen cyanide (HCN), siderophore,
-            and cytokinin (CK) production ([Abd El-Fattah et al, 2013](https://www.researchgate.net/publication/259130343_Effect_of_carrier_materials_sterilization_method_and_storage_temperature_on_survival_and_biological_activities_of_Azotobacter_chroococcum_inoculant); [Revillas et al, 2000](https://pubmed.ncbi.nlm.nih.gov/11021581/); [Wani et al, 2007](https://www.researchgate.net/publication/240762870_Co-inoculation_of_nitrogen-fixing_and_phosphate-solubilizing_bacteria_to_promote_growth_yield_and_nutrient_uptake_in_chickpea)).
-            Shown to increase germination rates and aboveground biomass and crop quality and yield in maize ([Zahir et al, 2005](https://www.researchgate.net/publication/233130106_Precursor_L-tryptophan-Inoculum_Azotobacter_Interaction_for_Improving_Yields_and_Nitrogen_Uptake_of_Maize)). <br>
-            - *Bacillus subtilis* - PGPB that has been shown to improve fruit quality and yield in tomato
-            ([Mena-Violante & Olalde-Portugal, 2007](https://www.researchgate.net/publication/222326135_Alteration_of_tomato_fruit_quality_by_root_inoculation_with_plant_growth-promoting_rhizobacteria_PGPR_Bacillus_subtilis_BEB-13bs); [Kokalis-Burelle et al, 2002](https://link.springer.com/article/10.1023/A:1014464716261))
-            and shown to increase metabolite production ([Sharaf-Eldin et al, 2008](https://pubmed.ncbi.nlm.nih.gov/18622904/)).
-            Shown to solubilize phosphate, fix nitrogen, produce IAA, CK, GA, HCN, and antibiotics,
-            as well as exhibiting phytase activity ([Ahmad et al, 2008](https://pubmed.ncbi.nlm.nih.gov/16735107/); [Arkhipova et al, 2005](https://link.springer.com/article/10.1007/s11104-004-5047-x); [Yao et al, 2006](https://www.researchgate.net/publication/233193377_Effect_of_FZB_24_Bacillus_subtilis_as_biofertilizer_on_cotton_yields_in_field_tests)).
-            It has been used as a biocontrol agent against aphids and pathogenic bacteria ([Kokalis-Burelle et al, 2002](https://link.springer.com/article/10.1023/A:1014464716261)). <br>
-            - *Methylobacterium oryzae CBMB20* - PGPB that has been shown to improve fruit quality and yield in tomato
-            in both foliar and chitosan encapsulated inoculations ([Chanratana et al., 2019](https://www.researchgate.net/profile/Aritra-Choudhury/publication/323564168_Evaluation_of_chitosan_and_alginate_immobilized_Methylobacterium_oryzae_CBMB20_on_tomato_plant_growth/links/5a9e6fcfa6fdcc214af2b315/Evaluation-of-chitosan-and-alginate-immobilized-Methylobacterium-oryzae-CBMB20-on-tomato-plant-growth.pdf)). 
-            Operates through phytohormone (auxin and cytokinin) production, stress reduction via ACC deaminase production, 
-            increased nutrient availability through nitrogen fixation, and as a biopesticide ([Chauhan et al., 2015](https://www.sciencedirect.com/science/article/abs/pii/S0929139315300159)). <br>
-            - *Pseudomonas putida 90* - PGPB that increases plant growth by solubilizing phosphate and producing
-            IAA and siderophores ([Hariprasad & Niranjana, 2009](https://link.springer.com/article/10.1007/s11104-008-9754-6)). Shown to inhibit ethylene production ([Mayak et al, 1999](https://pubmed.ncbi.nlm.nih.gov/10552131/)).
-            Shown to significantly increase tomato fruit macro- and micronutrient content ([He et al, 2019](https://pubmed.ncbi.nlm.nih.gov/30955229/)). 
-            Shown to increase potassium, magnesium, and calcium uptake and decrease sodium uptake ([Yao et al, 2010](https://www.sciencedirect.com/science/article/abs/pii/S1164556309001046)). 
-            Also shown to increase root and shoot growth ([Glick et al, 1997](https://www.researchgate.net/publication/223543401_Early_development_of_canola_seedlings_in_the_presence_of_the_plant_growth-promoting_rhizobacterium_Pseudomonas_putida_GR12-2); [Hall et al, 1996](https://ui.adsabs.harvard.edu/abs/1996IsJPS..44...37H/abstract)). <br>
-            ")
-            ), # end methods card
-          card(card_header("Variables", class = "bg-primary", style = "font-size: 20px"),
-            markdown("
-            ##### **Explanatory Variables**
-            - **Treatment** is the inoculation timing of the tomato. Options are Control, Germination, Transplantation, and Germ+Trans. <br>
-            - **Row** is the row of the tomato. (A:D) <br>
-            - **Pot** is the pot number of the tomato. (1:12) <br>
-            - **Plant** is a combination of *Row* and *Pot*, and acts as an ID for every individual plant. (A1: D12) <br>
-            ###### **Fluorescence**
-            - **Time** is the time at which the measurement was taken <br>
-            - **Date** is the date at which the measurement was taken <br>
-            - **DaysFromGermination** is the number of days from germination (2025-05-01) to the date of measurement. <br>
-            - **AmbientHumidity** is the relative humidity (%) at the time of measurement. <br>
-            - **AmbientLight** is the ambient light level (lumens) at the time of measurement. <br>
-            - **AmbientPressure** is the ambient pressure (kPa) at the time of measurement. <br>
-            - **LeafTemperature** is the temperature (Celcius) of the leaf. <br>
-            ###### **Fruit**
-            - **DateHarvest** (date) is the date the fruit was harvested (August 2024:October 2024) <br>
-            - **DateAnalysis** (date) is the date the fruit was analyzed in the lab (August 2024:October 2024) <br>
-            - **DaysFromHarvestToAnalysis** (int) is the number of days from harvest to analysis (fruit only). <br>
-            - **Penetrometer** corresponds to the force in kilograms it takes to penetrate the flesh of the tomato (~0.5:~4) <br>
-            - **Ripeness** is the **Penetrometer** value mapped from 0:1 and reversed, so that riper fruit are closer to 1 and unripe fruit are closer to 0. (0:1) <br>
-            ---
-            ##### **Response Variables**
-            ###### **Fluorescence**
-            - **gsw** is the stomatal conductance (mol m-2 s-1) of the leaf. Stomatal conductance refers to the
-            rate at which molecules are moving through the leaf's stomates, and is indicitave of photosynthesis.<br>
-            - **PhiPS2** is the efficiency of Photosystem II. It is unitless. (0:1) <br>
-            ###### **Fruit**
-            - **Mass** is the mass of the tomato (grams), measured on an Ohaus Scout. (~10:~400) <br>
-            - **BER** corresponds to whether or not the tomato has blossom end rot, a disease caused by calcium deficiency that renders the fruit unmarketable. (0,1) <br>
-            - **Sugar** is the average of two measurements of the tomato juice's sugar concentration taken on a Fisher BRIX Refractometer (~2:~12) <br>
-            - **SugarGrams** is the grams of sugar in each tomato, calculated as **Sugar** x **Mass** <br>
-            
-            > It's important to note that **only** the Li-600 can measure gsw, while both
-            the Li-600 and the MultispeQ can measure PhiPS2. Also, even though both devices can 
-            measure PhiPS2, they do so **in different ways**. For our purposes, this is fine
-            so long as the measurements from each device correlate. <br>
-            "),
-            div(style="border-left: 5px solid", 
-              markdown(
-                "> For a more comprehensive explanation of PhiPS2, check out 
-                [Genty *et al*., 1989](https://www.sciencedirect.com/science/article/abs/pii/S0304416589800169) or
-                for a simpler explanation, the [chlorophyll fluorescence wikipedia page](https://en.wikipedia.org/wiki/Chlorophyll_fluorescence)."
-              )
-            )
-          ) # end variable card
-          ) # end info tab Panel
-        ) # end tabset Panel
-      ) # end TIT tabpanel
+      )
     )# end "Tomato Inoculant Trials" tabsetpanel
   ),
   ##### ABOUT NAV PANEL #####
   nav_panel("About",
-    card(card_header("About the app", class = "bg-primary", style = "font-size: 20px"),
+    card(card_header("About the app", class = "bg-secondary", style = "font-size: 20px"),
       div(layout_columns(col_widths = c(8,4),
        markdown(
          "This app is built using **R** 4.4.3 and uses a myriad of packages, 
@@ -2719,13 +2740,13 @@ ui <- navbarPage(collapsible = TRUE,
          PDF, CDF, and prediction plots. These functions are from my package **ztils**, which you can check out on
          [CRAN](https://cran.r-project.org/web/packages/ztils/index.html) or view the source code on [Github](https://github.com/zachpeagler/ztils).
          This app was originally intended to be containerized with Docker and hosted to an Amazon Web Services
-         Elastic Kubernetes Cluster, but with the recent advent of shinylive, it is now deployed as a static webpage on Github Pages. This significantly
+         Elastic Kubernetes Cluster, but with the recent advent of shinylive, it is now deployed as a static webpage on Github Pages and uses Github Actions for CI/CD. This significantly
          reduces cost at the price of performance. As a broke college student, this is a tradeoff I'm willing to accept.
          Instead of the app running on the server, the app runs locally in the browser using WebR. 
          The diagram to the right illustrates the shinylive architecture (in broad strokes). I briefly considered using Quarto to develop this app,
          but Quarto's integration with Shiny has a few features lacking that I really wanted to implement in this app, so I stuck with base R. The switch
          to shinylive also came at the cost of custom fonts, much to my chagrin. While it's still possible to use custom fonts with shinylive, becayuse shinylive is incompatible with **curl** it's not possible
-         to fetch them remotely using **showtext** and **sysfonts** (i.e. using the font_add_google() command) and would've required multiple megabytes of space and a whole bunch of custom CSS.
+         to fetch them remotely using **showtext** and **sysfonts** (i.e. using the font_add_google() command) and using custom fonts without those would've required multiple megabytes of space and a whole bunch of custom CSS.
          The source code for this app can be found on the app [Github repository](github.com/zachpeagler/tomato-inoculant-app), accessible via that link or the GitHub icon in the top right corner of the app.
          "
        ),
@@ -2758,24 +2779,47 @@ ui <- navbarPage(collapsible = TRUE,
     card(card_header("References", class="bg-primary", style = "font-size: 20px"),
       markdown(" ##### **References**
       - Abd El-Fattah, D.A., *et al*. 2013. *Effect of carrier materials, sterilization method, and storage temperature on survival and biological activities of* Azotobacter chroococcum *inoculants*. Ann. Agric. Sci. 58:111-118. <br>
+      - Adesemoye, A.O. & Kloepper, J.W. 2009 *Plant-microbes interactions in enhanced fertilizer-use efficiency.* Appl. Microbiol. Biotechnol. 85:1-12.
       - Ahmad, F., *et al*. 2008. *Screening of free-living rhizospheric bacteria for their multiple plant growth promoting activities*. Microbiological Research, 163(2):173-181. <br>
       - Arkhipova, T., *et al*. 2005. *Ability of bacterium* Bacillus subtilis *to produce cytokinins and to influence the growth and endogenous hormone content of lettuce plants*. Plant Soil. 272:201-209. <br>
       - Askary, M. *et al*. 2009. *Influence of the co-inoculation* Azospirillum brasilense *and* Rhizobium meliloti *plus 2,4-D on Grain Yield and N, P, K content of* Triticum aestivum. American-Eurasian J. Agric. & Environ. Sci., 5(3):296-307 <br>
+      - Bashan, Y., et al. 2014. *Advances in plant growth-promoting bacterial inoculant technology: formulations and practical perspectives (1998-2013).* Plant Soil 378:1-33.
+      - Bashan, Y. & Gonzalez, L.E. 1999. *Long-term survival of the plant-growth-promoting bacteria Azospirillum brasilense and Pseudomonas fluorescens in dry alginate inoculant.* Appl. Microbiol. Biotechnol. 51:262-266.
+      - Berninger, T., et al. 2018. *Maintenance and assessment of cell viability in formulation of non-sporulating bacterial inoculants.* Microb. Biotech. 11(2):271-431.
+      - Brownlie, W.J., et al. 2023. *Phosphorous price spikes: A wake-up call for phosphorous resilience.* Front. Sustain. Food Syst. 7, 1088776.
       - Casanovas, E.M., *et al*. 2002. *Azospirillum inoculation mitigates water stress effects in Maize Seedlings*. Cereal Res. Comm. 30:343-350. <br>
       - Chanratana, M., *et al.* 2018. *Evaluation of chitosan and alginate immobilized* Methylobacterium oryzae CBMB20 *on tomato plant growth*. Archives of Agronomy and Soil Sci. 64(11):1489-1502. 
       - Chauhan, H., *et al.* (2015). *Novel plant growth promoting rhizobacteria—Prospects and potential*. Applied Soil Ecology, 95, 38–53. doi:10.1016/j.apsoil.2015.05.011 <br>
+      - Conley, D.J., et al. 2009. *Controlling eutrophication: nitrogen and phosphorous.* Science. 323:1014-1015.
+      - Declerck, S., et al. 1996. *Entrapment of in vitro produced spores of Glomus versiforme in alginate beads: in vitro and in vivo inoculum potentials.* J. Biotech. 48:51-57.
+      - Fitter, A.H. 2012. *Why plant science matters.* New Phytologist 193:1-2.
       - Glick, B. R., *et al*. 1997. *Early development of canola seedlings in the presence of the plant growth-promoting rhizobacterium* Pseudomonas putida GR12-2. Soil Biology and Biochemistry, 28(8):1233-1239 DOI 10.1016/S0038-0717(97)00026-6 <br>
       - Hall, J.A., *et al*. 1996. *Root elongation in various crops by the plant growth promoting rhizobacteria* Pseudomonas putida GR12-2. Isr. J. Plant Sci. 44:37-42. <br>
       - Hariprasad, P., Niranjana, S.R. 2009. *Isolation and characterization of phosphate solubilizing rhizobacteria to improve plant health of tomato*. Plant Soil. 316:13-24. <br>
       - He, Y., *et al*. 2019. *Co-inoculation of* Bacillus sp. *and* Pseudomonas putida *at different development stages acts as a biostimulant to promoted growth, yield and nutrient uptake of tomato*. J. Appl. Micro. DOI: 10.1111/jam.14273. <br>
+      - Joe, M.M., et al. 2012. *Survival of Azospirillum brasilense flocculated cells in alginate and its inoculation effect on growth and yield of maize under water deficit conditions.* Euro. J. Soil Bio. 50:198-206.
       - Kokalis-Burelle, N., *et al*. 2002. *Field evaluation of plant growth-promoting rhizobacteria amended transplant mixes and soil solarization for tomato and pepper production in Florida*. Plant Soil. 238:257-266. <br>
+      - Li, J., et al. 2022. *A Meta-Analysis of Biostimulant Yield Effectiveness in Field Trials.* Frontiers in Plant Sci. 13.
       - Li, Q., *et al*. 2005. *The effect of native and ACC deaminase-containing* Azospirillum brasilense Cd1843 *on the rooting of carnation cuttings*. Can. J. Microbiol. 51:511-514. <br>
       - Madhaiyan, M. *et al*. 2009. *Effect of co-inoculation of methylotrophic* Methylobacterium oryzae *with* Azospirillum brasilense *and* Burkholderia pyrrocinia *on the growth and nutrient uptake of tomato, red pepper and rice*. Plant Soil 328:71-82 DOI 10.1007/s11104-009-0083-1 <br>
       - Mayak, S. et al. 1999. *Effect of wild-type and mutant plant growth-promoting rhizobacteria on the rooting of mung bean cuttings*. J. Plant Growth Regul. 18:49-53. <br>
       - Mena-Violante, H., Olalde-Portugal, V. 2007. *Alteration of tomato fruit quality by root inoculation with plant growth-promoting rhizobacteria (PGPR)*: Bacillus subtilis BEB-13s. Sci. Hortic-Amsterdam 113:103-106. <br>
+      - Noel, S., et al. 2015. *Report for policy and decision makers. Reaping economic and environmental benefits from sustainable land management.* Economics of Land Degradation Initiative. Bonn, Germany
+      - Oksanen J. et al. 2025. *vegan: Community Ecology Package.* R package version 2.6-10.
+      - Pederson, T. & Crameri, F. 2023. *scico: Colour Palettes Based on the Scientific Colour-Maps.* R package version 1.5.0.
+      - R Core Team. 2025. *R: A Language and Environment for Statistical Computing.* R Foundation for Statistical Computing, Vienna, Austria.
       - Revillas, J.J., *et al*. 2000. *Production of B-Group vitamins by two Azotobacter strains with phenolic compounds as sole carbon source under diazotrophic and adiazotrophic conditions*. J. Appl. Microbiol. 89:486-493. <br>
+      - Rosa, L. & Gabrielli, P. 2022. *Energy and food security implications of transitioning synthetic nitrogen fertilizers to net-zero emissions.* Environ. Res. Lett. 18(1)
       - Sahoo, R.K., *et al*. 2014. *Phenotypic and molecular characterization of efficient native Azospirillum strains from rice fields for crop improvement*. Protoplasma. 251(4):943-953. <br>
+      - Schnitkey, G., Zulauf, C., Swanson, J., Paulson, N. 2022. *Planting decisions, nitrogen fertilizer prices, and corn and soybean prices.* Farmdoc daily. 11:145.
+      - Schoebitz, M., Lopez, M.D., Roldan, A. 2013. *Bioencapsulation of microbial inoculants for better soil-plant fertilization. A review.* Agron. Sustain. Dev. 33:751-765.
       - Sharaf-Eldin, M., *et al*. 2008. Bacillus subtilis FZB24 *affects flower quantity and quality of Saffron* (Crocus sativus). Planta Med. 74:1316-1320. <br>
+      - Sievert C (2023). _bsicons: Easily Work with 'Bootstrap' Icons_. R package version 0.1.2.
+      - Sievert C, Cheng J, Aden-Buie G (2025). _bslib: Custom 'Bootstrap' 'Sass' Themes for 'shiny' and 'rmarkdown'_. R package version 0.9.0.
+      - UC Innovation Commission. 2023. *Microbial Fertilizer.* Innovation Case for COP28.
+      - UN. 2017. *World Population Prospects: The 2017 Revision, Key Findings and Advance Tables.* Working Paper No. ESA/P/WP/248. United Nations.
+      - Venables, W. N. & Ripley, B. D. 2002. *Modern Applied Statistics with S. Fourth Edition.* Springer, New York. ISBN 0-387-95457-0
+      - Wickham, H. 2016. *ggplot2: Elegant Graphics for Data Analysis.* Springer-Verlag New York
       - Yao, A.V., *et al*. 2006. *Effect of* FZB 24 Bacillus subtilis *as a biofertilizer on cotton yields in field tests*. Arch. Phytopathol. Plant Prot. 39:323-328. <br>
       - Yao, Y., *et al*. 2010. *Growth promotion and protection against salt stress by* Pseudomonas putida Rs-198 *on cotton*. European J. Soil Biol. 46:49-54. <br>
       - Zahir, Z.A., *et al*. 2005. *Precursor (L-tryptophan)-inoculum (Azotobacter) interaction for improving yields and nitrogen uptake in maize*. J. Plant Nutr. 28:805-817. <br>
