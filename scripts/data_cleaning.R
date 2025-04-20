@@ -290,26 +290,45 @@ data_til_fruit <- d23_fl[,c(10,11,12,1,2,16,9,17,4,5,13,8,15)] %>%
          Date = date,
          Mass = mass,
          Penetrometer = penetrometer,
-         pSugar = sugar_avg,
+         Sugar = sugar_avg,
          SugarGrams = Sugar_grams
          ) %>%
-  mutate(pSugar = pSugar/100,
-         LogitpSugar = logit(pSugar)
+  mutate(Sugar = Sugar/100,
+         LogitSugar = logit(Sugar)
          ) %>%
   filter(Ripeness > 0)
 
 data_til_fruit_sug <- na.omit(data_til_fruit) %>%
   group_by(Treatment, Soil, Foliar, Plant) %>%
-  summarise_at(vars(pSugar),
+  summarise_at(vars(Sugar),
                list(mean=mean)) %>%
   ungroup() %>%
-  rename(pSugar_mean = mean) %>%
-  mutate(LogitpSugar_mean = logit(pSugar_mean))
+  rename(Sugar_mean = mean) %>%
+  mutate(LogitSugar_mean = logit(Sugar_mean))
 
 data_til_fruit_summary <- cbind(data_til_fruit_summary, data_til_fruit_sug[,c(5:6)])
 
 save(data_til_fruit_summary, file = "C:/Github/tomato-inoculant-app/app/data_til_fruit_summary.RData")
 save(data_til_fruit, file = "C:/Github/tomato-inoculant-app/app/data_til_fruit.RData")
+
+data_til_fruit_summary2 <- d23_fl %>%
+  rename(Row = row,
+         Pot = pot,
+         Plant = plant,
+         Date = date,
+         Mass = mass,
+         Penetrometer = penetrometer,
+         Sugar = sugar_avg,
+         SugarGrams = Sugar_grams
+  ) %>%
+  mutate(Fruit = 1) %>%
+  group_by(Treatment, Soil, Foliar, Plant) %>%
+  summarise_at(vars(Fruit, Mass),
+               list(sum=sum)) %>%
+  ungroup()
+
+save(data_til_fruit_summary2, file = "C:/Github/tomato-inoculant-app/app/data_tit_fruit_summary2.RData")
+
 
 d23_li <- read.csv(d23_li_file, stringsAsFactors = T) %>%
   mutate(Treatment = case_when(
@@ -516,12 +535,12 @@ data_tit_fruit <- d24_f[,c(13,14,15,1,2,19,11,12,17,18,3,4,7,20,10,21)] %>%
          Mass = mass,
          Penetrometer = penetrometer,
          Ripeness = ripeness,
-         pSugar = sugar_avg,
+         Sugar = sugar_avg,
          SugarGrams = sugar_grams
          ) %>%
   mutate(Row = as.factor(Row),
-         pSugar = pSugar/100,
-         LogitpSugar = logit(pSugar)
+         Sugar = Sugar/100,
+         LogitSugar = logit(Sugar)
          ) %>%
   filter(Ripeness > 0)
 
@@ -539,15 +558,25 @@ data_tit_fruit_summary <- data_tit_fruit_summary[,c(1,2,3,4,5,6,7,10,11,12)]
 
 data_tit_fruit_sug <- na.omit(data_tit_fruit) %>%
   group_by(Treatment, Transplantation, Germination, Plant) %>%
-  summarise_at(vars(pSugar),
+  summarise_at(vars(Sugar),
                list(mean=mean)) %>%
   ungroup() %>%
-  rename(pSugar_mean = mean) %>%
-  mutate(LogitpSugar_mean = logit(pSugar_mean))
+  rename(Sugar_mean = mean) %>%
+  mutate(LogitSugar_mean = logit(Sugar_mean))
 
 data_tit_fruit_summary <- cbind(data_tit_fruit_summary, data_tit_fruit_sug[,c(5:6)])
 
 save(data_tit_fruit_summary, file = "C:/Github/tomato-inoculant-app/app/data_tit_fruit_summary.RData")
+
+data_tit_fruit_summary2 <- data_tit_fruit %>%
+  filter(BER == FALSE) %>%
+  mutate(Fruit = 1) %>%
+  group_by(Treatment, Transplantation, Germination, Plant) %>%
+  summarise_at(vars(Fruit, Mass),
+               list(sum=sum)) %>%
+  ungroup()
+
+save(data_tit_fruit_summary2, file = "C:/Github/tomato-inoculant-app/app/data_tit_fruit_summary2.RData")
 
 ## Li-600
 d24_li <- read.csv(d24_li_file, stringsAsFactors = F) %>%

@@ -85,7 +85,7 @@ til_fluoro_vars <- c("Date", "DaysFromGermination", "MinutesFromStart", "Ambient
 til_fluoro_vars_d <- c("Treatment", "Soil", "Foliar", "Row", "Pot", "Plant", "Time", "Device")
 all_til_fluoro_vars <- c(til_fluoro_vars_d, til_fluoro_vars)
 #### fruit
-til_fruit_vars <- c("Date", "DaysFromGermination", "Mass", "Ripeness", "pSugar", "SugarGrams")
+til_fruit_vars <- c("Date", "DaysFromGermination", "Mass", "Ripeness", "Sugar", "SugarGrams")
 til_fruit_vars_d <- c("Treatment", "Soil", "Foliar", "Row", "Pot", "Plant")
 all_til_fruit_vars <- c(til_fruit_vars_d, til_fruit_vars)
 #### fruit sums
@@ -98,7 +98,7 @@ tit_fluoro_vars <- c("Date", "DaysFromGermination", "MinutesFromStart", "Ambient
 tit_fluoro_vars_d <- c("Treatment", "Transplantation", "Germination", "Row", "Pot", "Plant", "Time", "Device")
 all_tit_fluoro_vars <- c(tit_fluoro_vars_d, tit_fluoro_vars)
 ##### fruit
-tit_fruit_vars <- c("DateHarvest", "DateAnalysis", "DaysFromHarvestToAnalysis", "DaysFromGermination", "Mass", "Ripeness", "pSugar", "SugarGrams")
+tit_fruit_vars <- c("DateHarvest", "DateAnalysis", "DaysFromHarvestToAnalysis", "DaysFromGermination", "Mass", "Ripeness", "Sugar", "SugarGrams")
 tit_fruit_vars_d <- c("Treatment", "Transplantation", "Germination", "Row", "Pot", "Plant", "BER")
 all_tit_fruit_vars <- c(tit_fruit_vars_d, tit_fruit_vars)
 ##### fruit sum
@@ -106,7 +106,7 @@ tit_fruit_sum_vars <- c("Fruit_sum", "BER_sum", "Mass_sum", "Mass_mean", "pBER")
 tit_fruit_sum_vars_d <- c("Treatment", "Transplantation", "Germination", "Plant")
 all_tit_fruit_sum_vars <- c(tit_fruit_sum_vars_d, tit_fruit_sum_vars)
 
-fruit_lab_vars  <- c("pSugar", "SugarGrams", "Ripeness")
+fruit_lab_vars  <- c("Sugar", "SugarGrams", "Ripeness")
 
 # custom functions
 ## i *think* this is faster and smaller than including these as a dependency via a custom package
@@ -452,7 +452,7 @@ pca_plot <- function(group, pcavars) {
   ggplot()+
     geom_point(data=px, aes(x=PC1, y=PC2, color=Groups, fill=Groups), size=3)+
     geom_segment(data = vx, aes(x=0, y=0, xend=PC1*.25, yend=PC2*.25), color = "black")+
-    annotate("text", x=vx[,1]*.27, y=vx[,2]*.27, label = rownames(vx))+
+    annotate("text", x=vx[,1]*.27, y=vx[,2]*.27, label = rownames(vx), size = 5)+
     xlim(-1, 1)+
     xlab(paste0("PC1 (", PC1val, "%)"))+
     ylab(paste0("PC2 (", PC2val, "%)"))+
@@ -491,7 +491,10 @@ p_from_modsum <- function(modsum) {
   }
   return(p)
 }
-
+glm_pseudor2 <- function(mod) {
+  pr2 <- 1 - (mod$deviance / mod$null.deviance)
+  return(pr2)
+}
 # pre-calculate models that don't have user inputs (PCRs and fruit mods)
 ## tim
 ### tim fluoro
@@ -525,15 +528,23 @@ til_pcr_ps2 <- lm(LogitPhiPS2 ~ Treatment + PC1 + PC2, data = til_pcr_data)
 til_pcr_ps2_pmod <- lm(LogitPhiPS2 ~ Treatment + PC1, data = til_pcr_data)
 til_pcr_ps2_sum <- summary(til_pcr_ps2)
 ### til fruit
+#### mass
 til_mass_mod <- lm(log(Mass_mean) ~ Treatment, data = data_til_fruit_summary)
 til_mass_mod_sum <- summary(til_mass_mod)
 til_mass_letters <- cld(glht(til_mass_mod, linfct = mcp(Treatment = "Tukey")))
-til_fc_mod <- glm(Fruit_sum ~ Treatment, data = data_til_fruit_summary, family = poisson())
+#### fruit count
+til_fc_mod <- glm(Fruit_sum ~ Treatment, data = data_til_fruit_summary, family = poisson(link = "identity"))
 til_fc_mod_sum <- summary(til_fc_mod)
 til_fc_letters <- cld(glht(til_fc_mod, linfct = mcp(Treatment = "Tukey")))
-til_sug_mod <- lm(logit(pSugar_mean) ~ Treatment + log(Mass_mean), data = data_til_fruit_summary)
+#### marketable fruit count
+til_mfc_mod <- glm(Fruit_sum ~ Treatment, data = data_til_fruit_summary2, family = poisson(link = "identity"))
+til_mfc_mod_sum <- summary(til_mfc_mod)
+til_mfc_letters <- cld(glht(til_mfc_mod, linfct = mcp(Treatment = "Tukey")))
+#### sugar
+til_sug_mod <- lm(logit(Sugar_mean) ~ Treatment + log(Mass_mean), data = data_til_fruit_summary)
 til_sug_mod_sum <- summary(til_sug_mod)
 til_sug_letters <- cld(glht(til_sug_mod, linfct = mcp(Treatment = "Tukey")))
+#### ber
 til_ber_mod <- lm(LogitpBER ~ Treatment, data = no_extremes(data_til_fruit_summary, LogitpBER))
 til_ber_mod_sum <- summary(til_ber_mod)
 til_ber_letters <- cld(glht(til_ber_mod, linfct = mcp(Treatment = "Tukey")))
@@ -548,15 +559,23 @@ tit_pcr_ps2 <- lm(LogitPhiPS2 ~ Treatment + PC1 + PC2, data = tit_pcr_data)
 tit_pcr_ps2_pmod <- lm(LogitPhiPS2 ~ Treatment + PC1, data = tit_pcr_data)
 tit_pcr_ps2_sum <- summary(tit_pcr_ps2)
 ### tit fruit
+#### mass
 tit_mass_mod <- lm(log(Mass_mean) ~ Treatment, data = data_tit_fruit_summary)
 tit_mass_mod_sum <- summary(tit_mass_mod)
 tit_mass_letters <- cld(glht(tit_mass_mod, linfct = mcp(Treatment = "Tukey")))
-tit_fc_mod <- glm(Fruit_sum ~ Treatment, data = data_tit_fruit_summary, family = poisson())
+#### fruit count
+tit_fc_mod <- glm(Fruit_sum ~ Treatment, data = data_tit_fruit_summary, family = poisson(link = "identity"))
 tit_fc_mod_sum <- summary(tit_fc_mod)
 tit_fc_letters <- cld(glht(tit_fc_mod, linfct = mcp(Treatment = "Tukey")))
-tit_sug_mod <- lm(logit(pSugar_mean) ~ Treatment + log(Mass_mean), data = data_tit_fruit_summary)
+#### marketable fruit count
+tit_mfc_mod <- glm(Fruit_sum ~ Treatment, data = data_tit_fruit_summary2, family = poisson(link = "identity"))
+tit_mfc_mod_sum <- summary(tit_mfc_mod)
+tit_mfc_letters <- cld(glht(tit_mfc_mod, linfct = mcp(Treatment = "Tukey")))
+#### sugar
+tit_sug_mod <- lm(logit(Sugar_mean) ~ Treatment + log(Mass_mean), data = data_tit_fruit_summary)
 tit_sug_mod_sum <- summary(tit_sug_mod)
 tit_sug_letters <- cld(glht(tit_sug_mod, linfct = mcp(Treatment = "Tukey")))
+#### ber
 tit_ber_mod <- lm(LogitpBER ~ Treatment, data = no_extremes(data_tit_fruit_summary, LogitpBER))
 tit_ber_mod_sum <- summary(tit_ber_mod)
 tit_ber_letters <- cld(glht(tit_ber_mod, linfct = mcp(Treatment = "Tukey")))
@@ -1019,8 +1038,11 @@ ui <- navbarPage(collapsible = TRUE,
         tabPanel("Statistics",
           accordion(
             accordion_panel("Fluorescence",
+              markdown("These first variables are *univariate*, meaning they examine a single
+                       explanatory variable at a time. Select an explanatory variable from the dropdown
+                       to change the model."),
               card(card_header("Stomatal conductance (gsw)", class = "bg-primary", style = "font-size: 20px"),
-                selectInput("tim_gsw_mod_var", "Predictor Variable",
+                selectInput("tim_gsw_mod_var", "Explanatory Variable",
                             choices = fluoro_mod_var_names, selected = "AmbientHumidity"),
                 div(layout_columns(col_widths = c(7,5),
                   div(
@@ -1029,9 +1051,6 @@ ui <- navbarPage(collapsible = TRUE,
                     )
                   ),# end model summary div
                   div(# value boxes for AIC and r^2
-                    card(card_header("Model Call", class = "bg-primary"),
-                         verbatimTextOutput("tim_gsw_mod_call")
-                         ),
                     value_box(
                       title = "GSW Model AIC",
                       value = textOutput("tim_gsw_aic"),
@@ -1057,7 +1076,7 @@ ui <- navbarPage(collapsible = TRUE,
                 ), # end div
               ), # end gsw stats card
               card(card_header("Photosystem II Efficiency (PhiPS2)", class = "bg-primary", style = "font-size: 20px"),
-                   selectInput("tim_ps2_mod_var", "Predictor Variable",
+                   selectInput("tim_ps2_mod_var", "Explanatory Variable",
                                choices = fluoro_mod_var_names, selected = "AmbientHumidity"),
                    div(layout_columns(col_widths = c(7,5),
                         div(
@@ -1066,9 +1085,6 @@ ui <- navbarPage(collapsible = TRUE,
                           )
                         ),# end model summary div
                         div(# value boxes for AIC and r^2
-                          card(card_header("Model Call", class = "bg-primary"),
-                               verbatimTextOutput("tim_ps2_mod_call")
-                          ),
                           value_box(
                             title = "PhiPS2 Model AIC",
                             value = textOutput("tim_ps2_aic"),
@@ -1106,7 +1122,10 @@ ui <- navbarPage(collapsible = TRUE,
                        verbatimTextOutput("tim_fluoro_pca_summary")
                     )
                   ),
-                  plotOutput("tim_fluoro_pca")
+                  div(
+                    markdown("##### **PCA for Fluorescence Variables**"),
+                    plotOutput("tim_fluoro_pca", height = "600px")
+                  )
                 )),
                 div(layout_column_wrap(
                   card(card_header("Multivariate Stomatal Conductance (GSW)", class = "bg-primary", style = "font-size: 20px"),
@@ -1180,9 +1199,6 @@ ui <- navbarPage(collapsible = TRUE,
                     plotOutput("tim_height_pred")
                   ),# end model summary div
                   div(# value boxes for AIC and r^2
-                    card(card_header("Model Call", class = "bg-primary"),
-                         verbatimTextOutput("tim_height_mod_call")
-                         ),
                     value_box(
                       title = "Height Model AIC",
                       value = textOutput("tim_height_aic"),
@@ -1218,9 +1234,6 @@ ui <- navbarPage(collapsible = TRUE,
                     plotOutput("tim_rs_length_annotated")
                   ),# end model summary div
                   div(# value boxes for AIC and r^2
-                    card(card_header("Model Call", class = "bg-primary"),
-                         verbatimTextOutput("tim_rs_length_mod_call")
-                         ),
                     value_box(
                       title = "R:S Length Model AIC",
                       value = textOutput("tim_rs_length_aic"),
@@ -1254,9 +1267,6 @@ ui <- navbarPage(collapsible = TRUE,
                     plotOutput("tim_rs_mass_annotated")
                   ),# end model summary div
                   div(# value boxes for AIC and r^2
-                    card(card_header("Model Call", class = "bg-primary"),
-                         verbatimTextOutput("tim_rs_mass_mod_call")
-                         ),
                     value_box(
                       title = "R:S Mass Model AIC",
                       value = textOutput("tim_rs_mass_aic"),
@@ -1283,6 +1293,7 @@ ui <- navbarPage(collapsible = TRUE,
               ) # end RS length stats card
             ), # end ds accordion panel
           ), # end stats accordion
+          div(markdown("<br>")),
           card(card_header("A Brief Explanation of Statistical Terminology", class = "bg-primary", style = "font-size: 20px"),
             markdown("Many of the people using this app may not be familiar with the statistical terminology used within, so
                       here is a brief overview of the highlighted values above.
@@ -1292,7 +1303,7 @@ ui <- navbarPage(collapsible = TRUE,
                       - **p-value**: This is the probability of the observed result occurring by random chance, if there is no effect. (This is a greatly simplified explanation of a highly contentious way of 
                       reporting statistical significance. For a more comprehensive explanation, see the [p-value Wikipedia page](https://en.wikipedia.org/wiki/P-value).)
                       - **R^2**: The coefficient of determination (pronounced 'R squared') is the proportion of variance in the *response* variable
-                      that is explained by the *predictor* variables in the model.
+                      that is explained by the *explanatory* variables in the model.
                      ")
           )
         ), # end stats tab panel
@@ -1325,11 +1336,9 @@ ui <- navbarPage(collapsible = TRUE,
             - **Hypothesis 3.1** – Because these bacteria have been shown to increase tomato
             health and encapsulation will aid in bacterial delivery, inoculation of tomato plants with 
             BGs will increase plant growth and fluorescence parameters more than liquid inoculation or uninoculated granules.
-            <br>
             > It should be noted that these hypotheses are technically *predictive hypotheses*, as not only do they hypothesize a 
             change, they also specify a prediction for that change. I.E. Fluorescence parameters will not only *change*, they will *increase*.
             This is a very minor distinction, but important to those in the science realm (nerds). 
-            <br>
             ")
                ), # end hypothesis and objective card
           div(
@@ -1549,7 +1558,7 @@ ui <- navbarPage(collapsible = TRUE,
                       selectInput("til_fruit_scatter_x","X Variable",
                                   choices = all_til_fruit_vars, selected = "Mass"),
                       selectInput("til_fruit_scatter_y","Y Variable",
-                                  choices = all_til_fruit_vars, selected = "pSugar"),
+                                  choices = all_til_fruit_vars, selected = "Sugar"),
                       selectInput("til_fruit_scatter_col","Color Variable",
                                   choices = all_til_fruit_vars, selected = "Treatment"),
                       selectInput("til_fruit_scatter_shape", "Shape Variable",
@@ -1598,8 +1607,11 @@ ui <- navbarPage(collapsible = TRUE,
         tabPanel("Statistics",
           accordion(
             accordion_panel("Fluorescence",
+              markdown("These first variables are *univariate*, meaning they examine a single
+                       explanatory variable at a time. Select an explanatory variable from the dropdown
+                       to change the model."),
               card(card_header("Stomatal conductance (gsw)", class = "bg-primary", style = "font-size: 20px"),
-                selectInput("til_gsw_mod_var", "Predictor Variable",
+                selectInput("til_gsw_mod_var", "Explanatory Variable",
                             choices = fluoro_mod_var_names, selected = "AmbientHumidity"),
                 div(layout_columns(col_widths = c(7,5),
                   div(
@@ -1608,9 +1620,6 @@ ui <- navbarPage(collapsible = TRUE,
                     )
                   ),# end model summary div
                   div(# value boxes for AIC and r^2
-                    card(card_header("Model Call", class = "bg-primary"),
-                         verbatimTextOutput("til_gsw_mod_call")
-                         ),
                     value_box(
                       title = "GSW Model AIC",
                       value = textOutput("til_gsw_aic"),
@@ -1636,7 +1645,7 @@ ui <- navbarPage(collapsible = TRUE,
                 ), # end div
               ), # end gsw stats card
               card(card_header("Photosystem II Efficiency (PhiPS2", class = "bg-primary", style = "font-size: 20px"),
-                   selectInput("til_ps2_mod_var", "Predictor Variable",
+                   selectInput("til_ps2_mod_var", "Explanatory Variable",
                                choices = fluoro_mod_var_names, selected = "AmbientHumidity"),
                    div(layout_columns(col_widths = c(7,5),
                         div(
@@ -1645,9 +1654,6 @@ ui <- navbarPage(collapsible = TRUE,
                           )
                         ),# end model summary div
                         div(# value boxes for AIC and r^2
-                          card(card_header("Model Call", class = "bg-primary"),
-                               verbatimTextOutput("til_ps2_mod_call")
-                          ),
                           value_box(
                             title = "PhiPS2 Model AIC",
                             value = textOutput("til_ps2_aic"),
@@ -1685,7 +1691,10 @@ ui <- navbarPage(collapsible = TRUE,
                        verbatimTextOutput("til_fluoro_pca_summary")
                     )
                   ),
-                  plotOutput("til_fluoro_pca")
+                  div(
+                    markdown("##### **PCA for Fluorescence Variables**"),
+                    plotOutput("til_fluoro_pca", height = "600px")
+                  )
                 )),
                 div(layout_column_wrap(
                   card(card_header("Multivariate Stomatal Conductance (GSW)", class = "bg-primary", style = "font-size: 20px"),
@@ -1767,9 +1776,6 @@ ui <- navbarPage(collapsible = TRUE,
                     plotOutput("til_mass_annotated")
                   ),# end model summary div
                   div(# value boxes for AIC and r^2
-                    card(card_header("Model Call", class = "bg-primary"),
-                         verbatimTextOutput("til_mass_mod_call")
-                         ),
                     value_box(
                       title = "Mass Model AIC",
                       value = textOutput("til_mass_aic"),
@@ -1803,9 +1809,6 @@ ui <- navbarPage(collapsible = TRUE,
                     plotOutput("til_sug_annotated")
                   ),# end model summary div
                   div(# value boxes for AIC and r^2
-                    card(card_header("Model Call", class = "bg-primary"),
-                         verbatimTextOutput("til_sug_mod_call")
-                         ),
                     value_box(
                       title = "Sugar Model AIC",
                       value = textOutput("til_sug_aic"),
@@ -1839,9 +1842,6 @@ ui <- navbarPage(collapsible = TRUE,
                     plotOutput("til_ber_annotated")
                   ),# end model summary div
                   div(# value boxes for AIC and r^2
-                    card(card_header("Model Call", class = "bg-primary"),
-                         verbatimTextOutput("til_ber_mod_call")
-                         ),
                     value_box(
                       title = "BER Model AIC",
                       value = textOutput("til_ber_aic"),
@@ -1866,7 +1866,7 @@ ui <- navbarPage(collapsible = TRUE,
                 ) # end column wrap
                 ) # end div
               ), # end ber stats card
-              card(card_header("Fruit Count", class = "bg-primary", style = "font-size: 20px"),
+              card(card_header("Total Fruit Count", class = "bg-primary", style = "font-size: 20px"),
                 div(layout_columns(col_widths = c(7,5),
                   div(
                     card(card_header("Model Summary"),
@@ -1875,25 +1875,68 @@ ui <- navbarPage(collapsible = TRUE,
                     plotOutput("til_fc_annotated")
                   ),# end model summary div
                   div(# value boxes for AIC and r^2
-                    card(card_header("Model Call", class = "bg-primary"),
-                         verbatimTextOutput("til_fc_mod_call")
-                         ),
                     value_box(
                       title = "Fruit Count Model AIC",
                       value = textOutput("til_fc_aic"),
                       theme = "bg-primary",
                       width = 0.2
                     ),
-                    card(card_header("Fruit Count Model R^2", class = "bg-secondary"),
-                         verbatimTextOutput("til_fc_r2")
+                    card(card_header("Fruit Count Model Confidence Intervals"),
+                         verbatimTextOutput("til_fc_confint")
+                    ),
+                    value_box(
+                      title = "Fruit Count Model R^2",
+                      value = textOutput("til_fc_r2"),
+                      theme = "bg-secondary",
+                      width = 0.2
                     ),
                     card(card_header("Treatment Letters", class="bg-secondary"),
                          verbatimTextOutput("til_fc_letters")
                     )
                   ) # end value box div
+                ), # end column wrap
+                markdown("> Because this is a *generalized* linear model rather than a linear model,
+                         we don't get an overall p-value for the model or a regular R^2 value. Instead,
+                         we can use the confidence intervals of each variable to determine if they 
+                         have a significant effect. If the confidence interval contains 0 it is not a significant
+                         effect, but if it doesn't contain 0 it is a significant effect. For example, if our 
+                         confidence intervals were (-0.5 to 0.5) or (-2 to 2) they would not be significant,
+                         whereas (0.5 to 2.5) or (-5 to -3) would be significant effects. Rather than
+                         using an R^2, we can calculate a pseudo-R^2, which is calculated as
+                         (1 - deviance/null deviance).")
+                ) # end div
+              ), # end fruit count stats card
+              card(card_header("Marketable Fruit Count", class = "bg-secondary", style = "font-size: 20px"),
+                div(layout_columns(col_widths = c(7,5),
+                  div(
+                    card(card_header("Model Summary"),
+                         verbatimTextOutput("til_mfc_mod_summary")
+                    ),
+                    plotOutput("til_mfc_annotated")
+                  ),# end model summary div
+                  div(# value boxes for AIC and r^2
+                    value_box(
+                      title = "Marketable Fruit Count Model AIC",
+                      value = textOutput("til_mfc_aic"),
+                      theme = "bg-primary",
+                      width = 0.2
+                    ),
+                    card(card_header("Marketable Fruit Count Model Confidence Intervals"),
+                         verbatimTextOutput("til_mfc_confint")
+                    ),
+                    value_box(
+                      title = "Marketable Fruit Count Model R^2",
+                      value = textOutput("til_mfc_r2"),
+                      theme = "bg-secondary",
+                      width = 0.2
+                    ),
+                    card(card_header("Treatment Letters", class="bg-secondary"),
+                         verbatimTextOutput("til_mfc_letters")
+                    )
+                  ) # end value box div
                 ) # end column wrap
                 ) # end div
-              ) # end fruit count stats card
+              ), # end fruit count stats card
             ) # end fruit accordion panel
           ) # end stats accordion
         ), # end stats tab panel
@@ -1922,10 +1965,9 @@ ui <- navbarPage(collapsible = TRUE,
             **Objective 1.** Determine the effect of M. oryzae inoculation method on tomato plant growth and crop quality and yield. <br>
             - **Hypothesis 1.1** – Because of the mass effect, combined soil and foliar M. oryzae application will 
             increase salt stressed tomato plant fluorescence parameters, fruit yield, and fruit quality more than either soil or foliar inoculations.
-            <br>
             > It should be noted that these hypotheses are technically *predictive hypotheses*, as not only do they hypothesize a 
             change, they also specify a prediction for that change. I.E. Fluorescence parameters will not only *change*, they will *increase*.
-            This is a very minor distinction, but important to those in the science realm (nerds). <br>
+            This is a very minor distinction, but important to those in the science realm (nerds).
             ")
           ), # end hypothesis and objective card
           card(card_header("Methods", class = "bg-secondary", style = "font-size: 20px"),
@@ -1996,8 +2038,8 @@ ui <- navbarPage(collapsible = TRUE,
             ###### **Fruit**
             - **Mass** is the mass of the tomato (grams), measured on an Ohaus Scout. (~10:~400) <br>
             - **BER** corresponds to whether or not the tomato has blossom end rot, a disease caused by calcium deficiency that renders the fruit unmarketable. (0,1) <br>
-            - **pSugar** is the average of two measurements of the tomato juice's sugar concentration taken on a Fisher BRIX Refractometer (~2:~12) <br>
-            - **SugarGrams** is the grams of sugar in each tomato, calculated as **pSugar** x **Mass** <br>
+            - **Sugar** is the average of two measurements of the tomato juice's sugar concentration taken on a Fisher BRIX Refractometer (~2:~12) <br>
+            - **SugarGrams** is the grams of sugar in each tomato, calculated as **Sugar** x **Mass** <br>
             
             > It's important to note that **only** the Li-600 can measure gsw, while both
             the Li-600 and the MultispeQ can measure PhiPS2. Also, even though both devices can 
@@ -2139,7 +2181,7 @@ ui <- navbarPage(collapsible = TRUE,
                       selectInput("tit_fruit_scatter_x","X Variable",
                                   choices = all_tit_fruit_vars, selected = "Mass"),
                       selectInput("tit_fruit_scatter_y","Y Variable",
-                                  choices = all_tit_fruit_vars, selected = "pSugar"),
+                                  choices = all_tit_fruit_vars, selected = "Sugar"),
                       selectInput("tit_fruit_scatter_col","Color Variable",
                                   choices = all_tit_fruit_vars, selected = "Treatment"),
                       selectInput("tit_fruit_scatter_shape", "Shape Variable",
@@ -2188,8 +2230,11 @@ ui <- navbarPage(collapsible = TRUE,
         tabPanel("Statistics",
           accordion(
             accordion_panel("Fluorescence",
+              markdown("These first variables are *univariate*, meaning they examine a single
+                       explanatory variable at a time. Select an explanatory variable from the dropdown
+                       to change the model."),
               card(card_header("Stomatal conductance (gsw)", class = "bg-primary", style = "font-size: 20px"),
-                selectInput("tit_gsw_mod_var", "Predictor Variable",
+                selectInput("tit_gsw_mod_var", "Explanatory Variable",
                             choices = fluoro_mod_var_names, selected = "AmbientHumidity"),
                 div(layout_columns(col_widths = c(7,5),
                   div(
@@ -2198,9 +2243,6 @@ ui <- navbarPage(collapsible = TRUE,
                     )
                   ),# end model summary div
                   div(# value boxes for AIC and r^2
-                    card(card_header("Model Call", class = "bg-primary"),
-                         verbatimTextOutput("tit_gsw_mod_call")
-                         ),
                     value_box(
                       title = "GSW Model AIC",
                       value = textOutput("tit_gsw_aic"),
@@ -2226,7 +2268,7 @@ ui <- navbarPage(collapsible = TRUE,
                 ), # end div
               ), # end gsw stats card
               card(card_header("Photosystem II Efficiency (PhiPS2", class = "bg-primary", style = "font-size: 20px"),
-                   selectInput("tit_ps2_mod_var", "Predictor Variable",
+                   selectInput("tit_ps2_mod_var", "Explanatory Variable",
                                choices = fluoro_mod_var_names, selected = "AmbientHumidity"),
                    div(layout_columns(col_widths = c(7,5),
                         div(
@@ -2235,9 +2277,6 @@ ui <- navbarPage(collapsible = TRUE,
                           )
                         ),# end model summary div
                         div(# value boxes for AIC and r^2
-                          card(card_header("Model Call", class = "bg-primary"),
-                               verbatimTextOutput("tit_ps2_mod_call")
-                          ),
                           value_box(
                             title = "PhiPS2 Model AIC",
                             value = textOutput("tit_ps2_aic"),
@@ -2275,7 +2314,10 @@ ui <- navbarPage(collapsible = TRUE,
                        verbatimTextOutput("tit_fluoro_pca_summary")
                     )
                   ),
-                  plotOutput("tit_fluoro_pca")
+                  div(
+                    markdown("##### **PCA for Fluorescence Variables**"),
+                    plotOutput("tit_fluoro_pca", height = "600px")
+                  )
                 )),
                 div(layout_column_wrap(
                   card(card_header("Multivariate Stomatal Conductance (GSW)", class = "bg-primary", style = "font-size: 20px"),
@@ -2357,9 +2399,6 @@ ui <- navbarPage(collapsible = TRUE,
                     plotOutput("tit_mass_annotated")
                   ),# end model summary div
                   div(# value boxes for AIC and r^2
-                    card(card_header("Model Call", class = "bg-primary"),
-                         verbatimTextOutput("tit_mass_mod_call")
-                         ),
                     value_box(
                       title = "Mass Model AIC",
                       value = textOutput("tit_mass_aic"),
@@ -2393,9 +2432,6 @@ ui <- navbarPage(collapsible = TRUE,
                     plotOutput("tit_sug_annotated")
                   ),# end model summary div
                   div(# value boxes for AIC and r^2
-                    card(card_header("Model Call", class = "bg-primary"),
-                         verbatimTextOutput("tit_sug_mod_call")
-                         ),
                     value_box(
                       title = "Sugar Model AIC",
                       value = textOutput("tit_sug_aic"),
@@ -2429,9 +2465,6 @@ ui <- navbarPage(collapsible = TRUE,
                     plotOutput("tit_ber_annotated")
                   ),# end model summary div
                   div(# value boxes for AIC and r^2
-                    card(card_header("Model Call", class = "bg-primary"),
-                         verbatimTextOutput("tit_ber_mod_call")
-                         ),
                     value_box(
                       title = "BER Model AIC",
                       value = textOutput("tit_ber_aic"),
@@ -2456,7 +2489,7 @@ ui <- navbarPage(collapsible = TRUE,
                 ) # end column wrap
                 ) # end div
               ), # end ber stats card
-              card(card_header("Fruit Count", class = "bg-primary", style = "font-size: 20px"),
+              card(card_header("Total Fruit Count", class = "bg-primary", style = "font-size: 20px"),
                 div(layout_columns(col_widths = c(7,5),
                   div(
                     card(card_header("Model Summary"),
@@ -2465,17 +2498,20 @@ ui <- navbarPage(collapsible = TRUE,
                     plotOutput("tit_fc_annotated")
                   ),# end model summary div
                   div(# value boxes for AIC and r^2
-                    card(card_header("Model Call", class = "bg-primary"),
-                         verbatimTextOutput("tit_fc_mod_call")
-                         ),
                     value_box(
                       title = "Fruit Count Model AIC",
                       value = textOutput("tit_fc_aic"),
                       theme = "bg-primary",
                       width = 0.2
                     ),
-                    card(card_header("Fruit Count Model R^2", class = "bg-secondary"),
-                         verbatimTextOutput("tit_fc_r2")
+                    card(card_header("Fruit Count Model Confidence Intervals"),
+                         verbatimTextOutput("tit_fc_confint")
+                    ),
+                    value_box(
+                      title = "Fruit Count Model R^2",
+                      value = textOutput("tit_fc_r2"),
+                      theme = "bg-secondary",
+                      width = 0.2
                     ),
                     card(card_header("Treatment Letters", class="bg-secondary"),
                          verbatimTextOutput("tit_fc_letters")
@@ -2483,7 +2519,38 @@ ui <- navbarPage(collapsible = TRUE,
                   ) # end value box div
                 ) # end column wrap
                 ) # end div
-              ) # end fruit count stats card
+              ), # end fruit count stats card
+              card(card_header("Marketable Fruit Count", class = "bg-secondary", style = "font-size: 20px"),
+                div(layout_columns(col_widths = c(7,5),
+                  div(
+                    card(card_header("Model Summary"),
+                         verbatimTextOutput("tit_mfc_mod_summary")
+                    ),
+                    plotOutput("tit_mfc_annotated")
+                  ),# end model summary div
+                  div(# value boxes for AIC and r^2
+                    value_box(
+                      title = "Marketable Fruit Count Model AIC",
+                      value = textOutput("tit_mfc_aic"),
+                      theme = "bg-primary",
+                      width = 0.2
+                    ),
+                    card(card_header("Marketable Fruit Count Model Confidence Intervals"),
+                         verbatimTextOutput("tit_mfc_confint")
+                    ),
+                    value_box(
+                      title = "Marketable Fruit Count Model R^2",
+                      value = textOutput("tit_mfc_r2"),
+                      theme = "bg-secondary",
+                      width = 0.2
+                    ),
+                    card(card_header("Treatment Letters", class="bg-secondary"),
+                         verbatimTextOutput("tit_mfc_letters")
+                    )
+                  ) # end value box div
+                ) # end column wrap
+                ) # end div
+              ), # end fruit count stats card
             ) # end fruit accordion panel
           ) # end stats accordion
         ), # end stats tab panel
@@ -2517,7 +2584,7 @@ ui <- navbarPage(collapsible = TRUE,
             and fruit quality more than either germination or transplantation inoculations.
             > It should be noted that these hypotheses are technically *predictive hypotheses*, as not only do they hypothesize a 
             change, they also specify a prediction for that change. I.E. Fluorescence parameters will not only *change*, they will *increase*.
-            This is a very minor distinction, but important to those in the science realm (nerds). <br>
+            This is a very minor distinction, but important to those in the science realm (nerds).
             ")
                ), # end hypothesis and objective card
           div(
@@ -2620,8 +2687,8 @@ ui <- navbarPage(collapsible = TRUE,
             ###### **Fruit**
             - **Mass** is the mass of the tomato (grams), measured on an Ohaus Scout. (~10:~400) <br>
             - **BER** corresponds to whether or not the tomato has blossom end rot, a disease caused by calcium deficiency that renders the fruit unmarketable. (0,1) <br>
-            - **pSugar** is the average of two measurements of the tomato juice's sugar concentration taken on a Fisher BRIX Refractometer (~2:~12) <br>
-            - **SugarGrams** is the grams of sugar in each tomato, calculated as **pSugar** x **Mass** <br>
+            - **Sugar** is the average of two measurements of the tomato juice's sugar concentration taken on a Fisher BRIX Refractometer (~2:~12) <br>
+            - **SugarGrams** is the grams of sugar in each tomato, calculated as **Sugar** x **Mass** <br>
             
             > It's important to note that **only** the Li-600 can measure gsw, while both
             the Li-600 and the MultispeQ can measure PhiPS2. Also, even though both devices can 
@@ -3165,9 +3232,6 @@ server <- function(input, output) {
   output$tim_gsw_mod_summary <- renderPrint({
     Rtim_gsw_mod_sum()
   })
-  output$tim_gsw_mod_call <- renderPrint({
-    Rtim_gsw_mod()$call
-  })
   output$tim_gsw_aic <- renderText({
     round(AIC(Rtim_gsw_mod()), 0)
   })
@@ -3185,9 +3249,6 @@ server <- function(input, output) {
 ##### phips2
   output$tim_ps2_mod_summary <- renderPrint({
     Rtim_ps2_mod_sum()
-  })
-  output$tim_ps2_mod_call <- renderPrint({
-    Rtim_ps2_mod()$call
   })
   output$tim_ps2_aic <- renderText({
     round(AIC(Rtim_ps2_mod()), 0)
@@ -3208,7 +3269,6 @@ server <- function(input, output) {
     pca_plot(mod_data_tim_fluoro$Treatment, mod_data_tim_fluoro[,c(12:18)])+
       scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
-      labs(title = "PCA for Fluorescence Variables")+
       theme(
         text = element_text(size=font_sizes[3]),
         axis.title = element_text(size=font_sizes[2], face= "bold"),
@@ -3268,9 +3328,6 @@ server <- function(input, output) {
   output$tim_height_mod_summary <- renderPrint({
     tim_height_mod_sum
   })
-  output$tim_height_mod_call <- renderPrint({
-    tim_height_mod$call
-  })
   output$tim_height_aic <- renderText({
     round(AIC(tim_height_mod), 0)
   })
@@ -3294,9 +3351,6 @@ server <- function(input, output) {
 ##### RS_Length
   output$tim_rs_length_mod_summary <- renderPrint({
     tim_rs_length_mod_sum
-  })
-  output$tim_rs_length_mod_call <- renderPrint({
-    tim_rs_length_mod$call
   })
   output$tim_rs_length_aic <- renderText({
     round(AIC(tim_rs_length_mod), 0)
@@ -3335,9 +3389,6 @@ server <- function(input, output) {
 ##### RS_Mass
   output$tim_rs_mass_mod_summary <- renderPrint({
     tim_rs_mass_mod_sum
-  })
-  output$tim_rs_mass_mod_call <- renderPrint({
-    tim_rs_mass_mod$call
   })
   output$tim_rs_mass_aic <- renderText({
     round(AIC(tim_rs_mass_mod), 0)
@@ -3597,9 +3648,6 @@ server <- function(input, output) {
   output$til_gsw_mod_summary <- renderPrint({
     Rtil_gsw_mod_sum()
   })
-  output$til_gsw_mod_call <- renderPrint({
-    Rtil_gsw_mod()$call
-  })
   output$til_gsw_aic <- renderText({
     round(AIC(Rtil_gsw_mod()), 0)
   })
@@ -3617,9 +3665,6 @@ server <- function(input, output) {
   ##### phips2
   output$til_ps2_mod_summary <- renderPrint({
     Rtil_ps2_mod_sum()
-  })
-  output$til_ps2_mod_call <- renderPrint({
-    Rtil_ps2_mod()$call
   })
   output$til_ps2_aic <- renderText({
     round(AIC(Rtil_ps2_mod()), 0)
@@ -3640,7 +3685,6 @@ server <- function(input, output) {
     pca_plot(mod_data_til_fluoro$Treatment, mod_data_til_fluoro[,c(13:19)])+
       scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
-      labs(title = "PCA for Fluorescence Variables")+
       theme(
         text = element_text(size=font_sizes[3]),
         axis.title = element_text(size=font_sizes[2], face= "bold"),
@@ -3701,9 +3745,6 @@ server <- function(input, output) {
   output$til_mass_mod_summary <- renderPrint({
     til_mass_mod_sum
   })
-  output$til_mass_mod_call <- renderPrint({
-    til_mass_mod$call
-  })
   output$til_mass_aic <- renderText({
     round(AIC(til_mass_mod), 0)
   })
@@ -3742,9 +3783,6 @@ server <- function(input, output) {
   output$til_sug_mod_summary <- renderPrint({
     til_sug_mod_sum
   })
-  output$til_sug_mod_call <- renderPrint({
-    til_sug_mod$call
-  })
   output$til_sug_aic <- renderText({
     round(AIC(til_sug_mod), 0)
   })
@@ -3760,16 +3798,13 @@ server <- function(input, output) {
     til_sug_letters
   })
   output$til_sug_annotated <- renderPlot({
-    predict_plot(til_sug_mod, data_til_fruit_summary, pSugar_mean, Mass_mean, Treatment, 100, correction = "logit")+
+    predict_plot(til_sug_mod, data_til_fruit_summary, Sugar_mean, Mass_mean, Treatment, 100, correction = "logit")+
       scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())
   })
   ##### ber
   output$til_ber_mod_summary <- renderPrint({
     til_ber_mod_sum
-  })
-  output$til_ber_mod_call <- renderPrint({
-    til_ber_mod$call
   })
   output$til_ber_aic <- renderText({
     round(AIC(til_ber_mod), 0)
@@ -3809,14 +3844,16 @@ server <- function(input, output) {
   output$til_fc_mod_summary <- renderPrint({
     til_fc_mod_sum
   })
-  output$til_fc_mod_call <- renderPrint({
-    til_fc_mod$call
-  })
   output$til_fc_aic <- renderText({
     round(AIC(til_fc_mod), 0)
   })
-  output$til_fc_r2 <- renderPrint({
-    r.squaredGLMM(til_fc_mod)
+  output$til_fc_confint <- renderPrint({
+    confint(til_fc_mod)
+  })
+  output$til_fc_r2 <- renderText({
+    r1 <- round(glm_pseudor2(til_fc_mod), 4)
+    r2 <- r1 *100
+    return(paste0(r1, "  (", r2, "%)"))
   })
   output$til_fc_letters <- renderPrint({
     til_fc_letters
@@ -3830,7 +3867,45 @@ server <- function(input, output) {
       xlab("Treatment")+
       annotate("text", x=1:4, y=100, label = til_fc_letters$mcletters$Letters, size=6)+
       scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
-      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      theme_bw()+
+      theme(
+        text = element_text(size=font_sizes[3]),
+        axis.title = element_text(size=font_sizes[2], face= "bold"),
+        title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
+        legend.position="bottom",
+        legend.title.position = "top",
+        legend.title = element_text(size=font_sizes[2], face= "bold")
+      )
+  })
+  ##### marketable count
+  output$til_mfc_mod_summary <- renderPrint({
+    til_mfc_mod_sum
+  })
+  output$til_mfc_aic <- renderText({
+    round(AIC(til_mfc_mod), 0)
+  })
+  output$til_mfc_confint <- renderPrint({
+    confint(til_mfc_mod)
+  })
+  output$til_mfc_r2 <- renderText({
+    r1 <- round(glm_pseudor2(til_mfc_mod), 4)
+    r2 <- r1 *100
+    return(paste0(r1, "  (", r2, "%)"))
+  })
+  output$til_mfc_letters <- renderPrint({
+    til_mfc_letters
+  })
+  output$til_mfc_annotated <- renderPlot({
+    ggplot(data=data_til_fruit_summary2, aes(x=Treatment, y=Fruit_sum,
+                                            color = Treatment, fill = Treatment))+
+      geom_jitter(width = 0.1, height = 0)+
+      geom_boxplot(width=0.4, alpha = 0.8)+
+      ylab("Fruit Count")+
+      xlab("Treatment")+
+      annotate("text", x=1:4, y=40, label = til_mfc_letters$mcletters$Letters, size=6)+
+      scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       theme_bw()+
       theme(
         text = element_text(size=font_sizes[3]),
@@ -4065,9 +4140,6 @@ server <- function(input, output) {
   output$tit_gsw_mod_summary <- renderPrint({
     Rtit_gsw_mod_sum()
   })
-  output$tit_gsw_mod_call <- renderPrint({
-    Rtit_gsw_mod()$call
-  })
   output$tit_gsw_aic <- renderText({
     round(AIC(Rtit_gsw_mod()), 0)
   })
@@ -4085,9 +4157,6 @@ server <- function(input, output) {
 ##### phips2
   output$tit_ps2_mod_summary <- renderPrint({
     Rtit_ps2_mod_sum()
-  })
-  output$tit_ps2_mod_call <- renderPrint({
-    Rtit_ps2_mod()$call
   })
   output$tit_ps2_aic <- renderText({
     round(AIC(Rtit_ps2_mod()), 0)
@@ -4108,7 +4177,6 @@ server <- function(input, output) {
     pca_plot(mod_data_tit_fluoro$Treatment, mod_data_tit_fluoro[,c(13:19)])+
       scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
-      labs(title = "PCA for Fluorescence Variables")+
     theme(
       text = element_text(size=font_sizes[3]),
       axis.title = element_text(size=font_sizes[2], face= "bold"),
@@ -4169,9 +4237,6 @@ server <- function(input, output) {
   output$tit_mass_mod_summary <- renderPrint({
     tit_mass_mod_sum
   })
-  output$tit_mass_mod_call <- renderPrint({
-    tit_mass_mod$call
-  })
   output$tit_mass_aic <- renderText({
     round(AIC(tit_mass_mod), 0)
   })
@@ -4210,9 +4275,6 @@ server <- function(input, output) {
   output$tit_sug_mod_summary <- renderPrint({
     tit_sug_mod_sum
   })
-  output$tit_sug_mod_call <- renderPrint({
-    tit_sug_mod$call
-  })
   output$tit_sug_aic <- renderText({
     round(AIC(tit_sug_mod), 0)
   })
@@ -4228,16 +4290,13 @@ server <- function(input, output) {
     tit_sug_letters
   })
   output$tit_sug_annotated <- renderPlot({
-    predict_plot(tit_sug_mod, data_tit_fruit_summary, pSugar_mean, Mass_mean, Treatment, 100, correction = "logit")+
+    predict_plot(tit_sug_mod, data_tit_fruit_summary, Sugar_mean, Mass_mean, Treatment, 100, correction = "logit")+
       scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())
   })
 ##### ber
   output$tit_ber_mod_summary <- renderPrint({
     tit_ber_mod_sum
-  })
-  output$tit_ber_mod_call <- renderPrint({
-    tit_ber_mod$call
   })
   output$tit_ber_aic <- renderText({
     round(AIC(tit_ber_mod), 0)
@@ -4277,14 +4336,16 @@ server <- function(input, output) {
   output$tit_fc_mod_summary <- renderPrint({
     tit_fc_mod_sum
   })
-  output$tit_fc_mod_call <- renderPrint({
-    tit_fc_mod$call
-  })
   output$tit_fc_aic <- renderText({
     round(AIC(tit_fc_mod), 0)
   })
-  output$tit_fc_r2 <- renderPrint({
-    r.squaredGLMM(tit_fc_mod)
+  output$tit_fc_confint <- renderPrint({
+    confint(tit_fc_mod)
+  })
+  output$tit_fc_r2 <- renderText({
+    r1 <- round(glm_pseudor2(tit_fc_mod), 4)
+    r2 <- r1 *100
+    return(paste0(r1, "  (", r2, "%)"))
   })
   output$tit_fc_letters <- renderPrint({
     tit_fc_letters
@@ -4297,6 +4358,44 @@ server <- function(input, output) {
       ylab("Fruit Count")+
       xlab("Treatment")+
       annotate("text", x=1:4, y=30, label = tit_fc_letters$mcletters$Letters, size=6)+
+      scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
+      theme_bw()+
+      theme(
+        text = element_text(size=font_sizes[3]),
+        axis.title = element_text(size=font_sizes[2], face= "bold"),
+        title = element_text(size=font_sizes[1], face="bold", lineheight = .8),
+        legend.position="bottom",
+        legend.title.position = "top",
+        legend.title = element_text(size=font_sizes[2], face= "bold")
+      )
+  })
+##### marketable count
+  output$tit_mfc_mod_summary <- renderPrint({
+    tit_mfc_mod_sum
+  })
+  output$tit_mfc_aic <- renderText({
+    round(AIC(tit_mfc_mod), 0)
+  })
+  output$tit_mfc_confint <- renderPrint({
+    confint(tit_mfc_mod)
+  })
+  output$tit_mfc_r2 <- renderText({
+    r1 <- round(glm_pseudor2(tit_mfc_mod), 4)
+    r2 <- r1 *100
+    return(paste0(r1, "  (", r2, "%)"))
+  })
+  output$tit_mfc_letters <- renderPrint({
+    tit_mfc_letters
+  })
+  output$tit_mfc_annotated <- renderPlot({
+    ggplot(data=data_tit_fruit_summary2, aes(x=Treatment, y=Fruit_sum,
+                                            color = Treatment, fill = Treatment))+
+      geom_jitter(width = 0.1, height = 0)+
+      geom_boxplot(width=0.4, alpha = 0.8)+
+      ylab("Fruit Count")+
+      xlab("Treatment")+
+      annotate("text", x=1:4, y=30, label = tit_mfc_letters$mcletters$Letters, size=6)+
       scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       theme_bw()+
