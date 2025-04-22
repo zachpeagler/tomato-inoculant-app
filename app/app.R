@@ -1033,7 +1033,11 @@ ui <- navbarPage(collapsible = TRUE,
                                verbatimTextOutput("til_ps2_letters")
                           )
                         ) # end value box div
-                   ) # end column wrap
+                   ), # end column wrap
+                   markdown("> Note: The best model for PhiPS2 here is actually a linear mixed model, *lmer(logit(PhiPS2) ~ Treatment + DaysFromGermination + (1 | Device), data = data_til_fluoro)*
+                            but Shiny has a weird error with reactive mixed effect models, preventing me from implementing it above.
+                            The AIC for the aforementioned model is 48, slightly better than what can be achieved here. However,
+                            the outcome of that model is pretty much the same as these models.")
                 ) # end div
               ), # end ps2 stats card
               card(card_header("Multivariate", class = "bg-secondary", style = "font-size: 20px"),
