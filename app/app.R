@@ -690,7 +690,7 @@ ui <- navbarPage(collapsible = TRUE,
        ),
        card(
        img(src="cbg_morphology.png"),
-       markdown("Chitosan bacterial granules at 400x magnification. This photo does a good job
+       markdown("Chitosan biostimulant granules at 400x magnification. This photo does a good job
                 showing the morphological variation between beads from the same batch.")
        )
      )
@@ -752,7 +752,7 @@ ui <- navbarPage(collapsible = TRUE,
         
         Specifically, chloroplasts contain lots of disk-like pouches called thylakoids, and photosynthesis happens *across*
         the thylakoid membrane. It's complicated, but for our purposes we can think of it like a gas station.
-        Depleted molecules come in (ADP and NADP), fuel up (receive sunlight), and exit *recharged* (ATP and NADPH). There's a series of reactions that happen
+        Depleted molecules come in (ADP and NADP), fuel up, and exit *recharged* (ATP and NADPH). There's a series of reactions that happen
         in two distinct reaction centers, Photosystem I and Photosystem II. Both of the fluorescence measurement devices
         used in this study, the Li-COR Li-600 and the PhotosynQ MultispeQ V2.0 can measure the efficiency of Photosystem II (PhiPS2). 
         PhiPS2 is calculated as (maximum fluorescence - steady state fluorescence)/maximum fluorescence,
@@ -805,9 +805,7 @@ ui <- navbarPage(collapsible = TRUE,
               markdown("
                 A critical component of an exploratory data analysis is the creation of **probability density function** (PDF) plots
                 and **cumulative distribution function** (CDF) plots. They tell us the shape the data takes and helps inform if we need to 
-                apply a mathematical correction or use a certain type of distribution in our statistical model. I'm only
-                making dedicated PDF and CDF plots for our response variables and not our explanatory variables. However,
-                we can see the shape of our explanatory variables using histograms (a couple accordion panels down).
+                apply a mathematical correction or use a certain type of distribution in our statistical model.
                 "),
               card(card_header("Fluorescence", class = "bg-primary", style = "font-size: 20px"),
                 layout_sidebar(sidebar=sidebar(
@@ -1445,9 +1443,7 @@ ui <- navbarPage(collapsible = TRUE,
               markdown("
                 A critical component of an exploratory data analysis is the creation of **probability density function** (PDF) plots
                 and **cumulative distribution function** (CDF) plots. They tell us the shape the data takes and helps inform if we need to 
-                apply a mathematical correction or use a certain type of distribution in our statistical model. I'm only
-                making dedicated PDF and CDF plots for our response variables and not our explanatory variables. However,
-                we can see the shape of our explanatory variables using histograms (a couple accordion panels down).
+                apply a mathematical correction or use a certain type of distribution in our statistical model.
                 "),
               card(card_header("Fluorescence", class = "bg-primary", style = "font-size: 20px"),
                 layout_sidebar(sidebar=sidebar(
@@ -2107,9 +2103,7 @@ ui <- navbarPage(collapsible = TRUE,
               markdown("
                 A critical component of an exploratory data analysis is the creation of **probability density function** (PDF) plots
                 and **cumulative distribution function** (CDF) plots. They tell us the shape the data takes and helps inform if we need to 
-                apply a mathematical correction or use a certain type of distribution in our statistical model. I'm only
-                making dedicated PDF and CDF plots for our response variables and not our explanatory variables. However,
-                we can see the shape of our explanatory variables using histograms (a couple accordion panels down).
+                apply a mathematical correction or use a certain type of distribution in our statistical model.
                 "),
               card(card_header("Fluorescence", class = "bg-primary", style = "font-size: 20px"),
                 layout_sidebar(sidebar=sidebar(
@@ -2641,10 +2635,10 @@ ui <- navbarPage(collapsible = TRUE,
           div(
             layout_column_wrap(
               card(img(src = "tim_1.jpg"),
-                   markdown("Tomato plants at six days after germination.")
+                   markdown("Tomato plants one week after germination.")
                    ),
               card(img(src = "tim_2.jpg"),
-                   markdown("Tomato plants at thirty-five days after germination.")
+                   markdown("Tomato plants thirty-five days after germination.")
                   )
             )
           ),
@@ -3421,7 +3415,7 @@ server <- function(input, output) {
       geom_boxplot(width=0.4, alpha = 0.8)+
       ylab("Root:Shoot Length")+
       xlab("Treatment")+
-      annotate("text", x=1:4, y=1.5, label = tim_rs_length_letters$mcletters$Letters, size=6)+
+      annotate("text", x=1:4, y=1.5, label = tim_rs_length_letters$mcletters$Letters, size=8)+
       scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       theme_bw()+
@@ -3459,7 +3453,7 @@ server <- function(input, output) {
       geom_boxplot(width=0.4, alpha = 0.8)+
       ylab("Root:Shoot Mass")+
       xlab("Treatment")+
-      annotate("text", x=1:4, y=.8, label = tim_rs_mass_letters$mcletters$Letters, size=6)+
+      annotate("text", x=1:4, y=.8, label = tim_rs_mass_letters$mcletters$Letters, size=8)+
       scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       theme_bw()+
@@ -3814,7 +3808,7 @@ server <- function(input, output) {
       geom_boxplot(width=0.4, alpha = 0.8)+
       ylab("Mean Mass (g)")+
       xlab("Treatment")+
-      annotate("text", x=1:4, y=120, label = til_mass_letters$mcletters$Letters, size=6)+
+      annotate("text", x=1:4, y=120, label = til_mass_letters$mcletters$Letters, size=8)+
       scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       theme_bw()+
@@ -3873,9 +3867,9 @@ server <- function(input, output) {
                                             color = Treatment, fill = Treatment))+
       geom_jitter(width = 0.1, height = 0)+
       geom_boxplot(width=0.4, alpha = 0.8)+
-      ylab("Mean Blossom End-Rot (%)")+
+      ylab("Mean Blossom-End Rot (%)")+
       xlab("Treatment")+
-      annotate("text", x=1:4, y=75, label = til_ber_letters$mcletters$Letters, size=6)+
+      annotate("text", x=1:4, y=80, label = til_ber_letters$mcletters$Letters, size=8)+
       scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       theme_bw()+
@@ -3913,7 +3907,7 @@ server <- function(input, output) {
       geom_boxplot(width=0.4, alpha = 0.8)+
       ylab("Fruit Count")+
       xlab("Treatment")+
-      annotate("text", x=1:4, y=100, label = til_fc_letters$mcletters$Letters, size=6)+
+      annotate("text", x=1:4, y=100, label = til_fc_letters$mcletters$Letters, size=8)+
       scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       theme_bw()+
@@ -3951,7 +3945,7 @@ server <- function(input, output) {
       geom_boxplot(width=0.4, alpha = 0.8)+
       ylab("Fruit Count")+
       xlab("Treatment")+
-      annotate("text", x=1:4, y=40, label = til_mfc_letters$mcletters$Letters, size=6)+
+      annotate("text", x=1:4, y=40, label = til_mfc_letters$mcletters$Letters, size=8)+
       scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       theme_bw()+
@@ -4306,7 +4300,7 @@ server <- function(input, output) {
       geom_boxplot(width=0.4, alpha = 0.8)+
       ylab("Mean Mass (g)")+
       xlab("Treatment")+
-      annotate("text", x=1:4, y=200, label = tit_mass_letters$mcletters$Letters, size=6)+
+      annotate("text", x=1:4, y=200, label = tit_mass_letters$mcletters$Letters, size=8)+
       scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       theme_bw()+
@@ -4367,7 +4361,7 @@ server <- function(input, output) {
       geom_boxplot(width=0.4, alpha = 0.8)+
       ylab("Mean Blossom End-Rot (%)")+
       xlab("Treatment")+
-      annotate("text", x=1:4, y=22, label = tit_ber_letters$mcletters$Letters, size=6)+
+      annotate("text", x=1:4, y=22, label = tit_ber_letters$mcletters$Letters, size=8)+
       scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       theme_bw()+
@@ -4405,7 +4399,7 @@ server <- function(input, output) {
       geom_boxplot(width=0.4, alpha = 0.8)+
       ylab("Fruit Count")+
       xlab("Treatment")+
-      annotate("text", x=1:4, y=30, label = tit_fc_letters$mcletters$Letters, size=6)+
+      annotate("text", x=1:4, y=30, label = tit_fc_letters$mcletters$Letters, size=8)+
       scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       theme_bw()+
@@ -4443,7 +4437,7 @@ server <- function(input, output) {
       geom_boxplot(width=0.4, alpha = 0.8)+
       ylab("Fruit Count")+
       xlab("Treatment")+
-      annotate("text", x=1:4, y=30, label = tit_mfc_letters$mcletters$Letters, size=6)+
+      annotate("text", x=1:4, y=30, label = tit_mfc_letters$mcletters$Letters, size=8)+
       scale_color_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       scale_fill_scico_d(begin=0.9, end=0.2, palette=Rpalette())+
       theme_bw()+
